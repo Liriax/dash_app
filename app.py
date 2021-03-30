@@ -25,10 +25,11 @@ df = pd.DataFrame({
 fig = px.bar(df, x="Fruit", y="Amount", color="City", barmode="group")
 
 app.layout = html.Div(children=[
-    html.H1(children='Hello Dash'),
+    html.H1(children='Hier ist ein Test-App für die Web-Anwendung von Xiaoge und Hannes'),
 
     html.Div(children='''
         Dash: A web application framework for Python.
+        Heroku: Diese Web-App wird auf Heroku deployed.
     '''),
 
     dcc.Graph(

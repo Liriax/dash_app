@@ -10,6 +10,7 @@ import plotly.express as px
 import pandas as pd
 import gunicorn
 from dash.dependencies import Input, Output
+from test_class import person
 
 # style the app
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -47,7 +48,7 @@ app.layout = html.Div(children=[
                                                 # row 1
                                                 html.Tr(
                                                     children=[
-                                                        html.Td(children=["table row 1"]),
+                                                        html.Td(children=["name"]),
                                                         html.Td(children=[
                                                             dcc.Input(id='text-input1',
                                                             placeholder='input some text here',
@@ -59,7 +60,7 @@ app.layout = html.Div(children=[
                                                 # row 2
                                                 html.Tr(
                                                     children=[
-                                                        html.Td(children=["table row 2"]),
+                                                        html.Td(children=["company"]),
                                                         html.Td(children=[
                                                             dcc.Input(id='text-input2',
                                                             placeholder='input some text here',
@@ -71,15 +72,15 @@ app.layout = html.Div(children=[
                                                 # row 3
                                                 html.Tr(
                                                     children=[
-                                                        html.Td(children=["table row 3"]),
+                                                        html.Td(children=["age"]),
                                                         html.Td(children=[
                                                             dcc.Dropdown(
                                                                 id='dropdown-input1',
                                                                 options=[
-                                                                    {'label': 'option 1', 'value': 'option 1'},
-                                                                    {'label': 'option 2', 'value': 'option 2'}
+                                                                    {'label': 'twenty', 'value': 20},
+                                                                    {'label': 'thirty', 'value': 30}
                                                                     ],
-                                                                value = 'option 1'
+                                                                value = 20
                                                                 )
                                                         ])
                                                     ]
@@ -147,14 +148,14 @@ app.layout = html.Div(children=[
                                             children=[
                                                 html.Tr(
                                                     children=[
-                                                        html.Th(children=["header1"]),
-                                                        html.Th(children=["header2"])
+                                                        html.Th(children=["Output type"]),
+                                                        html.Th(children=["Output value"])
                                                     ]
                                                 ),
                                                 # row 1
                                                 html.Tr(
                                                     children=[
-                                                        html.Td(children=["table row 1"]),
+                                                        html.Td(children=["name"]),
                                                         html.Td(children=[
                                                             html.Div(id='text-output1')
                                 
@@ -164,7 +165,7 @@ app.layout = html.Div(children=[
                                                 # row 2
                                                 html.Tr(
                                                     children=[
-                                                        html.Td(children=["table row 2"]),
+                                                        html.Td(children=["company"]),
                                                         html.Td(children=[
                                                             html.Div(id='text-output2')
                                                             ])
@@ -174,7 +175,7 @@ app.layout = html.Div(children=[
                                                 html.Tr(
                                                     children=[
                                          
-                                                        html.Td(children=["table row 3"]),
+                                                        html.Td(children=["age"]),
                                                         html.Td(children=[
                                                             html.Div(id='dropdown-output1')
                                                             ])
@@ -194,7 +195,8 @@ app.layout = html.Div(children=[
     Input(component_id='dropdown-input1', component_property='value')
 )
 def update_output_div(input_value):
-    return 'First Output: {} selected'.format(input_value)
+    p = person(input_value)
+    return 'I will be {} years old in 10 years'.format(p.add_to_age(10))
 
 # text output
 @app.callback(
@@ -205,7 +207,7 @@ def update_output_div(input_value):
 
 )
 def update_output_div(input_value1, input_value2):
-    return 'Second Output: {}'.format(input_value1), 'Third Output: {}'.format(input_value2)
+    return 'I am {}'.format(input_value1), 'I work in {}'.format(input_value2)
 
 
 # run the app

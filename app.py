@@ -10,6 +10,7 @@ import plotly.express as px
 import pandas as pd
 import gunicorn
 from dash.dependencies import Input, Output
+# import the classes
 from test_class import person
 
 # style the app
@@ -60,7 +61,7 @@ app.layout = html.Div(children=[
                                                 # row 2
                                                 html.Tr(
                                                     children=[
-                                                        html.Td(children=["company"]),
+                                                        html.Td(children=["city"]),
                                                         html.Td(children=[
                                                             dcc.Input(id='text-input2',
                                                             placeholder='input some text here',
@@ -165,7 +166,7 @@ app.layout = html.Div(children=[
                                                 # row 2
                                                 html.Tr(
                                                     children=[
-                                                        html.Td(children=["company"]),
+                                                        html.Td(children=["city"]),
                                                         html.Td(children=[
                                                             html.Div(id='text-output2')
                                                             ])
@@ -189,26 +190,20 @@ app.layout = html.Div(children=[
     
 ])
 
-# dropdown output
+# Define all Outputs first! Otherwise error
+# The order of the inputs is NOT the order of writing here, but the order of appearance in app.layout
 @app.callback(
     Output(component_id='dropdown-output1', component_property='children'),
-    Input(component_id='dropdown-input1', component_property='value')
-)
-def update_output_div(input_value):
-    p = person(input_value)
-    return 'I will be {} years old in 10 years'.format(p.add_to_age(10))
-
-# text output
-@app.callback(
     Output(component_id='text-output1', component_property='children'),
     Output('text-output2','children'),
+    Input(component_id='dropdown-input1', component_property='value'),
+    Input('text-input2','value'),
     Input(component_id='text-input1', component_property='value'),
-    Input('text-input2','value')
 
 )
-def update_output_div(input_value1, input_value2):
-    return 'I am {}'.format(input_value1), 'I work in {}'.format(input_value2)
-
+def update_output_div(age, name, city):
+    p = person(age, name, city)
+    return 'I will be {} years old in 10 years'.format(p.add_to_age(10)), 'I am {}'.format(p.name), 'I live in {}'.format(p.city)
 
 # run the app
 if __name__ == '__main__':

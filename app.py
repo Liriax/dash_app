@@ -11,7 +11,6 @@ import pandas as pd
 import gunicorn
 from dash.dependencies import Input, Output, State
 # import the classes
-from test_class import person
 
 # style the app
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -562,22 +561,29 @@ app.layout = html.Div(
     State('freqSameResource', 'value'),
     State('numNewVariant', 'value')
 )
-# search_times = ["timeNewComponent","freqNewComponent","timeSimComponent","freqSimComponent","timeSameComponent","freqSameComponent","timeNewProcess","freqNewProcess","timeSimProcess","freqSimProcess","timeSameProcess","freqSameProcess","timeNewResource","freqNewResource","timeSimResource","freqSimResource","timeSameResource","freqSameResource"]
 
 # This function calculates the total search time and writes the input from Ist-Situation to a csv file
 def save_ist_situation(n_clicks, matLevel, supFunction,
                        timeNewComponent, timeSimComponent, timeSameComponent,
                        timeNewProcess, timeSimProcess, timeSameProcess,
                        timeNewResource, timeSimResource, timeSameResource,
+                       freqNewComponent, freqSimComponent, freqSameComponent,
+                       freqNewProcess, freqSimProcess, freqSameProcess,
+                       freqNewResource, freqSimResource, freqSameResource,
                        numNewVariant):
-
-    data = {'matLevel': matLevel, 'supFunction': supFunction,
-            'timeNewComponent': timeNewComponent, 'timeSimComponent': timeSimComponent, 'timeSameComponent': timeSameComponent,
-            'timeNewProcess': timeNewProcess, 'timeSimProcess': timeSimProcess, 'timeSameProcess': timeSameProcess,
-            'timeNewResource': timeNewResource, 'timeSimResource': timeSimResource, 'timeSameResource': timeSameResource,
-            'numNewVariant': numNewVariant}
-    df = pd.DataFrame([data])
-    df.to_csv('ist_situation.csv', index=False)
+    if n_clicks is not None:
+        treeMatchAlgo = 1 if "treeMatching" in supFunction else 0
+        prodFeat = 1 if "prodFeature" in supFunction else 0
+        data = {'matLevel': matLevel, 'treeMatchAlgo': treeMatchAlgo, 'prodFeat': prodFeat,
+                'timeNewComponent': timeNewComponent, 'timeSimComponent': timeSimComponent, 'timeSameComponent': timeSameComponent,
+                'timeNewProcess': timeNewProcess, 'timeSimProcess': timeSimProcess, 'timeSameProcess': timeSameProcess,
+                'timeNewResource': timeNewResource, 'timeSimResource': timeSimResource, 'timeSameResource': timeSameResource,
+                'freqNewComponent': freqNewComponent, 'freqSimComponent': freqSimComponent, 'freqSameComponent': freqSameComponent,
+                'freqNewProcess': freqNewProcess, 'freqSimProcess': freqSimProcess, 'freqSameProcess': freqSameProcess,
+                'freqNewResource': freqNewResource, 'freqSimResource': freqSimResource, 'freqSameResource': freqSameResource,
+                'numNewVariant': numNewVariant}
+        df = pd.DataFrame([data])
+        df.to_csv('ist_situation.csv', index=False)
     return None
 
 

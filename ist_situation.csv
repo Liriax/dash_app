@@ -1,2 +1,2 @@
-matLevel,supFunction,totalSearchTime,numNewVariant
-2,['treeMatching'],892,5
+matLevel,treeMatchAlgo,prodFeat,timeNewComponent,timeSimComponent,timeSameComponent,timeNewProcess,timeSimProcess,timeSameProcess,timeNewResource,timeSimResource,timeSameResource,freqNewComponent,freqSimComponent,freqSameComponent,freqNewProcess,freqSimProcess,freqSameProcess,freqNewResource,freqSimResource,freqSameResource,numNewVariant
+2,0,0,10,5,5,20,15,10,10,10,10,10,10,10,10,10,10,10,10,10,5

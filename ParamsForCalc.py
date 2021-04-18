@@ -12,7 +12,7 @@ class ParamsForCalc:
     # t_t: throughput time
     # r_acc: revenue per product variant
 
-    def __init__(I_l2, I_l3, I_al, I_pr, T, r_acc, t_t, c_person, t_S , c_main, r, t):
+    def __init__(self, I_l2, I_l3, I_al, I_pr, T, r_acc, t_t, c_person, t_S , c_main, r, t):
         self.I_total=I_l2+I_l3+I_al+I_pr 
         self.S_person = c_person * t_S # personnel cost savings
         self.r=r

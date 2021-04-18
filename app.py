@@ -368,7 +368,7 @@ app.layout = html.Div(
                                      html.Td(children=["Personalkostensatz, %"]),
                                      html.Td(children=[
                                          dcc.Input(
-                                             id='C_person',
+                                             id='c_person',
                                              type='number', min=0, value=20
                                          )
                                      ]),
@@ -380,7 +380,7 @@ app.layout = html.Div(
                                      html.Td(children=["Instandhaltungskostensatz, %"]),
                                      html.Td(children=[
                                          dcc.Input(
-                                             id='C_main',
+                                             id='c_main',
                                              type='number', min=0, value=20
                                          )
                                      ]),
@@ -392,7 +392,7 @@ app.layout = html.Div(
                                      html.Td(children=["Zinssatz, %"]),
                                      html.Td(children=[
                                          dcc.Input(
-                                             id='C_int',
+                                             id='c_int',
                                              type='number', min=0, value=7
                                          )
                                      ]),
@@ -594,16 +594,16 @@ def save_ist_situation(n_clicks, matLevel, supFunction,
     State('I_pr', 'value'),
     State('I_l2', 'value'),
     State('I_l3', 'value'),
-    State('C_person', 'value'),
-    State('C_main', 'value'),
-    State('C_int', 'value'),
+    State('c_person', 'value'),
+    State('c_main', 'value'),
+    State('c_int', 'value'),
     State('t', 'value'),
     State('npvRevProProduct', 'value')
 )
 # This function writes the input from Parameter für Investitionsrechnung to a csv file
-def save_parameter_Investitionsrechnung(n_clicks, I_al, I_pr, I_l2, I_l3, C_person, C_main, C_int, t, npvRevProProduct):
+def save_parameter_Investitionsrechnung(n_clicks, I_al, I_pr, I_l2, I_l3, c_person, c_main, c_int, t, npvRevProProduct):
     data = {'I_al': I_al, 'I_pr': I_pr, 'I_l2': I_l2, 'I_l3': I_l3,
-            'C_person': C_person, 'C_main': C_main, 'C_int': C_int,
+            'c_person': c_person, 'c_main': c_main, 'c_int': c_int,
             't': t,
             'npvRevProProduct': npvRevProProduct}
     df = pd.DataFrame([data])

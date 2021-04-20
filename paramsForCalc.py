@@ -19,12 +19,19 @@ class ParamsForCalc:
             c_main = invest_params.iloc[0]["c_main"]
             r = invest_params.iloc[0]["c_int"]
             T = invest_params.iloc[0]["t"]
-            r_acc = invest_params.iloc[0]["npvRevProProduct"]
-            self.I_total = I_l2 + I_l3 + I_al + I_pr
             self.r = r
+            self.c_main = c_main
+            self.c_person = c_person
+            self.T = T
+            self.r_acc = invest_params.iloc[0]["npvRevProProduct"]
+            self.I_total = I_l2 + I_l3 + I_al + I_pr
             self.C_depr = self.I_total / T
             self.C_int = 0.5 * self.I_total * r
             self.C_main = c_main * self.I_total
         except pd.errors.EmptyDataError:
             invest_params = 'could not read parameter_Investitionsrechnung.csv'
 
+# p = ParamsForCalc()
+# print(p.C_depr)
+# print(p.C_int)
+# print(p.C_main)

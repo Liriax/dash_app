@@ -1,4 +1,6 @@
 import pandas as pd
+
+
 class CurrentSituation:
     def __init__(self):
         try:
@@ -28,6 +30,3 @@ class CurrentSituation:
 
         except pd.errors.EmptyDataError:
             ist_situation = 'could not read ist_situation.csv!'
-        
-
-        

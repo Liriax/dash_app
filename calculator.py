@@ -76,30 +76,34 @@ class Calculator:
         self.invest_params = retrieve_invest_params()
         self.alternatives = create_alternatives(self.ist_situation)
 
-    def calculate_npv(self, t_supported):
+    def calculate_npv(self, improved_time):
         # return self.invest_params.C_depr + self.invest_params.C_int + self.invest_params.C_main + self.invest_params.C_person
         # -> C_person needs to be calculated first, which requires the parameter t_supported!
+        t_unsupported = self.ist_situation.t_unsupported
+        t_supported = t_unsupported - improved_time
+
         C_person = self.invest_params.c_person * t_supported
         return self.invest_params.C_depr + self.invest_params.C_int + self.invest_params.C_main + self.invest_params.c_person * t_supported
 
-    # t_supported = t_not_supported - improved_time; t_t: throughput time (?); 
-    def calculate_comparison(self, t_supported, improved_time, t_t):
-        # MUSS NOCH ANGEPASST WERDEN!!!!
+    # improved_time = calculate_time(alternative, self.ist_situation)
+    def calculate_comparison(self, improved_time):
+        t_unsupported = self.ist_situation.t_unsupported
+        t_supported = t_unsupported - improved_time
         r = self.invest_params.r
         C_main = self.invest_params.C_main
         S_person = self.invest_params.c_person * improved_time  # personnel cost savings
         C_person = self.invest_params.c_person * t_supported
-        R_acc = self.invest_params.r_acc * improved_time / t_t  # R_acc: additional revenues
+        R_acc = self.invest_params.r_acc * improved_time / t_unsupported * self.ist_situation.numNewVariant  # R_acc: additional revenues
         npv = - self.I_total
         for t in range(1, self.T + 1):
             npv += (R_acc + S_person - C_main) / (1 + r) ** t
         return npv
     # def calculate_results(self):
 
-# tests: 
+# test: hat funktioniert 
 # c = Calculator()
 # for alt in c.alternatives:
 #     print(calculate_time(alt, c.ist_situation))
 
-# print(c.calculate_npv(t_supported=100))
+# print(c.calculate_npv(calculate_time(c.alternatives[0], c.ist_situation)))
 

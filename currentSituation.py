@@ -27,6 +27,16 @@ class CurrentSituation:
             self.freqNewResource = ist_situation.iloc[0]["freqNewResource"]
             self.freqSimResource = ist_situation.iloc[0]["freqSimResource"]
             self.freqSameResource = ist_situation.iloc[0]["freqSameResource"]
-
+            # calculate t_suchzeiten: "die Summe aller eingegebenen Suchzeiten, jeweils multipliziert mit der Häufigkeit je Variante. "
+            self.t_unsupported = \
+                self.timeNewComponent*self.freqNewComponent + \
+                self.timeSimComponent * self.freqSimComponent + \
+                self.timeSameComponent * self.freqSameComponent + \
+                self.timeNewProcess*self.freqNewProcess + \
+                self.timeSimProcess * self.freqSimProcess + \
+                self.timeSameProcess * self.freqSameProcess + \
+                self.timeNewResource*self.freqNewResource + \
+                self.timeSimResource * self.freqSimResource + \
+                self.timeSameResource * self.freqSameResource
         except pd.errors.EmptyDataError:
             ist_situation = 'could not read ist_situation.csv!'

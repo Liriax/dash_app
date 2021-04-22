@@ -438,90 +438,49 @@ app.layout = html.Div(
         html.Div(className='col2',
                  style={'margin-left': '3vw', 'margin-top': '3vw'},
                  children=[
-                     html.Table(
-                         children=[
-                             html.Tr(
-                                 children=[
-                                     html.Th(colSpan=3, style={'text-align': 'center'}, children=["Ergebnis"])
-                                 ]
-                             ),
-                             # row 1
-                             html.Tr(
-                                 children=[
-                                     html.Td(colSpan=2, children=["Sortieren nach: "]),
-                                     html.Td(colSpan=2,
-                                             children=[
-                                                 dcc.Dropdown(
+                     html.Header("Ergebnis",style={'text-align': 'center',"font-weight": "bold"}),
+                     html.Br(),
+                     dcc.Dropdown(
                                                      id='resultSort',
                                                      options=[
-                                                         {'label': 'Kosten/Kapitalwert', 'value': 'money'},
-                                                         {'label': 'Reifegrad', 'value': 'matLevel'},
-                                                         {'label': 'Zeiteinsparung', 'value': 'timeSaving'}
+                                                         {'label': 'Nach Kosten/Kapitalwert sortieren', 'value': 'money'},
+                                                         {'label': 'Nach Reifegrad sortieren', 'value': 'matLevel'},
+                                                         {'label': 'Nach Zeiteinsparung sortieren', 'value': 'timeSaving'}
                                                      ],
                                                      value='money'
-                                                 )
-                                             ])
-                                 ]
-                             ),
-                             # row 2
-                             html.Tr(
-                                 children=[
-                                     html.Th(colSpan=3, style={'text-align': 'left'},
-                                             children=["Option {}".format(opt)]), ]
-                             ),
-                             # row 3
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Kosten/Kapitalwert: "]),
-                                     html.Td(id='CostCapOutput'),
-                                     html.Td(children=["Investitionssumme: "]),
-                                     html.Td(id="InvSumOutput")
-                                 ]
-                             ),
-                             html.Tr(
-                                 children=[
-                                     html.Td(colSpan=4, children=[
-                                         dcc.Graph(id='capitalGraphOutput')
-                                     ])
-                                 ]
-                             ),
+                                                 ),
 
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Durchsatzzeit vorher: "]),
-                                     html.Td(id="timeBeforeOutput"),
-                                     html.Td(children=["Durchsatzzeit nachher: "]),
-                                     html.Td(id="timeAfterOutput")
-                                 ]
-                             ),
-                             html.Tr(
-                                 children=[
-                                     html.Td(colSpan=4, children=[
-                                         dcc.Graph(id='timeGraphOutput')
-                                     ])
-                                 ]
-                             ),
-                             # header support function outputs
-                             html.Tr(
-                                 children=[
-                                     html.Th(colSpan=2, children=["Unterstützungen"]),
-                                     html.Th(colSpan=2, children=["Investitionskosten"])
-                                 ]
-                             ),
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Funktion 1"]),
-                                     html.Td(id="invCostF1")
-                                 ]
-                             ),
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Funktion 2"]),
-                                     html.Td(id="invCostF2")
-                                 ]
-                             )
-                         ]
-                     )
+                     html.Div(id="results_output"),
+                    #  html.Table(
+                    #      children=[
+                    #          html.Tr(
+                    #              children=[
+                    #                  html.Th(colSpan=3, style={'text-align': 'center'}, children=["Ergebnis"])
+                    #              ]
+                    #          ),
+                    #          # row 1
+                    #          html.Tr(
+                    #              children=[
+                    #                  html.Td(colSpan=2, children=["Sortieren nach: "]),
+                    #                  html.Td(colSpan=2,
+                    #                          children=[
+                    #                              dcc.Dropdown(
+                    #                                  id='resultSort',
+                    #                                  options=[
+                    #                                      {'label': 'Kosten/Kapitalwert', 'value': 'money'},
+                    #                                      {'label': 'Reifegrad', 'value': 'matLevel'},
+                    #                                      {'label': 'Zeiteinsparung', 'value': 'timeSaving'}
+                    #                                  ],
+                    #                                  value='money'
+                    #                              )
+                    #                          ])
+                    #              ]
+                    #          )
+                    #      ]
+                    #  ),
+                    # dcc.Graph(id='capitalGraphOutput'),
+                    # dcc.Graph(id='timeGraphOutput')
+
                  ]
 
                  )
@@ -610,7 +569,119 @@ def save_parameter_Investitionsrechnung(n_clicks, I_al, I_pr, I_l2, I_l3, c_pers
     df.to_csv('parameter_Investitionsrechnung.csv', index=False)
     return None
 
+class html_table:
+    def __init__(self, opt, money, investition, time, time_before, treeMatchAlgo, prodFeat):
+        support_functions = []
+        if treeMatchAlgo == 1: 
+            support_functions.append("Tree-Matching")
+        if prodFeat == 1:
+            support_functions.append("Produktmerkmale")
+        support_functions = str(support_functions).strip("[]'").replace("'","")
 
+        self.table = html.Table(style={"width":"100%"},
+                        children=[
+                            html.Tr(
+                                 children=[
+                                     html.Th(colSpan=4, style={'text-align': 'left'},
+                                             children=["Option {}".format(opt)])]
+                              ),
+
+                             html.Tr(
+                                 children=[
+                                     html.Td(children=["Kosten/Kapitalwert: "]),
+                                     html.Td(children=[str(money)]),
+                                     html.Td(children=["Investitionssumme: "]),
+                                     html.Td(children=[str(investition)])
+                                 ]
+                             ),
+                             
+                             html.Tr(
+                                 children=[
+                                     html.Td(children=["Durchsatzzeit vorher: "]),
+                                     html.Td(children=[str(time_before)]),
+                                     html.Td(children=["Durchsatzzeit nachher: "]),
+                                     html.Td(children=[str(time)])
+                                 ]
+                             ),
+                             
+                             # header support function outputs
+                             html.Tr(
+                                 children=[
+                                     html.Td(children=["Unterstützungen: "]),
+                                     html.Td(support_functions),
+                                     html.Td(children=["Investitionskosten: "]),
+                                     html.Td(investition)
+                                 ]
+                             ),
+                            #  html.Tr(
+                            #      children=[
+                            #          html.Td(colSpan=2, children=["Tree-Matching"]),
+                            #          html.Td(colSpan=2, children=[str(investition)])
+                            #      ]
+                            #  ) if treeMatchAlgo == 1 else None,
+
+                            #  html.Tr(
+                            #      children=[
+                            #          html.Td(colSpan=2, children=["Produktmerkmale"]),
+                            #          html.Td(colSpan=2, children=[str(investition)])
+                            #      ]
+                            #  ) if prodFeat == 1 else None
+                            ])
+            
+
+@app.callback(
+    # Output('capitalGraphOutput','figure'),
+    # Output('timeGraphOutput','figure'),
+    Output('results_output','children'),
+    Input("saveTable2Input", 'n_clicks'),
+    Input('resultSort', 'value'),
+    Input('calMethod', 'value')
+)
+def generate_graphs(n_clicks, resultSort, calMethod):
+    if n_clicks is not None:
+        res = pd.read_csv('result.csv')
+        name = ["Option {}".format(x) for x in range(1,len(res)+1)]
+        
+        print(res)
+        # sort dataframes
+        sorted_by_npv = res.sort_values(by=["npv"], ascending=False)
+        sorted_by_cost = res.sort_values(by=["comparison"], ascending=True)
+        sorted_by_time = res.sort_values(by=['time'],ascending=True)
+        sorted_by_matLevel = res.sort_values(by=['matLevel'],ascending=True)
+        
+        best_time = sorted_by_time.iloc[0]['time']
+
+        sorted_by_npv['name']=name        
+        sorted_by_time['name']=name
+        sorted_by_cost['name']=name
+        sorted_by_matLevel['name']=name
+        npv_fig = px.bar(sorted_by_npv,x='name',y='npv')
+        time_fig = px.bar(sorted_by_time,x='name',y='time')
+        cost_fig = px.bar(sorted_by_cost,x='name',y='comparison')
+        mat_fig = px.bar(sorted_by_matLevel,x='name',y='matLevel')
+
+        if resultSort == "money":
+            if calMethod == "staCost":
+                df = sorted_by_cost
+                g = cost_fig
+            else:
+                df = sorted_by_npv
+                g = npv_fig
+
+        elif resultSort == "timeSaving":
+             df = sorted_by_time
+             g = time_fig
+        
+        else:
+            df = sorted_by_matLevel
+            g = mat_fig
+
+        results_output = [html_table(x+1, df.iloc[x]['npv'], \
+                    df.iloc[x]['investition'], df.iloc[x]["time"], \
+                    0, df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"]).table for x in range(0,len(df))]
+        results_output.insert(0, dcc.Graph(figure=g))
+        return results_output
+        
 # run the app
 if __name__ == '__main__':
     app.run_server(debug=True)

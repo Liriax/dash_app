@@ -1,7 +1,6 @@
 import currentSituation
 import paramsForCalc
 import alternative
-import result
 import pandas as pd
 
 

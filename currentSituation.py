@@ -27,16 +27,24 @@ class CurrentSituation:
             self.freqNewResource = ist_situation.iloc[0]["freqNewResource"]
             self.freqSimResource = ist_situation.iloc[0]["freqSimResource"]
             self.freqSameResource = ist_situation.iloc[0]["freqSameResource"]
-            # calculate t_suchzeiten: "die Summe aller eingegebenen Suchzeiten, jeweils multipliziert mit der Häufigkeit je Variante. "
+            # calculate t_suchzeiten: 
+            sameComponent = 0 if self.treeMatchAlgo == 1 else self.timeSameComponent * self.freqSameComponent
+            simComponent = 0.036 * (35 + 15 * 9) if self.prodFeat == 1 else self.timeSimComponent * self.freqSimComponent
+            newComponent = 0.036 * (35 + 15 * 9) if self.prodFeat == 1 and self.treeMatchAlgo == 1 else self.timeNewComponent*self.freqNewComponent
+            sameProcess = 0 if self.matLevel >= 2 else self.timeSameProcess * self.freqSameProcess
+            simProcess = 0 if self.matLevel >= 2 else self.timeSimProcess * self.freqSimProcess
+            sameResource = 0 if self.matLevel == 3 else self.timeSameResource * self.freqSameResource
+            simResource = 0 if self.matLevel == 3 else self.timeSimResource * self.freqSimResource
             self.t_unsupported = \
-                self.timeNewComponent*self.freqNewComponent + \
-                self.timeSimComponent * self.freqSimComponent + \
-                self.timeSameComponent * self.freqSameComponent + \
+                newComponent + \
+                simComponent + \
+                sameComponent + \
                 self.timeNewProcess*self.freqNewProcess + \
-                self.timeSimProcess * self.freqSimProcess + \
-                self.timeSameProcess * self.freqSameProcess + \
+                simProcess + \
+                sameProcess + \
                 self.timeNewResource*self.freqNewResource + \
-                self.timeSimResource * self.freqSimResource + \
-                self.timeSameResource * self.freqSameResource
+                simResource + \
+                sameResource
+
         except pd.errors.EmptyDataError:
             ist_situation = 'could not read ist_situation.csv!'

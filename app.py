@@ -289,12 +289,12 @@ app.layout = html.Div(
                                                      id='calMethod',
                                                      options=[
                                                          {'label': 'Statische Kostenvergleichsrechnung',
-                                                          'value': 'staCost'},
+                                                          'value': 'comparison'},
                                                          {
                                                              'label': 'Dynamische Investitionsrechnung mit Kapitalwertmethode',
-                                                             'value': 'NPV'}
+                                                             'value': 'npv'}
                                                      ],
-                                                     value='staCost'
+                                                     value='comparison'
                                                  )
                                              ])
                                  ]
@@ -645,26 +645,25 @@ def generate_graphs(n_clicks, resultSort, calMethod):
         res = pd.read_csv('result.csv')
         name = ["Option {}".format(x) for x in range(1,len(res)+1)]
         
-        print(res)
         # sort dataframes
         sorted_by_npv = res.sort_values(by=["npv"], ascending=False)
         sorted_by_cost = res.sort_values(by=["comparison"], ascending=True)
-        sorted_by_time = res.sort_values(by=['t_supported'],ascending=True)
+        sorted_by_time = res.sort_values(by=[' improved_time'],ascending=True)
         sorted_by_matLevel = res.sort_values(by=['matLevel'],ascending=True)
         
-        best_time = sorted_by_time.iloc[0]['t_supported']
+        best_time = sorted_by_time.iloc[0][' improved_time']
 
         sorted_by_npv['name']=name        
         sorted_by_time['name']=name
         sorted_by_cost['name']=name
         sorted_by_matLevel['name']=name
         npv_fig = px.bar(sorted_by_npv,x='name',y='npv')
-        time_fig = px.bar(sorted_by_time,x='name',y='t_supported')
+        time_fig = px.bar(sorted_by_time,x='name',y=' improved_time')
         cost_fig = px.bar(sorted_by_cost,x='name',y='comparison')
         mat_fig = px.bar(sorted_by_matLevel,x='name',y='matLevel')
 
         if resultSort == "money":
-            if calMethod == "staCost":
+            if calMethod == "comparison":
                 df = sorted_by_cost
                 g = cost_fig
             else:
@@ -679,8 +678,8 @@ def generate_graphs(n_clicks, resultSort, calMethod):
             df = sorted_by_matLevel
             g = mat_fig
 
-        results_output = [html_table(x+1, df.iloc[x]['npv'], \
-                    df.iloc[x]['investition'], df.iloc[x]['t_supported'], \
+        results_output = [html_table(x+1, df.iloc[x][calMethod], \
+                    df.iloc[x]['investition'], df.iloc[x][' improved_time'], \
                     df.iloc[x]['t_unsupported'], df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"]).table for x in range(0,len(df))]
         results_output.insert(0, dcc.Graph(figure=g))
         return results_output

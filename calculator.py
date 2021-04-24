@@ -157,7 +157,7 @@ class Calculator:
             prodFeat = alternative.prodFeat
             treeMatchAlgo = alternative.treeMatchAlgo
             res.append([npv,comparison,investition, t_unsupported,  improved_time, matLevel, prodFeat, treeMatchAlgo])
-        res_df = pd.DataFrame(res, columns = ['npv','comparison','investition', 't_unsupported', ' improved_time', 'matLevel', 'prodFeat', 'treeMatchAlgo'])
+        res_df = pd.DataFrame(res, columns = ['npv','comparison','investition', 't_unsupported', 'improved_time', 'matLevel', 'prodFeat', 'treeMatchAlgo'])
         res_df.to_csv('result.csv', index=False)
 
 

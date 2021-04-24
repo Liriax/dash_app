@@ -571,7 +571,7 @@ def save_parameter_Investitionsrechnung(n_clicks, I_al, I_pr, I_l2, I_l3, c_pers
     return None
 
 class html_table:
-    def __init__(self, opt, money, investition, time, time_before, treeMatchAlgo, prodFeat):
+    def __init__(self, opt, money, investition, time, time_before, treeMatchAlgo, prodFeat, matLevel):
         support_functions = []
         if treeMatchAlgo == 1: 
             support_functions.append("Tree-Matching")
@@ -610,8 +610,8 @@ class html_table:
                                  children=[
                                      html.Td(children=["Unterstützungen: "]),
                                      html.Td(support_functions),
-                                     html.Td(children=["Investitionskosten: "]),
-                                     html.Td(investition)
+                                     html.Td(children=["Reifegrad: "]),
+                                     html.Td(matLevel)
                                  ]
                              ),
                             #  html.Tr(
@@ -648,19 +648,19 @@ def generate_graphs(n_clicks, resultSort, calMethod):
         # sort dataframes
         sorted_by_npv = res.sort_values(by=["npv"], ascending=False)
         sorted_by_cost = res.sort_values(by=["comparison"], ascending=True)
-        sorted_by_time = res.sort_values(by=[' improved_time'],ascending=True)
+        sorted_by_time = res.sort_values(by=['improved_time'],ascending=True)
         sorted_by_matLevel = res.sort_values(by=['matLevel'],ascending=True)
         
-        best_time = sorted_by_time.iloc[0][' improved_time']
+        best_time = sorted_by_time.iloc[0]['improved_time']
 
         sorted_by_npv['name']=name        
         sorted_by_time['name']=name
         sorted_by_cost['name']=name
         sorted_by_matLevel['name']=name
-        npv_fig = px.bar(sorted_by_npv,x='name',y='npv')
-        time_fig = px.bar(sorted_by_time,x='name',y=' improved_time')
-        cost_fig = px.bar(sorted_by_cost,x='name',y='comparison')
-        mat_fig = px.bar(sorted_by_matLevel,x='name',y='matLevel')
+        npv_fig = px.bar(sorted_by_npv,x='name',y='npv',labels={'name': "", 'npv': "Kapitalwert"})
+        time_fig = px.bar(sorted_by_time,x='name',y='improved_time',labels={'name': "", 'improved_time': "Zeit nachher"})
+        cost_fig = px.bar(sorted_by_cost,x='name',y='comparison',labels={'name': "", 'comparison': "Kosten"})
+        mat_fig = px.bar(sorted_by_matLevel,x='name',y='matLevel',labels={'name': "", 'matLevel': "Reifegrad"})
 
         if resultSort == "money":
             if calMethod == "comparison":
@@ -679,8 +679,8 @@ def generate_graphs(n_clicks, resultSort, calMethod):
             g = mat_fig
 
         results_output = [html_table(x+1, df.iloc[x][calMethod], \
-                    df.iloc[x]['investition'], df.iloc[x][' improved_time'], \
-                    df.iloc[x]['t_unsupported'], df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"]).table for x in range(0,len(df))]
+                    df.iloc[x]['investition'], df.iloc[x]['improved_time'], \
+                    df.iloc[x]['t_unsupported'], df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"], df.iloc[x]["matLevel"]).table for x in range(0,len(df))]
         results_output.insert(0, dcc.Graph(figure=g))
         return results_output
         

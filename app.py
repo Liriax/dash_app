@@ -11,7 +11,7 @@ import pandas as pd
 import gunicorn
 from dash.dependencies import Input, Output, State
 # import the classes
-
+import calculator
 # style the app
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 # define the app
@@ -61,7 +61,8 @@ app.layout = html.Div(
                                              options=[
                                                  {'label': 'Tree-Matching', 'value': 'treeMatching'},
                                                  {'label': 'Produktmerkmale', 'value': 'prodFeature'}
-                                             ]
+                                             ],
+                                             value = []
 
                                          )
                                      ])
@@ -639,6 +640,8 @@ class html_table:
 )
 def generate_graphs(n_clicks, resultSort, calMethod):
     if n_clicks is not None:
+        c = calculator.Calculator()
+        c.calculate_results()
         res = pd.read_csv('result.csv')
         name = ["Option {}".format(x) for x in range(1,len(res)+1)]
         
@@ -646,17 +649,17 @@ def generate_graphs(n_clicks, resultSort, calMethod):
         # sort dataframes
         sorted_by_npv = res.sort_values(by=["npv"], ascending=False)
         sorted_by_cost = res.sort_values(by=["comparison"], ascending=True)
-        sorted_by_time = res.sort_values(by=['time'],ascending=True)
+        sorted_by_time = res.sort_values(by=['t_supported'],ascending=True)
         sorted_by_matLevel = res.sort_values(by=['matLevel'],ascending=True)
         
-        best_time = sorted_by_time.iloc[0]['time']
+        best_time = sorted_by_time.iloc[0]['t_supported']
 
         sorted_by_npv['name']=name        
         sorted_by_time['name']=name
         sorted_by_cost['name']=name
         sorted_by_matLevel['name']=name
         npv_fig = px.bar(sorted_by_npv,x='name',y='npv')
-        time_fig = px.bar(sorted_by_time,x='name',y='time')
+        time_fig = px.bar(sorted_by_time,x='name',y='t_supported')
         cost_fig = px.bar(sorted_by_cost,x='name',y='comparison')
         mat_fig = px.bar(sorted_by_matLevel,x='name',y='matLevel')
 
@@ -677,8 +680,8 @@ def generate_graphs(n_clicks, resultSort, calMethod):
             g = mat_fig
 
         results_output = [html_table(x+1, df.iloc[x]['npv'], \
-                    df.iloc[x]['investition'], df.iloc[x]["time"], \
-                    0, df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"]).table for x in range(0,len(df))]
+                    df.iloc[x]['investition'], df.iloc[x]['t_supported'], \
+                    df.iloc[x]['t_unsupported'], df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"]).table for x in range(0,len(df))]
         results_output.insert(0, dcc.Graph(figure=g))
         return results_output
         

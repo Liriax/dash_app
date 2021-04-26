@@ -2,7 +2,8 @@ import currentSituation
 import paramsForCalc
 import alternative
 import pandas as pd
-
+# amount of opitz product features is 9
+amount_of_product_features = 9
 
 def retrieve_ist_situation():  # the read, try and except are done by creating a CurrentSituation object
     return currentSituation.CurrentSituation()
@@ -10,6 +11,7 @@ def retrieve_ist_situation():  # the read, try and except are done by creating a
 
 def retrieve_invest_params():  # the read, try and except are done by creating a ParamsForCalc object
     return paramsForCalc.ParamsForCalc()
+
 
 def calculate_investment(alternative, ist_situation, params):
     # find out if extra investment is to be made:
@@ -19,11 +21,11 @@ def calculate_investment(alternative, ist_situation, params):
     mat_increase = 0
     if alternative.matLevel > ist_situation.matLevel:
         if alternative.matLevel == 3 and ist_situation.matLevel == 2:
-            mat_increase+=params.I_l3
+            mat_increase += params.I_l3
         if alternative.matLevel == 2 and ist_situation.matLevel == 1:
-            mat_increase+=params.I_l2
+            mat_increase += params.I_l2
         if alternative.matLevel == 3 and ist_situation.matLevel == 1:
-            mat_increase+=params.I_l2+params.I_l3
+            mat_increase += params.I_l2 + params.I_l3
     
     # calculate amount of investment needed:
     I_total = invest_tree_matching * params.I_al + invest_prod_feature * params.I_pr + mat_increase
@@ -31,40 +33,10 @@ def calculate_investment(alternative, ist_situation, params):
     return I_total
 
 def calculate_time(alternative, ist_situation): 
-    improved_time = 0
-
-    # if alternative.treeMatchAlgo == 1:
-    #     improved_time += 0
-    # else:
-    #     improved_time += ist_situation.timeNewComponent * ist_situation.freqNewComponent
-
-    # if alternative.prodFeat == 1:
-    #     improved_time += 0.036 * (35 + 15 * 9)  # Berechnung nach "TMU", 9 ist Anzahl der Produktmerkmale bei Opitz
-
-    # else:
-    #     improved_time += ist_situation.timeSimComponent + ist_situation.timeNewComponent
-
-    # if alternative.matLevel == 1:
-    #     improved_time += ist_situation.timeNewProcess + ist_situation.timeSimProcess + \
-    #                      ist_situation.timeSameProcess
-    #     improved_time += ist_situation.timeNewResource + ist_situation.timeSimResource + \
-    #                      ist_situation.timeSameResource
-
-    # elif alternative.matLevel == 2:
-    #     improved_time += ist_situation.timeNewProcess
-    #     improved_time += ist_situation.timeNewResource + ist_situation.timeSimResource + \
-    #                      ist_situation.timeSameResource
-
-    # elif alternative.matLevel == 3:
-    #     improved_time += ist_situation.timeNewProcess
-    #     improved_time += ist_situation.timeNewResource
-
-    # else:
-    #     print('Ungültiger Reifegrad bei Berechnung von Zeitersparnissen!')
 
     sameComponent = 0 if alternative.treeMatchAlgo == 1 else ist_situation.timeSameComponent * ist_situation.freqSameComponent
-    simComponent = 0.036 * (35 + 15 * 9) if alternative.prodFeat == 1 else ist_situation.timeSimComponent * ist_situation.freqSimComponent
-    newComponent = 0.036 * (35 + 15 * 9) if alternative.prodFeat == 1 and alternative.treeMatchAlgo == 1 else ist_situation.timeNewComponent*ist_situation.freqNewComponent
+    simComponent = 0.036 * (35 + 15 * amount_of_product_features) if alternative.prodFeat == 1 else ist_situation.timeSimComponent * ist_situation.freqSimComponent
+    newComponent = 0.036 * (35 + 15 * amount_of_product_features) if alternative.prodFeat == 1 and alternative.treeMatchAlgo == 1 else ist_situation.timeNewComponent*ist_situation.freqNewComponent
     sameProcess = 0 if alternative.matLevel >= 2 else ist_situation.timeSameProcess * ist_situation.freqSameProcess
     simProcess = 0 if alternative.matLevel >= 2 else ist_situation.timeSimProcess * ist_situation.freqSimProcess
     sameResource = 0 if alternative.matLevel == 3 else ist_situation.timeSameResource * ist_situation.freqSameResource
@@ -87,20 +59,34 @@ def create_alternatives(ist_situation):
     # Here we make sure to only consider alternatives that are at least as good as the current situation
     # for i in range(1, 3): -> should be 4 because range(1,3) is only 1 and 2
     for i in range(1, 4):
-        if ist_situation.matLevel <= i:
+        if ist_situation.matLevel < i:
             if ist_situation.treeMatchAlgo == 0 and ist_situation.prodFeat == 0:
-                alternatives.append(alternative.Alternative(0, 0, i))
-                alternatives.append(alternative.Alternative(0, 1, i))
-                alternatives.append(alternative.Alternative(1, 0, i))
-                alternatives.append(alternative.Alternative(1, 1, i))
+                alternatives.append(alternative.Alternative(0, 0, i, 0))
+                alternatives.append(alternative.Alternative(0, 1, i, 0))
+                alternatives.append(alternative.Alternative(1, 0, i, 0))
+                alternatives.append(alternative.Alternative(1, 1, i, 0))
             if ist_situation.treeMatchAlgo == 0 and ist_situation.prodFeat == 1:
-                alternatives.append(alternative.Alternative(0, 1, i))
-                alternatives.append(alternative.Alternative(1, 1, i))
+                alternatives.append(alternative.Alternative(0, 1, i, 0))
+                alternatives.append(alternative.Alternative(1, 1, i, 0))
             if ist_situation.treeMatchAlgo == 1 and ist_situation.prodFeat == 0:
-                alternatives.append(alternative.Alternative(1, 0, i))
-                alternatives.append(alternative.Alternative(1, 1, i))
+                alternatives.append(alternative.Alternative(1, 0, i, 0))
+                alternatives.append(alternative.Alternative(1, 1, i, 0))
             if ist_situation.treeMatchAlgo == 1 and ist_situation.prodFeat == 1:
-                alternatives.append(alternative.Alternative(1, 1, i))
+                alternatives.append(alternative.Alternative(1, 1, i, 0))
+        if ist_situation.matLevel == i:
+            if ist_situation.treeMatchAlgo == 0 and ist_situation.prodFeat == 0:
+                alternatives.append(alternative.Alternative(0, 0, i, 1))
+                alternatives.append(alternative.Alternative(0, 1, i, 0))
+                alternatives.append(alternative.Alternative(1, 0, i, 0))
+                alternatives.append(alternative.Alternative(1, 1, i, 0))
+            if ist_situation.treeMatchAlgo == 0 and ist_situation.prodFeat == 1:
+                alternatives.append(alternative.Alternative(0, 1, i, 1))
+                alternatives.append(alternative.Alternative(1, 1, i, 0))
+            if ist_situation.treeMatchAlgo == 1 and ist_situation.prodFeat == 0:
+                alternatives.append(alternative.Alternative(1, 0, i, 1))
+                alternatives.append(alternative.Alternative(1, 1, i, 0))
+            if ist_situation.treeMatchAlgo == 1 and ist_situation.prodFeat == 1:
+                alternatives.append(alternative.Alternative(1, 1, i, 1))
     return alternatives
 
 
@@ -123,7 +109,7 @@ class Calculator:
         C_depr = I_total / self.invest_params.T
         C_int = 0.5 * I_total * self.invest_params.r
         C_main = self.invest_params.c_main * I_total
-        C_person = self.invest_params.c_person *  improved_time
+        C_person = self.invest_params.c_person * improved_time
         return C_depr + C_int + C_main + C_person
 
     # improved_time = calculate_time(alternative, self.ist_situation)
@@ -136,7 +122,7 @@ class Calculator:
 
         r = self.invest_params.r
         S_person = self.invest_params.c_person * (t_unsupported - improved_time)  # personnel cost savings
-        C_person = self.invest_params.c_person *  improved_time
+        C_person = self.invest_params.c_person * improved_time
         R_acc = self.invest_params.r_acc * (t_unsupported - improved_time) / t_unsupported * self.ist_situation.numNewVariant  # R_acc: additional revenues
         npv = - I_total
         for t in range(1, self.invest_params.T + 1):
@@ -155,8 +141,9 @@ class Calculator:
             matLevel = alternative.matLevel
             prodFeat = alternative.prodFeat
             treeMatchAlgo = alternative.treeMatchAlgo
-            res.append([npv,comparison,investition, t_unsupported,  improved_time, matLevel, prodFeat, treeMatchAlgo])
-        res_df = pd.DataFrame(res, columns = ['npv','comparison','investition', 't_unsupported', 'improved_time', 'matLevel', 'prodFeat', 'treeMatchAlgo'])
+            alreadyImplemented = alternative.alreadyImplemented
+            res.append([npv, comparison, investition, t_unsupported,  improved_time, matLevel, prodFeat, treeMatchAlgo, alreadyImplemented, amount_of_product_features])
+        res_df = pd.DataFrame(res, columns = ['npv', 'comparison', 'investition', 't_unsupported', 'improved_time', 'matLevel', 'prodFeat', 'treeMatchAlgo', 'alreadyImplemented', 'amount_of_product_features'])
         res_df.to_csv('result.csv', index=False)
 
 

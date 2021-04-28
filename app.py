@@ -10,6 +10,7 @@ import plotly.express as px
 import pandas as pd
 import gunicorn
 from dash.dependencies import Input, Output, State
+
 # import the classes
 import calculator
 # style the app
@@ -446,41 +447,13 @@ app.layout = html.Div(
                                                      options=[
                                                          {'label': 'Nach Kosten/Kapitalwert sortieren', 'value': 'money'},
                                                          {'label': 'Nach Reifegrad sortieren', 'value': 'matLevel'},
-                                                         {'label': 'Nach Zeiteinsparung sortieren', 'value': 'timeSaving'}
+                                                         {'label': 'Nach Zeit sortieren', 'value': 'timeSaving'}
                                                      ],
                                                      value='money'
                                                  ),
-
-                     html.Div(id="results_output"),
-                    #  html.Table(
-                    #      children=[
-                    #          html.Tr(
-                    #              children=[
-                    #                  html.Th(colSpan=3, style={'text-align': 'center'}, children=["Ergebnis"])
-                    #              ]
-                    #          ),
-                    #          # row 1
-                    #          html.Tr(
-                    #              children=[
-                    #                  html.Td(colSpan=2, children=["Sortieren nach: "]),
-                    #                  html.Td(colSpan=2,
-                    #                          children=[
-                    #                              dcc.Dropdown(
-                    #                                  id='resultSort',
-                    #                                  options=[
-                    #                                      {'label': 'Kosten/Kapitalwert', 'value': 'money'},
-                    #                                      {'label': 'Reifegrad', 'value': 'matLevel'},
-                    #                                      {'label': 'Zeiteinsparung', 'value': 'timeSaving'}
-                    #                                  ],
-                    #                                  value='money'
-                    #                              )
-                    #                          ])
-                    #              ]
-                    #          )
-                    #      ]
-                    #  ),
-                    # dcc.Graph(id='capitalGraphOutput'),
-                    # dcc.Graph(id='timeGraphOutput')
+                     dcc.Graph(id="figure_output"),
+                     html.Div(id="dummy_output"),
+                     html.Div(id="results_output")
 
                  ]
 
@@ -571,12 +544,12 @@ def save_parameter_Investitionsrechnung(n_clicks, I_al, I_pr, I_l2, I_l3, c_pers
     return None
 
 class html_table:
-    def __init__(self, opt, money, investition, time, time_before, treeMatchAlgo, prodFeat, matLevel):
+    def __init__(self, opt, money, investition, time, time_before, treeMatchAlgo, prodFeat, matLevel, ifCost):
         support_functions = []
         if treeMatchAlgo == 1: 
             support_functions.append("Tree-Matching")
         if prodFeat == 1:
-            support_functions.append("Produktmerkmale")
+            support_functions.append("Produktmerkmale*")
         support_functions = str(support_functions).strip("[]'").replace("'","")
 
         self.table = html.Table(style={"width":"100%"},
@@ -584,12 +557,12 @@ class html_table:
                             html.Tr(
                                  children=[
                                      html.Th(colSpan=4, style={'text-align': 'left'},
-                                             children=["Option {}".format(opt)])]
+                                             children=["Option {}".format(opt) if opt>0 else "Ist-Situation"])]
                               ),
 
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Kosten/Kapitalwert: "]),
+                                     html.Td(children=["Kosten: " if ifCost else "Kapitalwert: "]),
                                      html.Td(children=[str(money)]),
                                      html.Td(children=["Investitionssumme: "]),
                                      html.Td(children=[str(investition)])
@@ -614,36 +587,36 @@ class html_table:
                                      html.Td(matLevel)
                                  ]
                              ),
-                            #  html.Tr(
-                            #      children=[
-                            #          html.Td(colSpan=2, children=["Tree-Matching"]),
-                            #          html.Td(colSpan=2, children=[str(investition)])
-                            #      ]
-                            #  ) if treeMatchAlgo == 1 else None,
+                             
+                            html.Tr(
+                                children=[
+                                    html.Td(children=[""]),
+                                    html.Td(colSpan=3, children=["*Bei Produktmermale wird der Standardwert 9 benutzt"] , style={"font-size":"small"})
+                                ] if prodFeat == 1 else None
+                            ),
 
-                            #  html.Tr(
-                            #      children=[
-                            #          html.Td(colSpan=2, children=["Produktmerkmale"]),
-                            #          html.Td(colSpan=2, children=[str(investition)])
-                            #      ]
-                            #  ) if prodFeat == 1 else None
+                             html.Br()
                             ])
             
 
+
+
 @app.callback(
-    # Output('capitalGraphOutput','figure'),
-    # Output('timeGraphOutput','figure'),
+    Output('figure_output','figure'),
     Output('results_output','children'),
     Input("saveTable2Input", 'n_clicks'),
     Input('resultSort', 'value'),
-    Input('calMethod', 'value')
+    Input('calMethod', 'value'),
+    Input("figure_output", "clickData")
 )
-def generate_graphs(n_clicks, resultSort, calMethod):
+def generate_graphs(n_clicks, resultSort, calMethod, clickData):
+    res = pd.read_csv('default_result.csv')
     if n_clicks is not None:
         c = calculator.Calculator()
         c.calculate_results()
         res = pd.read_csv('result.csv')
-        name = ["Option {}".format(x) for x in range(1,len(res)+1)]
+        name = ["Option {}".format(x) for x in range(1,len(res))]
+        name.insert(0,"Ist-Situation")
         
         # sort dataframes
         sorted_by_npv = res.sort_values(by=["npv"], ascending=False)
@@ -657,16 +630,20 @@ def generate_graphs(n_clicks, resultSort, calMethod):
         sorted_by_time['name']=name
         sorted_by_cost['name']=name
         sorted_by_matLevel['name']=name
-        npv_fig = px.bar(sorted_by_npv,x='name',y='npv',labels={'name': "", 'npv': "Kapitalwert"})
-        time_fig = px.bar(sorted_by_time,x='name',y='improved_time',labels={'name': "", 'improved_time': "Zeit nachher"})
-        cost_fig = px.bar(sorted_by_cost,x='name',y='comparison',labels={'name': "", 'comparison': "Kosten"})
-        mat_fig = px.bar(sorted_by_matLevel,x='name',y='matLevel',labels={'name': "", 'matLevel': "Reifegrad"})
+        npv_fig = px.bar(sorted_by_npv,x='name',y='npv',labels={'name': "", 'npv': "Kapitalwert"},color='npv')
+        time_fig = px.bar(sorted_by_time,x='name',y='improved_time',labels={'name': "", 'improved_time': "Zeit nachher"},color='improved_time')
+        cost_fig = px.bar(sorted_by_cost,x='name',y='comparison',labels={'name': "", 'comparison': "Kosten"},color="comparison")
+        mat_fig = px.bar(sorted_by_matLevel,x='name',y='matLevel',labels={'name': "", 'matLevel': "Reifegrad"},color="matLevel")
+        
+        ifCost = True
 
         if resultSort == "money":
             if calMethod == "comparison":
+                ifCost=True
                 df = sorted_by_cost
                 g = cost_fig
             else:
+                ifCost=False
                 df = sorted_by_npv
                 g = npv_fig
 
@@ -678,12 +655,22 @@ def generate_graphs(n_clicks, resultSort, calMethod):
             df = sorted_by_matLevel
             g = mat_fig
 
-        results_output = [html_table(x+1, df.iloc[x][calMethod], \
+        results_output = [html_table(x, df.iloc[x][calMethod], \
                     df.iloc[x]['investition'], df.iloc[x]['improved_time'], \
-                    df.iloc[x]['t_unsupported'], df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"], df.iloc[x]["matLevel"]).table for x in range(0,len(df))]
-        results_output.insert(0, dcc.Graph(figure=g))
-        return results_output
-        
+                    df.iloc[x]['t_unsupported'], df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"], df.iloc[x]["matLevel"], ifCost).table for x in range(0,len(df))]
+        try:
+            n = clickData.get('points')[0].get('pointIndex')
+            results_output.insert(0,results_output.pop(n))
+        except:
+            print("not rendered yet")
+
+        results_output[0].style={"width":"100%","background-color":"#baefff"}           
+
+        return g, results_output
+    
+    else:
+        return px.bar(res,x='comparison',y='npv',labels={'comparison': "", 'npv': ""}), html.H6(children=["Bitte Parameter eingeben."])
+
 # run the app
 if __name__ == '__main__':
     app.run_server(debug=True)

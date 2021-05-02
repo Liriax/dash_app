@@ -13,6 +13,7 @@ from dash.dependencies import Input, Output, State
 
 # import the classes
 import calculator
+
 # style the app
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 # define the app
@@ -63,12 +64,52 @@ app.layout = html.Div(
                                                  {'label': 'Tree-Matching', 'value': 'treeMatching'},
                                                  {'label': 'Produktmerkmale', 'value': 'prodFeature'}
                                              ],
-                                             value = []
+                                             value=[]
 
                                          )
                                      ])
                                  ]
                              ),
+                             html.Br(),
+
+                             # Number of new variants
+                             html.Tr(
+                                 children=[
+                                     html.Td(children=["Anzahl neue Varianten pro Jahr"]),
+                                     html.Td(children=[
+                                         dcc.Input(
+                                             id="numNewVariant",
+                                             type="number", min=0, value=5
+                                         )
+                                     ]),
+                                     html.Td(children=[
+                                         html.Button(id='saveTable1Input', n_clicks=None, children="Speichern")
+                                     ])
+
+                                 ]
+                             ),
+
+                             html.Tr(
+                                 children=[
+                                     dcc.Dropdown(
+                                         id='dropdown-to-switch-between-absolute-and-relative-time',
+                                         options=[
+                                             {'label': 'Absolute Zeitangaben', 'value': 'absolute'},
+                                             {'label': 'Relative Zeitangaben', 'value': 'relative'}
+                                         ],
+                                         value='absolute'
+                                     ),
+
+                                 ]
+                             ),
+
+                             html.Tr(id="dummyOutput1")
+                         ],
+
+                     ),
+                     # Suchzeiten mit absoluten Werten
+                     html.Table(
+                         children=[
                              # headers Suchzeiten
                              html.Tr(
                                  children=[
@@ -248,27 +289,145 @@ app.layout = html.Div(
                                      ])
                                  ]
                              ),
+                         ], style={'display': 'block'}, id='tableAbsoluteTimes',
+                     ),
 
-                             html.Br(),
-
-                             # Number of new variants
+                     html.Br(),
+                     # Suchzeiten mit Prozentualen Anteilen
+                     html.Table(
+                         children=[
+                             html.Td(children=["Gesamte benötigte Zeit zum Suchen von Bauteilen, Prozessen und Resourcen"]),
+                             html.Td(children=[
+                                 dcc.Input(
+                                     id="totalSearchTime",
+                                     type="number", min=0, value=5
+                                 )
+                             ]),
+                             # headers Suchzeiten
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Anzahl neue Varianten pro Jahr"]),
+                                     html.Th(children=["Beschreibung der Suchzeit"]),
+                                     html.Th(children=["Prozentualer Anteil des gesamten Suchprozesses"]),
+                                 ]
+                             ),
+
+                             # Bauteile 1
+                             html.Tr(
+                                 children=[
+                                     html.Td(children=["Neuer Bauteile/Baugruppen"]),
                                      html.Td(children=[
                                          dcc.Input(
-                                             id="numNewVariant",
+                                             id="shareNewComponent",
+                                             type="number", min=0, value=10
+                                         )
+                                     ]),
+                                 ]
+
+                             ),
+                             # Bauteile 2
+                             html.Tr(
+                                 children=[
+                                     html.Td(children=["Ähnlicher Bauteile/Baugruppen"]),
+                                     html.Td(children=[
+                                         dcc.Input(
+                                             id="shareSimComponent",
                                              type="number", min=0, value=5
                                          )
                                      ]),
-                                     html.Td(children=[
-                                         html.Button(id='saveTable1Input', n_clicks=None, children="Speichern")
-                                     ])
-
                                  ]
                              ),
-                             html.Tr(id="dummyOutput1")
-                         ]
+                             # Bauteile 3
+                             html.Tr(
+                                 children=[
+                                     html.Td(children=["Gleicher Bauteile/Baugruppen"]),
+                                     html.Td(children=[
+                                         dcc.Input(
+                                             id="shareSameComponent",
+                                             type="number", min=0, value=15
+                                         )
+                                     ]),
+                                 ]
+
+                             ),
+
+                             html.Br(),
+
+                             # Prozess 1
+                             html.Tr(
+                                 children=[
+                                     html.Td(children=["Neue Prozessinformation"]),
+                                     html.Td(children=[
+                                         dcc.Input(
+                                             id="shareNewProcess",
+                                             type="number", min=0, value=10
+                                         )
+                                     ]),
+                                 ]
+                             ),
+                             # Prozess 2
+                             html.Tr(
+                                 children=[
+                                     html.Td(children=["Ähnliche Prozessinformation"]),
+                                     html.Td(children=[
+                                         dcc.Input(
+                                             id="shareSimProcess",
+                                             type="number", min=0, value=10
+                                         )
+                                     ]),
+                                 ]
+                             ),
+                             # Prozess 3
+                             html.Tr(
+                                 children=[
+                                     html.Td(children=["Gleiche Prozessinformation"]),
+                                     html.Td(children=[
+                                         dcc.Input(
+                                             id="shareSameProcess",
+                                             type="number", min=0, value=10
+                                         )
+                                     ]),
+                                 ]
+                             ),
+
+                             html.Br(),
+
+                             # ressource 1
+                             html.Tr(
+                                 children=[
+                                     html.Td(children=["Neue Ressource-Information"]),
+                                     html.Td(children=[
+                                         dcc.Input(
+                                             id="shareNewResource",
+                                             type="number", min=0, value=10
+                                         )
+                                     ]),
+                                 ]
+                             ),
+                             # ressource 2
+                             html.Tr(
+                                 children=[
+                                     html.Td(children=["Ähnliche Ressource-Information"]),
+                                     html.Td(children=[
+                                         dcc.Input(
+                                             id="shareSimResource",
+                                             type="number", min=0, value=10
+                                         )
+                                     ]),
+                                 ]
+                             ),
+                             # ressource 3
+                             html.Tr(
+                                 children=[
+                                     html.Td(children=["Gleiche Ressource-Information"]),
+                                     html.Td(children=[
+                                         dcc.Input(
+                                             id="shareSameResource",
+                                             type="number", min=0, value=10
+                                         )
+                                     ]),
+                                 ]
+                             ),
+                         ], style={'display': 'block'}, id='tableRelativeTimes',
                      ),
                      html.Br(),
                      # ------table 2-----------------------------------
@@ -440,17 +599,17 @@ app.layout = html.Div(
         html.Div(className='col2',
                  style={'margin-left': '3vw', 'margin-top': '3vw'},
                  children=[
-                     html.Header("Ergebnis",style={'text-align': 'center',"font-weight": "bold"}),
+                     html.Header("Ergebnis", style={'text-align': 'center', "font-weight": "bold"}),
                      html.Br(),
                      dcc.Dropdown(
-                                                     id='resultSort',
-                                                     options=[
-                                                         {'label': 'Nach Kosten/Kapitalwert sortieren', 'value': 'money'},
-                                                         {'label': 'Nach Reifegrad sortieren', 'value': 'matLevel'},
-                                                         {'label': 'Nach Zeit sortieren', 'value': 'timeSaving'}
-                                                     ],
-                                                     value='money'
-                                                 ),
+                         id='resultSort',
+                         options=[
+                             {'label': 'Nach Kosten/Kapitalwert sortieren', 'value': 'money'},
+                             {'label': 'Nach Reifegrad sortieren', 'value': 'matLevel'},
+                             {'label': 'Nach Zeit sortieren', 'value': 'timeSaving'}
+                         ],
+                         value='money'
+                     ),
                      dcc.Graph(id="figure_output"),
                      html.Div(id="dummy_output"),
                      html.Div(id="results_output")
@@ -462,8 +621,22 @@ app.layout = html.Div(
     ])
 
 
+# this switches the visibility of input fields for absolute and relative time
+@app.callback(
+    Output(component_id='tableRelativeTimes', component_property='style'),
+    Output(component_id='tableAbsoluteTimes', component_property='style'),
+    [Input(component_id='dropdown-to-switch-between-absolute-and-relative-time', component_property='value')]
+)
+def switch_time_input_variant(visibility_state):
+    if visibility_state == 'relative':
+        return [{'display': 'block'}, {'display': 'none'}]
+    else:
+        return [{'display': 'none'}, {'display': 'block'}]
+
+
 # Define all Outputs first! Otherwise error
 # Be careful with the order!
+
 
 @app.callback(
     Output('dummyOutput1', 'children'),
@@ -492,9 +665,19 @@ app.layout = html.Div(
     State('freqSimResource', 'value'),
     State('timeSameResource', 'value'),
     State('freqSameResource', 'value'),
-    State('numNewVariant', 'value')
+    State('numNewVariant', 'value'),
+    State('totalSearchTime', 'value'),
+    State('dropdown-to-switch-between-absolute-and-relative-time', 'value'),
+    State('shareNewComponent', 'value'),
+    State('shareSimComponent', 'value'),
+    State('shareSameComponent', 'value'),
+    State('shareNewProcess', 'value'),
+    State('shareSimProcess', 'value'),
+    State('shareSameProcess', 'value'),
+    State('shareNewResource', 'value'),
+    State('shareSimResource', 'value'),
+    State('shareSameResource', 'value'),
 )
-
 # This function calculates the total search time and writes the input from Ist-Situation to a csv file
 def save_ist_situation(n_clicks, matLevel, supFunction,
                        timeNewComponent, timeSimComponent, timeSameComponent,
@@ -503,18 +686,28 @@ def save_ist_situation(n_clicks, matLevel, supFunction,
                        freqNewComponent, freqSimComponent, freqSameComponent,
                        freqNewProcess, freqSimProcess, freqSameProcess,
                        freqNewResource, freqSimResource, freqSameResource,
-                       numNewVariant):
+                       numNewVariant, totalSearchTime, typeOfTimeMeasurement,
+                       shareNewComponent, shareSimComponent, shareSameComponent,
+                       shareNewProcess, shareSimProcess, shareSameProcess,
+                       shareNewResource, shareSimResource, shareSameResource):
     if n_clicks is not None:
         treeMatchAlgo = 1 if "treeMatching" in supFunction else 0
         prodFeat = 1 if "prodFeature" in supFunction else 0
         data = {'matLevel': matLevel, 'treeMatchAlgo': treeMatchAlgo, 'prodFeat': prodFeat,
-                'timeNewComponent': timeNewComponent, 'timeSimComponent': timeSimComponent, 'timeSameComponent': timeSameComponent,
+                'timeNewComponent': timeNewComponent, 'timeSimComponent': timeSimComponent,
+                'timeSameComponent': timeSameComponent,
                 'timeNewProcess': timeNewProcess, 'timeSimProcess': timeSimProcess, 'timeSameProcess': timeSameProcess,
-                'timeNewResource': timeNewResource, 'timeSimResource': timeSimResource, 'timeSameResource': timeSameResource,
-                'freqNewComponent': freqNewComponent, 'freqSimComponent': freqSimComponent, 'freqSameComponent': freqSameComponent,
+                'timeNewResource': timeNewResource, 'timeSimResource': timeSimResource,
+                'timeSameResource': timeSameResource,
+                'freqNewComponent': freqNewComponent, 'freqSimComponent': freqSimComponent,
+                'freqSameComponent': freqSameComponent,
                 'freqNewProcess': freqNewProcess, 'freqSimProcess': freqSimProcess, 'freqSameProcess': freqSameProcess,
-                'freqNewResource': freqNewResource, 'freqSimResource': freqSimResource, 'freqSameResource': freqSameResource,
-                'numNewVariant': numNewVariant}
+                'freqNewResource': freqNewResource, 'freqSimResource': freqSimResource,
+                'freqSameResource': freqSameResource,
+                'numNewVariant': numNewVariant, 'totalSearchTime': totalSearchTime, 'typeOfTimeMeasurement': typeOfTimeMeasurement,
+                'shareNewComponent': shareNewComponent, 'shareSimComponent': shareSimComponent, 'shareSameComponent': shareSameComponent,
+                'shareNewProcess': shareNewProcess, 'shareSimProcess': shareSimProcess, 'shareSameProcess': shareSameProcess,
+                'shareNewResource': shareNewResource, 'shareSimResource': shareSimResource, 'shareSameResource': shareSameResource}
         df = pd.DataFrame([data])
         df.to_csv('ist_situation.csv', index=False)
     return None
@@ -543,67 +736,68 @@ def save_parameter_Investitionsrechnung(n_clicks, I_al, I_pr, I_l2, I_l3, c_pers
     df.to_csv('parameter_Investitionsrechnung.csv', index=False)
     return None
 
+
 class html_table:
     def __init__(self, opt, money, investition, time, time_before, treeMatchAlgo, prodFeat, matLevel, ifCost):
         support_functions = []
-        if treeMatchAlgo == 1: 
+        if treeMatchAlgo == 1:
             support_functions.append("Tree-Matching")
         if prodFeat == 1:
             support_functions.append("Produktmerkmale*")
-        support_functions = str(support_functions).strip("[]'").replace("'","")
+        support_functions = str(support_functions).strip("[]'").replace("'", "")
 
-        self.table = html.Table(style={"width":"100%"},
-                        children=[
-                            html.Tr(
-                                 children=[
-                                     html.Th(colSpan=4, style={'text-align': 'left'},
-                                             children=["Option {}".format(opt) if opt>0 else "Ist-Situation"])]
-                              ),
-
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Kosten: " if ifCost else "Kapitalwert: "]),
-                                     html.Td(children=[str(money)]),
-                                     html.Td(children=["Investitionssumme: "]),
-                                     html.Td(children=[str(investition)])
-                                 ]
-                             ),
-                             
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Durchsatzzeit vorher: "]),
-                                     html.Td(children=[str(time_before)]),
-                                     html.Td(children=["Durchsatzzeit nachher: "]),
-                                     html.Td(children=[str(time)])
-                                 ]
-                             ),
-                             
-                             # header support function outputs
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Unterstützungen: "]),
-                                     html.Td(support_functions),
-                                     html.Td(children=["Reifegrad: "]),
-                                     html.Td(matLevel)
-                                 ]
-                             ),
-                             
-                            html.Tr(
+        self.table = html.Table(style={"width": "100%"},
                                 children=[
-                                    html.Td(children=[""]),
-                                    html.Td(colSpan=3, children=["*Bei Produktmermale wird der Standardwert 9 benutzt"] , style={"font-size":"small"})
-                                ] if prodFeat == 1 else None
-                            ),
+                                    html.Tr(
+                                        children=[
+                                            html.Th(colSpan=4, style={'text-align': 'left'},
+                                                    children=["Option {}".format(opt) if opt > 0 else "Ist-Situation"])]
+                                    ),
 
-                             html.Br()
-                            ])
-            
+                                    html.Tr(
+                                        children=[
+                                            html.Td(children=["Kosten: " if ifCost else "Kapitalwert: "]),
+                                            html.Td(children=[str(money)]),
+                                            html.Td(children=["Investitionssumme: "]),
+                                            html.Td(children=[str(investition)])
+                                        ]
+                                    ),
 
+                                    html.Tr(
+                                        children=[
+                                            html.Td(children=["Durchsatzzeit vorher: "]),
+                                            html.Td(children=[str(time_before)]),
+                                            html.Td(children=["Durchsatzzeit nachher: "]),
+                                            html.Td(children=[str(time)])
+                                        ]
+                                    ),
+
+                                    # header support function outputs
+                                    html.Tr(
+                                        children=[
+                                            html.Td(children=["Unterstützungen: "]),
+                                            html.Td(support_functions),
+                                            html.Td(children=["Reifegrad: "]),
+                                            html.Td(matLevel)
+                                        ]
+                                    ),
+
+                                    html.Tr(
+                                        children=[
+                                            html.Td(children=[""]),
+                                            html.Td(colSpan=3,
+                                                    children=["*Bei Produktmermale wird der Standardwert 9 benutzt"],
+                                                    style={"font-size": "small"})
+                                        ] if prodFeat == 1 else None
+                                    ),
+
+                                    html.Br()
+                                ])
 
 
 @app.callback(
-    Output('figure_output','figure'),
-    Output('results_output','children'),
+    Output('figure_output', 'figure'),
+    Output('results_output', 'children'),
     Input("saveTable2Input", 'n_clicks'),
     Input('resultSort', 'value'),
     Input('calMethod', 'value'),
@@ -615,61 +809,67 @@ def generate_graphs(n_clicks, resultSort, calMethod, clickData):
         c = calculator.Calculator()
         c.calculate_results()
         res = pd.read_csv('result.csv')
-        name = ["Option {}".format(x) for x in range(1,len(res))]
-        name.insert(0,"Ist-Situation")
-        
+        name = ["Option {}".format(x) for x in range(1, len(res))]
+        name.insert(0, "Ist-Situation")
+
         # sort dataframes
         sorted_by_npv = res.sort_values(by=["npv"], ascending=False)
         sorted_by_cost = res.sort_values(by=["comparison"], ascending=True)
-        sorted_by_time = res.sort_values(by=['improved_time'],ascending=True)
-        sorted_by_matLevel = res.sort_values(by=['matLevel'],ascending=True)
-        
+        sorted_by_time = res.sort_values(by=['improved_time'], ascending=True)
+        sorted_by_matLevel = res.sort_values(by=['matLevel'], ascending=True)
+
         best_time = sorted_by_time.iloc[0]['improved_time']
 
-        sorted_by_npv['name']=name        
-        sorted_by_time['name']=name
-        sorted_by_cost['name']=name
-        sorted_by_matLevel['name']=name
-        npv_fig = px.bar(sorted_by_npv,x='name',y='npv',labels={'name': "", 'npv': "Kapitalwert"},color='npv')
-        time_fig = px.bar(sorted_by_time,x='name',y='improved_time',labels={'name': "", 'improved_time': "Zeit nachher"},color='improved_time')
-        cost_fig = px.bar(sorted_by_cost,x='name',y='comparison',labels={'name': "", 'comparison': "Kosten"},color="comparison")
-        mat_fig = px.bar(sorted_by_matLevel,x='name',y='matLevel',labels={'name': "", 'matLevel': "Reifegrad"},color="matLevel")
-        
+        sorted_by_npv['name'] = name
+        sorted_by_time['name'] = name
+        sorted_by_cost['name'] = name
+        sorted_by_matLevel['name'] = name
+        npv_fig = px.bar(sorted_by_npv, x='name', y='npv', labels={'name': "", 'npv': "Kapitalwert"}, color='npv')
+        time_fig = px.bar(sorted_by_time, x='name', y='improved_time',
+                          labels={'name': "", 'improved_time': "Zeit nachher"}, color='improved_time')
+        cost_fig = px.bar(sorted_by_cost, x='name', y='comparison', labels={'name': "", 'comparison': "Kosten"},
+                          color="comparison")
+        mat_fig = px.bar(sorted_by_matLevel, x='name', y='matLevel', labels={'name': "", 'matLevel': "Reifegrad"},
+                         color="matLevel")
+
         ifCost = True
 
         if resultSort == "money":
             if calMethod == "comparison":
-                ifCost=True
+                ifCost = True
                 df = sorted_by_cost
                 g = cost_fig
             else:
-                ifCost=False
+                ifCost = False
                 df = sorted_by_npv
                 g = npv_fig
 
         elif resultSort == "timeSaving":
-             df = sorted_by_time
-             g = time_fig
-        
+            df = sorted_by_time
+            g = time_fig
+
         else:
             df = sorted_by_matLevel
             g = mat_fig
 
         results_output = [html_table(x, df.iloc[x][calMethod], \
-                    df.iloc[x]['investition'], df.iloc[x]['improved_time'], \
-                    df.iloc[x]['t_unsupported'], df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"], df.iloc[x]["matLevel"], ifCost).table for x in range(0,len(df))]
+                                     df.iloc[x]['investition'], df.iloc[x]['improved_time'], \
+                                     df.iloc[x]['t_unsupported'], df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"],
+                                     df.iloc[x]["matLevel"], ifCost).table for x in range(0, len(df))]
         try:
             n = clickData.get('points')[0].get('pointIndex')
-            results_output.insert(0,results_output.pop(n))
+            results_output.insert(0, results_output.pop(n))
         except:
             print("not rendered yet")
 
-        results_output[0].style={"width":"100%","background-color":"#baefff"}           
+        results_output[0].style = {"width": "100%", "background-color": "#baefff"}
 
         return g, results_output
-    
+
     else:
-        return px.bar(res,x='comparison',y='npv',labels={'comparison': "", 'npv': ""}), html.H6(children=["Bitte Parameter eingeben."])
+        return px.bar(res, x='comparison', y='npv', labels={'comparison': "", 'npv': ""}), html.H6(
+            children=["Bitte Parameter eingeben."])
+
 
 # run the app
 if __name__ == '__main__':

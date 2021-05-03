@@ -34,21 +34,21 @@ def calculate_investment(alternative, ist_situation, params):
 
 def calculate_time(alternative, ist_situation): 
 
-    sameComponent = 0 if alternative.treeMatchAlgo == 1 else ist_situation.timeSameComponent * ist_situation.freqSameComponent
-    simComponent = 0.036 * (35 + 15 * amount_of_product_features) if alternative.prodFeat == 1 else ist_situation.timeSimComponent * ist_situation.freqSimComponent
-    newComponent = 0.036 * (35 + 15 * amount_of_product_features) if alternative.prodFeat == 1 and alternative.treeMatchAlgo == 1 else ist_situation.timeNewComponent*ist_situation.freqNewComponent
-    sameProcess = 0 if alternative.matLevel >= 2 else ist_situation.timeSameProcess * ist_situation.freqSameProcess
-    simProcess = 0 if alternative.matLevel >= 2 else ist_situation.timeSimProcess * ist_situation.freqSimProcess
-    sameResource = 0 if alternative.matLevel == 3 else ist_situation.timeSameResource * ist_situation.freqSameResource
-    simResource = 0 if alternative.matLevel == 3 else ist_situation.timeSimResource * ist_situation.freqSimResource
+    sameComponent = 0 if alternative.treeMatchAlgo == 1 else ist_situation.cumTimeSameComponent
+    simComponent = 0.036 * (35 + 15 * amount_of_product_features) if alternative.prodFeat == 1 else ist_situation.cumTimeSimComponent
+    newComponent = 0.036 * (35 + 15 * amount_of_product_features) if alternative.prodFeat == 1 and alternative.treeMatchAlgo == 1 else ist_situation.cumTimeNewComponent
+    sameProcess = 0 if alternative.matLevel >= 2 else ist_situation.cumTimeSameProcess
+    simProcess = 0 if alternative.matLevel >= 2 else ist_situation.cumTimeSimProcess
+    sameResource = 0 if alternative.matLevel == 3 else ist_situation.cumTimeSameResource
+    simResource = 0 if alternative.matLevel == 3 else ist_situation.cumTimeSimResource
 
     improved_time = newComponent + \
                 simComponent + \
                 sameComponent + \
-                ist_situation.timeNewProcess*ist_situation.freqNewProcess + \
+                ist_situation.cumTimeNewProcess + \
                 simProcess + \
                 sameProcess + \
-                ist_situation.timeNewResource*ist_situation.freqNewResource + \
+                ist_situation.cumTimeNewResource + \
                 simResource + \
                 sameResource
     return improved_time
@@ -112,7 +112,6 @@ class Calculator:
         C_person = self.invest_params.c_person * improved_time
         return C_depr + C_int + C_main + C_person
 
-    # improved_time = calculate_time(alternative, self.ist_situation)
     def calculate_npv(self, alternative):
         improved_time = calculate_time(alternative, self.ist_situation)
         t_unsupported = calculate_time(self.ist_situation, self.ist_situation)

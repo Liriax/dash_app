@@ -3,7 +3,7 @@ import paramsForCalc
 import alternative
 import pandas as pd
 # amount of opitz product features is 9
-amount_of_product_features = 9
+n_prodFeat = 9
 
 def retrieve_ist_situation():  # the read, try and except are done by creating a CurrentSituation object
     return currentSituation.CurrentSituation()
@@ -33,10 +33,10 @@ def calculate_investment(alternative, ist_situation, params):
     return I_total
 
 def calculate_time(alternative, ist_situation): 
-
+    n_prodFeat = ist_situation.n_prodFeat
     sameComponent = 0 if alternative.treeMatchAlgo == 1 else ist_situation.cumTimeSameComponent
-    simComponent = 0.036 * (35 + 15 * amount_of_product_features) if alternative.prodFeat == 1 else ist_situation.cumTimeSimComponent
-    newComponent = 0.036 * (35 + 15 * amount_of_product_features) if alternative.prodFeat == 1 and alternative.treeMatchAlgo == 1 else ist_situation.cumTimeNewComponent
+    simComponent = 0.036 * (35 + 15 * n_prodFeat) if alternative.prodFeat == 1 else ist_situation.cumTimeSimComponent
+    newComponent = 0.036 * (35 + 15 * n_prodFeat) if alternative.prodFeat == 1 and alternative.treeMatchAlgo == 1 else ist_situation.cumTimeNewComponent
     sameProcess = 0 if alternative.matLevel >= 2 else ist_situation.cumTimeSameProcess
     simProcess = 0 if alternative.matLevel >= 2 else ist_situation.cumTimeSimProcess
     sameResource = 0 if alternative.matLevel == 3 else ist_situation.cumTimeSameResource
@@ -98,8 +98,8 @@ class Calculator:
         
 
     def calculate_comparison(self, alternative):
-        # return self.invest_params.C_depr + self.invest_params.C_int + self.invest_params.C_main + self.invest_params.C_person
-        # -> C_person needs to be calculated first, which requires the parameter  improved_time!
+        
+        # c_person is temporarily substituted by 0.2
         improved_time = calculate_time(alternative, self.ist_situation)
         I_total = calculate_investment(alternative, self.ist_situation, self.invest_params)
 
@@ -109,7 +109,7 @@ class Calculator:
         C_depr = I_total / self.invest_params.T
         C_int = 0.5 * I_total * self.invest_params.r
         C_main = self.invest_params.c_main * I_total
-        C_person = self.invest_params.c_person * improved_time
+        C_person = 0.2 * improved_time
         return C_depr + C_int + C_main + C_person
 
     def calculate_npv(self, alternative):
@@ -120,8 +120,8 @@ class Calculator:
         C_main = self.invest_params.c_main * I_total
 
         r = self.invest_params.r
-        S_person = self.invest_params.c_person * (t_unsupported - improved_time)  # personnel cost savings
-        C_person = self.invest_params.c_person * improved_time
+        S_person = 0.2 * (t_unsupported - improved_time)  # personnel cost savings
+        C_person = 0.2 * improved_time
         R_acc = self.invest_params.r_acc * (t_unsupported - improved_time) / t_unsupported * self.ist_situation.numNewVariant  # R_acc: additional revenues
         npv = - I_total
         for t in range(1, self.invest_params.T + 1):
@@ -141,8 +141,8 @@ class Calculator:
             prodFeat = alternative.prodFeat
             treeMatchAlgo = alternative.treeMatchAlgo
             alreadyImplemented = alternative.alreadyImplemented
-            res.append([npv, comparison, investition, t_unsupported,  improved_time, matLevel, prodFeat, treeMatchAlgo, alreadyImplemented, amount_of_product_features])
-        res_df = pd.DataFrame(res, columns = ['npv', 'comparison', 'investition', 't_unsupported', 'improved_time', 'matLevel', 'prodFeat', 'treeMatchAlgo', 'alreadyImplemented', 'amount_of_product_features'])
+            res.append([npv, comparison, investition, t_unsupported,  improved_time, matLevel, prodFeat, treeMatchAlgo, alreadyImplemented, n_prodFeat])
+        res_df = pd.DataFrame(res, columns = ['npv', 'comparison', 'investition', 't_unsupported', 'improved_time', 'matLevel', 'prodFeat', 'treeMatchAlgo', 'alreadyImplemented', 'n_prodFeat'])
         res_df.to_csv('result.csv', index=False)
 
 

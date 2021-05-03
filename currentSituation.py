@@ -38,6 +38,8 @@ class CurrentSituation:
             self.shareNewResource = ist_situation.iloc[0]["shareNewResource"]
             self.shareSimResource = ist_situation.iloc[0]["shareSimResource"]
             self.shareSameResource = ist_situation.iloc[0]["shareSameResource"]
+            self.n_prodFeat= ist_situation.iloc[0]["n_prodFeat"]   
+
             # calculate cumulative times by using either abs. time * freq or share of total time * total time
             if self.typeOfTimeMeasurement == 'absolute':
                 self.cumTimeNewComponent = self.timeNewComponent * self.freqNewComponent

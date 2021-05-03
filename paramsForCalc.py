@@ -5,7 +5,7 @@ class ParamsForCalc:
     # T: depreciation period = use time
     # r: interest rate
     # c_main: maintenance cost rate
-    # c_person: hourly personnel cost rate
+    # AS: hourly personnel cost rate
     # r_acc: revenue per product variant
 
     def __init__(self):  
@@ -15,7 +15,8 @@ class ParamsForCalc:
             self.I_l3 = invest_params.iloc[0]["I_l3"]
             self.I_al = invest_params.iloc[0]["I_al"]
             self.I_pr = invest_params.iloc[0]["I_pr"]
-            self.c_person = invest_params.iloc[0]["c_person"]
+            self.AS = invest_params.iloc[0]["AS"]
+            self.K_PGrund = invest_params.iloc[0]["K_PGrund"]
             self.c_main = invest_params.iloc[0]["c_main"]
             self.r = invest_params.iloc[0]["c_int"]
             self.T = invest_params.iloc[0]["t"]

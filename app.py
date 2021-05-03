@@ -88,7 +88,7 @@ app.layout = html.Div(
 
                                  ]
                              ),
-
+                             html.Br(),
                              html.Tr(
                                  children=[
                                      dcc.Dropdown(
@@ -114,7 +114,7 @@ app.layout = html.Div(
                              html.Tr(
                                  children=[
                                      html.Th(children=["Suchzeiten zum Identifizieren"]),
-                                     html.Th(children=["Dauer"]),
+                                     html.Th(children=["Dauer (Minuten)"]),
                                      html.Th(children=["Häufigkeit je Variante"])
                                  ]
                              ),
@@ -292,17 +292,21 @@ app.layout = html.Div(
                          ], style={'display': 'block'}, id='tableAbsoluteTimes',
                      ),
 
-                     html.Br(),
+                     
                      # Suchzeiten mit Prozentualen Anteilen
                      html.Table(
                          children=[
-                             html.Td(children=["Gesamte benötigte Zeit zum Suchen von Bauteilen, Prozessen und Resourcen"]),
-                             html.Td(children=[
-                                 dcc.Input(
-                                     id="totalSearchTime",
-                                     type="number", min=0, value=5
-                                 )
-                             ]),
+                             html.Br(),
+                             html.Tr(children=[
+                                html.Td(children=["Gesamte benötigte Zeit zum Suchen von Bauteilen, Prozessen und Resourcen (Minuten)"]),
+                                html.Td(children=[
+                                    dcc.Input(
+                                        id="totalSearchTime",
+                                        type="number", min=0, value=5
+                                    )
+                                ])]
+                             ),
+                             
                              # headers Suchzeiten
                              html.Tr(
                                  children=[
@@ -427,7 +431,7 @@ app.layout = html.Div(
                                      ]),
                                  ]
                              ),
-                         ], style={'display': 'block'}, id='tableRelativeTimes',
+                         ], id='tableRelativeTimes'
                      ),
                      html.Br(),
                      # ------table 2-----------------------------------
@@ -526,14 +530,26 @@ app.layout = html.Div(
                              ),
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Personalkostensatz, %"]),
+                                     html.Td(children=["Arbeitsstunden pro Woche"]),
                                      html.Td(children=[
                                          dcc.Input(
-                                             id='c_person',
-                                             type='number', min=0, value=20
+                                             id='AS',
+                                             type='number', min=0, value=30
                                          )
                                      ]),
-                                     html.Td(children=[""])  # calculate standard cost
+                                     html.Td(children=["35-40"])  # calculate standard cost
+                                 ]
+                             ),
+                             html.Tr(
+                                 children=[
+                                     html.Td(children=["Grundgehalt in der Arbeitsvorbereitung"]),
+                                     html.Td(children=[
+                                         dcc.Input(
+                                             id='K_PGrund',
+                                             type='number', min=0, value=1000
+                                         )
+                                     ]),
+                                     html.Td(children=["-"])  # calculate standard cost
                                  ]
                              ),
                              html.Tr(
@@ -545,7 +561,7 @@ app.layout = html.Div(
                                              type='number', min=0, value=20
                                          )
                                      ]),
-                                     html.Td(children=[""])  # calculate standard cost
+                                     html.Td(children=["20-30%"])  # calculate standard cost
                                  ]
                              ),
                              html.Tr(
@@ -554,10 +570,10 @@ app.layout = html.Div(
                                      html.Td(children=[
                                          dcc.Input(
                                              id='c_int',
-                                             type='number', min=0, value=7
+                                             type='number', min=0, value=6
                                          )
                                      ]),
-                                     html.Td(children=[""])  # standard interest
+                                     html.Td(children=["maximal 6%"])  # standard interest
                                  ]
                              ),
                              html.Tr(
@@ -569,7 +585,19 @@ app.layout = html.Div(
                                              type='number', min=1, value=3
                                          )
                                      ]),
-                                     html.Td(children=["3"])  # standard duration
+                                     html.Td(children=["3 bzw. 5 für ERP-System"])  # standard duration
+                                 ]
+                             ),
+                             html.Tr(
+                                 children=[
+                                     html.Td(children=["Anzahl Produktmerkmale"]),
+                                     html.Td(children=[
+                                         dcc.Input(
+                                             id='n_prodFeat',
+                                             type='number', min=0, value=9
+                                         )
+                                     ]),
+                                     html.Td(children=["9"])  # calculate standard cost
                                  ]
                              ),
                              html.Br(),
@@ -629,9 +657,9 @@ app.layout = html.Div(
 )
 def switch_time_input_variant(visibility_state):
     if visibility_state == 'relative':
-        return [{'display': 'block'}, {'display': 'none'}]
+        return [{'display': 'table',"width":"100%"}, {'display': 'none'}]
     else:
-        return [{'display': 'none'}, {'display': 'block'}]
+        return [{'display': 'none'}, {'display': 'table'}]
 
 
 # Define all Outputs first! Otherwise error
@@ -677,6 +705,7 @@ def switch_time_input_variant(visibility_state):
     State('shareNewResource', 'value'),
     State('shareSimResource', 'value'),
     State('shareSameResource', 'value'),
+    State('n_prodFeat','value'),
 )
 # This function calculates the total search time and writes the input from Ist-Situation to a csv file
 def save_ist_situation(n_clicks, matLevel, supFunction,
@@ -689,7 +718,7 @@ def save_ist_situation(n_clicks, matLevel, supFunction,
                        numNewVariant, totalSearchTime, typeOfTimeMeasurement,
                        shareNewComponent, shareSimComponent, shareSameComponent,
                        shareNewProcess, shareSimProcess, shareSameProcess,
-                       shareNewResource, shareSimResource, shareSameResource):
+                       shareNewResource, shareSimResource, shareSameResource, n_prodFeat):
     if n_clicks is not None:
         treeMatchAlgo = 1 if "treeMatching" in supFunction else 0
         prodFeat = 1 if "prodFeature" in supFunction else 0
@@ -707,7 +736,8 @@ def save_ist_situation(n_clicks, matLevel, supFunction,
                 'numNewVariant': numNewVariant, 'totalSearchTime': totalSearchTime, 'typeOfTimeMeasurement': typeOfTimeMeasurement,
                 'shareNewComponent': shareNewComponent, 'shareSimComponent': shareSimComponent, 'shareSameComponent': shareSameComponent,
                 'shareNewProcess': shareNewProcess, 'shareSimProcess': shareSimProcess, 'shareSameProcess': shareSameProcess,
-                'shareNewResource': shareNewResource, 'shareSimResource': shareSimResource, 'shareSameResource': shareSameResource}
+                'shareNewResource': shareNewResource, 'shareSimResource': shareSimResource, 'shareSameResource': shareSameResource,
+                'n_prodFeat':n_prodFeat}
         df = pd.DataFrame([data])
         df.to_csv('ist_situation.csv', index=False)
     return None
@@ -720,16 +750,17 @@ def save_ist_situation(n_clicks, matLevel, supFunction,
     State('I_pr', 'value'),
     State('I_l2', 'value'),
     State('I_l3', 'value'),
-    State('c_person', 'value'),
+    State('AS', 'value'),
+    State('K_PGrund','value'),
     State('c_main', 'value'),
     State('c_int', 'value'),
     State('t', 'value'),
     State('npvRevProProduct', 'value')
 )
 # This function writes the input from Parameter für Investitionsrechnung to a csv file
-def save_parameter_Investitionsrechnung(n_clicks, I_al, I_pr, I_l2, I_l3, c_person, c_main, c_int, t, npvRevProProduct):
+def save_parameter_Investitionsrechnung(n_clicks, I_al, I_pr, I_l2, I_l3, AS,K_PGrund, c_main, c_int, t, npvRevProProduct):
     data = {'I_al': I_al, 'I_pr': I_pr, 'I_l2': I_l2, 'I_l3': I_l3,
-            'c_person': c_person, 'c_main': c_main, 'c_int': c_int,
+            'AS': AS, 'K_PGrund':K_PGrund,'c_main': c_main, 'c_int': c_int,
             't': t,
             'npvRevProProduct': npvRevProProduct}
     df = pd.DataFrame([data])
@@ -738,7 +769,7 @@ def save_parameter_Investitionsrechnung(n_clicks, I_al, I_pr, I_l2, I_l3, c_pers
 
 
 class html_table:
-    def __init__(self, opt, money, investition, time, time_before, treeMatchAlgo, prodFeat, matLevel, ifCost):
+    def __init__(self, name, money, investition, time, time_before, treeMatchAlgo, prodFeat, matLevel, ifCost):
         support_functions = []
         if treeMatchAlgo == 1:
             support_functions.append("Tree-Matching")
@@ -751,7 +782,7 @@ class html_table:
                                     html.Tr(
                                         children=[
                                             html.Th(colSpan=4, style={'text-align': 'left'},
-                                                    children=["Option {}".format(opt) if opt > 0 else "Ist-Situation"])]
+                                                    children=[name])]
                                     ),
 
                                     html.Tr(
@@ -810,7 +841,7 @@ def generate_graphs(n_clicks, resultSort, calMethod, clickData):
         c.calculate_results()
         res = pd.read_csv('result.csv')
         name = ["Option {}".format(x) for x in range(1, len(res))]
-        name.insert(0, "Ist-Situation")
+        
 
         # sort dataframes
         sorted_by_npv = res.sort_values(by=["npv"], ascending=False)
@@ -820,39 +851,42 @@ def generate_graphs(n_clicks, resultSort, calMethod, clickData):
 
         best_time = sorted_by_time.iloc[0]['improved_time']
 
-        sorted_by_npv['name'] = name
-        sorted_by_time['name'] = name
-        sorted_by_cost['name'] = name
-        sorted_by_matLevel['name'] = name
-        npv_fig = px.bar(sorted_by_npv, x='name', y='npv', labels={'name': "", 'npv': "Kapitalwert"}, color='npv')
-        time_fig = px.bar(sorted_by_time, x='name', y='improved_time',
-                          labels={'name': "", 'improved_time': "Zeit nachher"}, color='improved_time')
-        cost_fig = px.bar(sorted_by_cost, x='name', y='comparison', labels={'name': "", 'comparison': "Kosten"},
-                          color="comparison")
-        mat_fig = px.bar(sorted_by_matLevel, x='name', y='matLevel', labels={'name': "", 'matLevel': "Reifegrad"},
-                         color="matLevel")
-
         ifCost = True
 
         if resultSort == "money":
             if calMethod == "comparison":
                 ifCost = True
                 df = sorted_by_cost
-                g = cost_fig
+                name.insert(0, "Ist-Situation")
+                df['name'] = name
+                g = px.bar(df, x='name', y='comparison', labels={'name': "", 'comparison': "Kosten"},
+                          color="comparison")
             else:
                 ifCost = False
                 df = sorted_by_npv
-                g = npv_fig
+                if df.iloc[1]['npv']<=0:
+                    name.insert(0, "Ist-Situation")
+                else: 
+                    name.insert(len(df),"Ist-Situation")
+                df['name'] = name
+                g = px.bar(df, x='name', y='npv', labels={'name': "", 'npv': "Kapitalwert"}, color='npv')
+
 
         elif resultSort == "timeSaving":
             df = sorted_by_time
-            g = time_fig
+            name.insert(len(df),"Ist-Situation")
+            df['name'] = name
+            g = px.bar(df, x='name', y='improved_time',
+                          labels={'name': "", 'improved_time': "Zeit nachher"}, color='improved_time')
 
         else:
             df = sorted_by_matLevel
-            g = mat_fig
+            name.insert(0,"Ist-Situation")
+            df['name'] = name
+            g = px.bar(df, x='name', y='matLevel', labels={'name': "", 'matLevel': "Reifegrad"},
+                         color="matLevel")
 
-        results_output = [html_table(x, df.iloc[x][calMethod], \
+        results_output = [html_table(df.iloc[x]["name"], df.iloc[x][calMethod], \
                                      df.iloc[x]['investition'], df.iloc[x]['improved_time'], \
                                      df.iloc[x]['t_unsupported'], df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"],
                                      df.iloc[x]["matLevel"], ifCost).table for x in range(0, len(df))]
@@ -862,12 +896,14 @@ def generate_graphs(n_clicks, resultSort, calMethod, clickData):
         except:
             print("not rendered yet")
 
-        results_output[0].style = {"width": "100%", "background-color": "#baefff"}
+        results_output[0].style = {"width": "100%", "background-color": "#fdff99"}
+        results_output.insert(0,html.P(style={"text-align":"center","font-size":"small"},children=["Mit dem Clicken auf die Säule können Sie eine Option zum Anzeigen auswählen."]))
 
         return g, results_output
 
     else:
         return px.bar(res, x='comparison', y='npv', labels={'comparison': "", 'npv': ""}), html.H6(
+            style={"color":"red"},
             children=["Bitte Parameter eingeben."])
 
 

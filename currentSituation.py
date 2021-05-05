@@ -27,7 +27,9 @@ class CurrentSituation:
             self.freqNewResource = ist_situation.iloc[0]["freqNewResource"]
             self.freqSimResource = ist_situation.iloc[0]["freqSimResource"]
             self.freqSameResource = ist_situation.iloc[0]["freqSameResource"]
-            self.totalSearchTime = ist_situation.iloc[0]["totalSearchTime"]
+            self.totalSearchTimeComponents = ist_situation.iloc[0]["totalSearchTimeComponents"]
+            self.totalSearchTimeProcesses = ist_situation.iloc[0]["totalSearchTimeProcesses"]
+            self.totalSearchTimeResources = ist_situation.iloc[0]["totalSearchTimeResources"]
             self.typeOfTimeMeasurement = ist_situation.iloc[0]["typeOfTimeMeasurement"]
             self.shareNewComponent = ist_situation.iloc[0]["shareNewComponent"]
             self.shareSimComponent = ist_situation.iloc[0]["shareSimComponent"]
@@ -38,7 +40,8 @@ class CurrentSituation:
             self.shareNewResource = ist_situation.iloc[0]["shareNewResource"]
             self.shareSimResource = ist_situation.iloc[0]["shareSimResource"]
             self.shareSameResource = ist_situation.iloc[0]["shareSameResource"]
-            self.n_prodFeat= ist_situation.iloc[0]["n_prodFeat"]   
+            self.n_prodFeat= ist_situation.iloc[0]["n_prodFeat"]
+            self.mean_amount_of_elem_comp = ist_situation.iloc[0]["mean_amount_of_elem_comp"]
 
             # calculate cumulative times by using either abs. time * freq or share of total time * total time
             if self.typeOfTimeMeasurement == 'absolute':
@@ -52,21 +55,21 @@ class CurrentSituation:
                 self.cumTimeSimResource = self.timeSimResource * self.freqSimResource
                 self.cumTimeSameResource = self.timeSameResource * self.freqSameResource
             if self.typeOfTimeMeasurement == 'relative':
-                self.cumTimeNewComponent = self.shareNewComponent * self.totalSearchTime
-                self.cumTimeSimComponent = self.shareSimComponent * self.totalSearchTime
-                self.cumTimeSameComponent = self.shareSameComponent * self.totalSearchTime
-                self.cumTimeNewProcess = self.shareNewProcess * self.totalSearchTime
-                self.cumTimeSimProcess = self.shareSimProcess * self.totalSearchTime
-                self.cumTimeSameProcess = self.shareSameProcess * self.totalSearchTime
-                self.cumTimeNewResource = self.shareNewResource * self.totalSearchTime
-                self.cumTimeSimResource = self.shareSimResource * self.totalSearchTime
-                self.cumTimeSameResource = self.shareSameResource * self.totalSearchTime
+                self.cumTimeNewComponent = self.shareNewComponent * self.totalSearchTimeComponents
+                self.cumTimeSimComponent = self.shareSimComponent * self.totalSearchTimeComponents
+                self.cumTimeSameComponent = self.shareSameComponent * self.totalSearchTimeComponents
+                self.cumTimeNewProcess = self.shareNewProcess * self.totalSearchTimeProcesses
+                self.cumTimeSimProcess = self.shareSimProcess * self.totalSearchTimeProcesses
+                self.cumTimeSameProcess = self.shareSameProcess * self.totalSearchTimeProcesses
+                self.cumTimeNewResource = self.shareNewResource * self.totalSearchTimeResources
+                self.cumTimeSimResource = self.shareSimResource * self.totalSearchTimeResources
+                self.cumTimeSameResource = self.shareSameResource * self.totalSearchTimeResources
 
 
 
             sameComponent = 0 if self.treeMatchAlgo == 1 else self.cumTimeSameComponent
-            simComponent = 0.036 * (35 + 15 * 9) if self.prodFeat == 1 else self.cumTimeSimComponent
-            newComponent = 0.036 * (35 + 15 * 9) if self.prodFeat == 1 and self.treeMatchAlgo == 1 else self.cumTimeNewComponent
+            simComponent = 0.036 * (35 + 15 * 9) * self.mean_amount_of_elem_comp if self.prodFeat == 1 else self.cumTimeSimComponent
+            newComponent = 0.036 * (35 + 15 * 9) * self.mean_amount_of_elem_comp if self.prodFeat == 1 and self.treeMatchAlgo == 1 else self.cumTimeNewComponent
             sameProcess = 0 if self.matLevel >= 2 else self.cumTimeSameProcess
             simProcess = 0 if self.matLevel >= 2 else self.cumTimeSimProcess
             sameResource = 0 if self.matLevel == 3 else self.cumTimeSameResource

@@ -16,15 +16,14 @@ class ParamsForCalc:
             self.I_al = invest_params.iloc[0]["I_al"]
             self.I_pr = invest_params.iloc[0]["I_pr"]
             self.AS = invest_params.iloc[0]["AS"]
+            #K_PGrund is given in €/Month
             self.K_PGrund = invest_params.iloc[0]["K_PGrund"]
-            self.c_main = invest_params.iloc[0]["c_main"]
-            self.r = invest_params.iloc[0]["c_int"]
+            self.c_main = invest_params.iloc[0]["c_main"] / 100
+            self.r = invest_params.iloc[0]["c_int"] / 100
             self.T = invest_params.iloc[0]["t"]
             self.r_acc = invest_params.iloc[0]["npvRevProProduct"]
-            # self.I_total = I_l2 + I_l3 + I_al + I_pr # ist das falsch?
-            # self.C_depr = self.I_total / T
-            # self.C_int = 0.5 * self.I_total * r
-            # self.C_main = c_main * self.I_total
+            # 0.726 is german standard for "Personalnebenkosten", k_personal is given in €/h
+            self.k_personal = (self.K_PGrund * 12 * 7 * (1 + 0.726)) / (365 * self.AS)
         except pd.errors.EmptyDataError:
             invest_params = 'could not read parameter_Investitionsrechnung.csv'
 

@@ -32,6 +32,7 @@ def calculate_investment(alternative, ist_situation, params):
     
     return I_total
 
+#"calculate_time" takes in time durations in minutes but returns the total time in hours!
 def calculate_time(alternative, ist_situation): 
     n_prodFeat = ist_situation.n_prodFeat
     sameComponent = 0 if alternative.treeMatchAlgo == 1 else ist_situation.cumTimeSameComponent
@@ -51,7 +52,7 @@ def calculate_time(alternative, ist_situation):
                 ist_situation.cumTimeNewResource + \
                 simResource + \
                 sameResource
-    return improved_time
+    return round(improved_time/60, 1)
 
 
 def create_alternatives(ist_situation):
@@ -109,7 +110,7 @@ class Calculator:
         C_depr = I_total / self.invest_params.T
         C_int = 0.5 * I_total * self.invest_params.r
         C_main = self.invest_params.c_main * I_total
-        C_person = 0.2 * improved_time
+        C_person = self.invest_params.k_personal * improved_time
         return C_depr + C_int + C_main + C_person
 
     def calculate_npv(self, alternative):
@@ -120,8 +121,8 @@ class Calculator:
         C_main = self.invest_params.c_main * I_total
 
         r = self.invest_params.r
-        S_person = 0.2 * (t_unsupported - improved_time)  # personnel cost savings
-        C_person = 0.2 * improved_time
+        S_person = self.invest_params.k_personal * (t_unsupported - improved_time)  # personnel cost savings
+        C_person = self.invest_params.k_personal * improved_time
         R_acc = self.invest_params.r_acc * (t_unsupported - improved_time) / t_unsupported * self.ist_situation.numNewVariant  # R_acc: additional revenues
         npv = - I_total
         for t in range(1, self.invest_params.T + 1):
@@ -131,9 +132,9 @@ class Calculator:
     def calculate_results(self):
         res = []
         for alternative in self.alternatives:
-            npv = self.calculate_npv(alternative)
-            comparison = self.calculate_comparison(alternative)
-            investition = calculate_investment(alternative, self.ist_situation, self.invest_params) 
+            npv = int(self.calculate_npv(alternative))
+            comparison = int(self.calculate_comparison(alternative))
+            investition = int(calculate_investment(alternative, self.ist_situation, self.invest_params))
             improved_time = calculate_time(alternative, self.ist_situation)
             t_unsupported = calculate_time(self.ist_situation, self.ist_situation)
              

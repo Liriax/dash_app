@@ -298,10 +298,10 @@ app.layout = html.Div(
                          children=[
                              html.Br(),
                              html.Tr(children=[
-                                html.Td(children=["Gesamte benötigte Zeit zum Suchen von Bauteilen, Prozessen und Resourcen (Minuten)"]),
+                                html.Th(children=["Gesamte benötigte Zeit zum Suchen von Bauteilen (Minuten):"]),
                                 html.Td(children=[
                                     dcc.Input(
-                                        id="totalSearchTime",
+                                        id="totalSearchTimeComponents",
                                         type="number", min=0, value=5
                                     )
                                 ])]
@@ -356,6 +356,17 @@ app.layout = html.Div(
 
                              html.Br(),
 
+                             html.Tr(children=[
+                                 html.Th(children=[
+                                     "Gesamte benötigte Zeit zum Suchen von Prozessen (Minuten)"]),
+                                 html.Td(children=[
+                                     dcc.Input(
+                                         id="totalSearchTimeProcesses",
+                                         type="number", min=0, value=5
+                                     )
+                                 ])]
+                             ),
+
                              # Prozess 1
                              html.Tr(
                                  children=[
@@ -395,10 +406,21 @@ app.layout = html.Div(
 
                              html.Br(),
 
-                             # ressource 1
+                             html.Tr(children=[
+                                 html.Th(children=[
+                                     "Gesamte benötigte Zeit zum Suchen von Resourcen (Minuten)"]),
+                                 html.Td(children=[
+                                     dcc.Input(
+                                         id="totalSearchTimeResources",
+                                         type="number", min=0, value=5
+                                     )
+                                 ])]
+                             ),
+
+                             # resource 1
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Neue Ressource-Information"]),
+                                     html.Td(children=["Neue Resource-Information"]),
                                      html.Td(children=[
                                          dcc.Input(
                                              id="shareNewResource",
@@ -410,7 +432,7 @@ app.layout = html.Div(
                              # ressource 2
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Ähnliche Ressource-Information"]),
+                                     html.Td(children=["Ähnliche Resource-Information"]),
                                      html.Td(children=[
                                          dcc.Input(
                                              id="shareSimResource",
@@ -422,7 +444,7 @@ app.layout = html.Div(
                              # ressource 3
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Gleiche Ressource-Information"]),
+                                     html.Td(children=["Gleiche Resource-Information"]),
                                      html.Td(children=[
                                          dcc.Input(
                                              id="shareSameResource",
@@ -600,12 +622,24 @@ app.layout = html.Div(
                                      html.Td(children=["9"])  # calculate standard cost
                                  ]
                              ),
+                             html.Tr(
+                                 children=[
+                                     html.Td(children=["Durschnittliche Anzahl an elementaren Bauteilen"]),
+                                     html.Td(children=[
+                                         dcc.Input(
+                                             id='mean_amount_of_elem_comp',
+                                             type='number', min=0, value=9
+                                         )
+                                     ]),
+                                     html.Td(children=["9"])  # calculate standard cost
+                                 ]
+                             ),
                              html.Br(),
                              html.Tr(id="npvChainOutput",
                                      children=[
-                                         html.Td(children=["Einnahmen pro Produktvariante"]),
+                                         html.Td(children=["Einnahmen pro Produktvariante"], id='npvRevProProductLabel', style={'display': 'none'}),
                                          html.Td(children=[
-                                             dcc.Input(id='npvRevProProduct', type='number', min=0, value=500)]),
+                                             dcc.Input(id='npvRevProProduct', type='number', min=0, value=500,  style={'display': 'none'})]),
                                          html.Td(html.Button(id="saveTable2Input", n_clicks=None, children="Submit"))
                                      ]
                                      ),
@@ -657,10 +691,21 @@ app.layout = html.Div(
 )
 def switch_time_input_variant(visibility_state):
     if visibility_state == 'relative':
-        return [{'display': 'table',"width":"100%"}, {'display': 'none'}]
+        return {'display': 'table', "width": "100%"}, {'display': 'none'}
     else:
-        return [{'display': 'none'}, {'display': 'table'}]
+        return {'display': 'none'}, {'display': 'table'}
 
+
+@app.callback(
+    Output(component_id='npvRevProProduct', component_property='style'),
+    Output(component_id='npvRevProProductLabel', component_property='style'),
+    [Input(component_id='calMethod', component_property='value')]
+)
+def switch_npv_rev_pro_product_visibility(calc_method):
+    if calc_method == 'npv':
+        return {'display': 'block'}, {'display': 'block'}
+    else:
+        return {'display': 'none'}, {'display': 'none'}
 
 # Define all Outputs first! Otherwise error
 # Be careful with the order!
@@ -694,7 +739,9 @@ def switch_time_input_variant(visibility_state):
     State('timeSameResource', 'value'),
     State('freqSameResource', 'value'),
     State('numNewVariant', 'value'),
-    State('totalSearchTime', 'value'),
+    State('totalSearchTimeComponents', 'value'),
+    State('totalSearchTimeProcesses', 'value'),
+    State('totalSearchTimeResources', 'value'),
     State('dropdown-to-switch-between-absolute-and-relative-time', 'value'),
     State('shareNewComponent', 'value'),
     State('shareSimComponent', 'value'),
@@ -705,7 +752,8 @@ def switch_time_input_variant(visibility_state):
     State('shareNewResource', 'value'),
     State('shareSimResource', 'value'),
     State('shareSameResource', 'value'),
-    State('n_prodFeat','value'),
+    State('n_prodFeat', 'value'),
+    State('mean_amount_of_elem_comp', 'value')
 )
 # This function calculates the total search time and writes the input from Ist-Situation to a csv file
 def save_ist_situation(n_clicks, matLevel, supFunction,
@@ -715,10 +763,12 @@ def save_ist_situation(n_clicks, matLevel, supFunction,
                        freqNewComponent, freqSimComponent, freqSameComponent,
                        freqNewProcess, freqSimProcess, freqSameProcess,
                        freqNewResource, freqSimResource, freqSameResource,
-                       numNewVariant, totalSearchTime, typeOfTimeMeasurement,
+                       numNewVariant,
+                       totalSearchTimeComponents, totalSearchTimeProcesses, totalSearchTimeResources,
+                       typeOfTimeMeasurement,
                        shareNewComponent, shareSimComponent, shareSameComponent,
                        shareNewProcess, shareSimProcess, shareSameProcess,
-                       shareNewResource, shareSimResource, shareSameResource, n_prodFeat):
+                       shareNewResource, shareSimResource, shareSameResource, n_prodFeat, mean_amount_of_elem_comp):
     if n_clicks is not None:
         treeMatchAlgo = 1 if "treeMatching" in supFunction else 0
         prodFeat = 1 if "prodFeature" in supFunction else 0
@@ -733,11 +783,13 @@ def save_ist_situation(n_clicks, matLevel, supFunction,
                 'freqNewProcess': freqNewProcess, 'freqSimProcess': freqSimProcess, 'freqSameProcess': freqSameProcess,
                 'freqNewResource': freqNewResource, 'freqSimResource': freqSimResource,
                 'freqSameResource': freqSameResource,
-                'numNewVariant': numNewVariant, 'totalSearchTime': totalSearchTime, 'typeOfTimeMeasurement': typeOfTimeMeasurement,
+                'numNewVariant': numNewVariant,
+                'totalSearchTimeComponents': totalSearchTimeComponents, 'totalSearchTimeProcesses': totalSearchTimeProcesses, 'totalSearchTimeResources': totalSearchTimeResources,
+                'typeOfTimeMeasurement': typeOfTimeMeasurement,
                 'shareNewComponent': shareNewComponent, 'shareSimComponent': shareSimComponent, 'shareSameComponent': shareSameComponent,
                 'shareNewProcess': shareNewProcess, 'shareSimProcess': shareSimProcess, 'shareSameProcess': shareSameProcess,
                 'shareNewResource': shareNewResource, 'shareSimResource': shareSimResource, 'shareSameResource': shareSameResource,
-                'n_prodFeat':n_prodFeat}
+                'n_prodFeat':n_prodFeat, 'mean_amount_of_elem_comp': mean_amount_of_elem_comp}
         df = pd.DataFrame([data])
         df.to_csv('ist_situation.csv', index=False)
     return None

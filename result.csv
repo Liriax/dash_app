@@ -1,7 +1,7 @@
-npv,comparison,investition,t_unsupported,improved_time,matLevel,prodFeat,treeMatchAlgo,alreadyImplemented,n_prodFeat
-0,198,0,15.0,15.0,1,0,1,1,9
--428,731,1000,15.0,12.7,1,1,1,0,9
-485,706,1000,15.0,10.8,2,0,1,0,9
-56,1239,2000,15.0,8.5,2,1,1,0,9
-537,1225,2000,15.0,7.5,3,0,1,0,9
-108,1758,3000,15.0,5.2,3,1,1,0,9
+npv,comparison,investition,t_unsupported,improved_time,matLevel,prodFeat,treeMatchAlgo,alreadyImplemented,n_prodFeat,name
+0,198,0,15.0,15.0,1,0,1,1,9,Ist-Situation
+-428,731,1000,15.0,12.7,1,1,1,0,9,RG 1 SÄ BÄ
+485,706,1000,15.0,10.8,2,0,1,0,9,RG 2 SÄ
+56,1239,2000,15.0,8.5,2,1,1,0,9,RG 2 SÄ BÄ
+537,1225,2000,15.0,7.5,3,0,1,0,9,RG 3 SÄ
+108,1758,3000,15.0,5.2,3,1,1,0,9,RG 3 SÄ BÄ

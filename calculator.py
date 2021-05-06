@@ -5,12 +5,12 @@ import pandas as pd
 # amount of opitz product features is 9
 n_prodFeat = 9
 
-def retrieve_ist_situation():  # the read, try and except are done by creating a CurrentSituation object
-    return currentSituation.CurrentSituation()
+# def retrieve_ist_situation():  # the read, try and except are done by creating a CurrentSituation object
+#     return currentSituation.CurrentSituation()
 
 
-def retrieve_invest_params():  # the read, try and except are done by creating a ParamsForCalc object
-    return paramsForCalc.ParamsForCalc()
+# def retrieve_invest_params():  # the read, try and except are done by creating a ParamsForCalc object
+#     return paramsForCalc.ParamsForCalc()
 
 
 def calculate_investment(alternative, ist_situation, params):
@@ -93,8 +93,8 @@ def create_alternatives(ist_situation):
 
 class Calculator:
     def __init__(self):
-        self.ist_situation = retrieve_ist_situation()
-        self.invest_params = retrieve_invest_params()
+        self.ist_situation = currentSituation.CurrentSituation()
+        self.invest_params = paramsForCalc.ParamsForCalc()
         self.alternatives = create_alternatives(self.ist_situation)
         
 
@@ -144,6 +144,9 @@ class Calculator:
             alreadyImplemented = alternative.alreadyImplemented
             res.append([npv, comparison, investition, t_unsupported,  improved_time, matLevel, prodFeat, treeMatchAlgo, alreadyImplemented, n_prodFeat])
         res_df = pd.DataFrame(res, columns = ['npv', 'comparison', 'investition', 't_unsupported', 'improved_time', 'matLevel', 'prodFeat', 'treeMatchAlgo', 'alreadyImplemented', 'n_prodFeat'])
+        
+        name = ["RG {}{}{}".format(int(res_df.iloc[x]['matLevel']), " SÄ" if res_df.iloc[x]['treeMatchAlgo']==1 else "", " BÄ" if res_df.iloc[x]['prodFeat']==1 else "") if res_df.iloc[x]['investition'] >0 else "Ist-Situation" for x in range(0, len(res_df))]
+        res_df['name']=name
         res_df.to_csv('result.csv', index=False)
 
 

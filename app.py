@@ -61,8 +61,8 @@ app.layout = html.Div(
                                          dcc.Checklist(
                                              id='supFunction',
                                              options=[
-                                                 {'label': 'Tree-Matching', 'value': 'treeMatching'},
-                                                 {'label': 'Produktmerkmale', 'value': 'prodFeature'}
+                                                 {'label': 'Stücklisten-Ähnlichkeit (SÄ)', 'value': 'treeMatching'},
+                                                 {'label': 'Bauteil-Ähnlichkeit (BÄ)', 'value': 'prodFeature'}
                                              ],
                                              value=[]
 
@@ -83,7 +83,7 @@ app.layout = html.Div(
                                          )
                                      ]),
                                      html.Td(children=[
-                                         html.Button(id='saveTable1Input', n_clicks=None, children="Speichern")
+                                         html.Button(id='saveTable1Input', n_clicks=None, children="Aktualisieren")
                                      ])
 
                                  ]
@@ -494,7 +494,7 @@ app.layout = html.Div(
                              ),
                              html.Tr(
                                  children=[
-                                     html.Td(colSpan=2, children=["Investition für Algorithmus"]),
+                                     html.Td(colSpan=2, children=["Investition für Stücklisten-Ähnlichkeit"]),
                                      html.Td(
                                          children=[
                                              dcc.Input(
@@ -507,7 +507,7 @@ app.layout = html.Div(
                              ),
                              html.Tr(
                                  children=[
-                                     html.Td(colSpan=2, children=["Investition für Produktmerkmale"]),
+                                     html.Td(colSpan=2, children=["Investition für Bauteil-Ähnlichkeit"]),
                                      html.Td(
                                          children=[
                                              dcc.Input(
@@ -564,7 +564,7 @@ app.layout = html.Div(
                              ),
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Grundgehalt in der Arbeitsvorbereitung"]),
+                                     html.Td(children=["Monatliches Grundgehalt in der Arbeitsvorbereitung"]),
                                      html.Td(children=[
                                          dcc.Input(
                                              id='K_PGrund',
@@ -612,7 +612,7 @@ app.layout = html.Div(
                              ),
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Anzahl Produktmerkmale"]),
+                                     html.Td(children=["Anzahl Bauteil-Ähnlichkeit"]),
                                      html.Td(children=[
                                          dcc.Input(
                                              id='n_prodFeat',
@@ -707,17 +707,16 @@ def switch_npv_rev_pro_product_visibility(calc_method):
     else:
         return {'display': 'none'}, {'display': 'none'}
 
-# Define all Outputs first! Otherwise error
-# Be careful with the order!
 
 
 @app.callback(
-    Output('dummyOutput1', 'children'),
-    # Output('CostCapOutput','children'),
-    # Output('InvSumOutput','children'),
-    # Output('timeBeforeOutput','children'),
-    # Output('timeAfterOutput','children'),
+    Output('figure_output', 'figure'),
+    Output('results_output', 'children'),
     Input("saveTable1Input", 'n_clicks'),
+    Input("saveTable2Input", 'n_clicks'),
+    Input('resultSort', 'value'),
+    Input('calMethod', 'value'),
+    Input("figure_output", "clickData"),
     State('matLevel', 'value'),
     State('supFunction', 'value'),
     State('timeNewComponent', 'value'),
@@ -753,10 +752,21 @@ def switch_npv_rev_pro_product_visibility(calc_method):
     State('shareSimResource', 'value'),
     State('shareSameResource', 'value'),
     State('n_prodFeat', 'value'),
-    State('mean_amount_of_elem_comp', 'value')
+    State('mean_amount_of_elem_comp', 'value'),
+    State('I_al', 'value'),
+    State('I_pr', 'value'),
+    State('I_l2', 'value'),
+    State('I_l3', 'value'),
+    State('AS', 'value'),
+    State('K_PGrund','value'),
+    State('c_main', 'value'),
+    State('c_int', 'value'),
+    State('t', 'value'),
+    State('npvRevProProduct', 'value')
 )
-# This function calculates the total search time and writes the input from Ist-Situation to a csv file
-def save_ist_situation(n_clicks, matLevel, supFunction,
+# This function generates the output
+def generateOutput(n_clicks1, n_clicks2, resultSort, calMethod, clickData,
+                       matLevel, supFunction,
                        timeNewComponent, timeSimComponent, timeSameComponent,
                        timeNewProcess, timeSimProcess, timeSameProcess,
                        timeNewResource, timeSimResource, timeSameResource,
@@ -768,8 +778,10 @@ def save_ist_situation(n_clicks, matLevel, supFunction,
                        typeOfTimeMeasurement,
                        shareNewComponent, shareSimComponent, shareSameComponent,
                        shareNewProcess, shareSimProcess, shareSameProcess,
-                       shareNewResource, shareSimResource, shareSameResource, n_prodFeat, mean_amount_of_elem_comp):
-    if n_clicks is not None:
+                       shareNewResource, shareSimResource, shareSameResource, n_prodFeat, mean_amount_of_elem_comp, I_al, I_pr, I_l2, I_l3, AS,K_PGrund, c_main, c_int, t, npvRevProProduct):
+    
+    # fist save the user input parameters
+    if n_clicks1 is not None or n_clicks2 is not None:
         treeMatchAlgo = 1 if "treeMatching" in supFunction else 0
         prodFeat = 1 if "prodFeature" in supFunction else 0
         data = {'matLevel': matLevel, 'treeMatchAlgo': treeMatchAlgo, 'prodFeat': prodFeat,
@@ -786,47 +798,99 @@ def save_ist_situation(n_clicks, matLevel, supFunction,
                 'numNewVariant': numNewVariant,
                 'totalSearchTimeComponents': totalSearchTimeComponents, 'totalSearchTimeProcesses': totalSearchTimeProcesses, 'totalSearchTimeResources': totalSearchTimeResources,
                 'typeOfTimeMeasurement': typeOfTimeMeasurement,
-                'shareNewComponent': shareNewComponent, 'shareSimComponent': shareSimComponent, 'shareSameComponent': shareSameComponent,
-                'shareNewProcess': shareNewProcess, 'shareSimProcess': shareSimProcess, 'shareSameProcess': shareSameProcess,
-                'shareNewResource': shareNewResource, 'shareSimResource': shareSimResource, 'shareSameResource': shareSameResource,
+                'shareNewComponent': shareNewComponent/100, 'shareSimComponent': shareSimComponent/100, 'shareSameComponent': shareSameComponent/100,
+                'shareNewProcess': shareNewProcess/100, 'shareSimProcess': shareSimProcess/100, 'shareSameProcess': shareSameProcess/100,
+                'shareNewResource': shareNewResource/100, 'shareSimResource': shareSimResource/100, 'shareSameResource': shareSameResource/100,
                 'n_prodFeat':n_prodFeat, 'mean_amount_of_elem_comp': mean_amount_of_elem_comp}
         df = pd.DataFrame([data])
         df.to_csv('ist_situation.csv', index=False)
-    return None
-
-
-@app.callback(
-    Output('dummyOutput2', 'children'),
-    Input("saveTable2Input", 'n_clicks'),
-    State('I_al', 'value'),
-    State('I_pr', 'value'),
-    State('I_l2', 'value'),
-    State('I_l3', 'value'),
-    State('AS', 'value'),
-    State('K_PGrund','value'),
-    State('c_main', 'value'),
-    State('c_int', 'value'),
-    State('t', 'value'),
-    State('npvRevProProduct', 'value')
-)
-# This function writes the input from Parameter für Investitionsrechnung to a csv file
-def save_parameter_Investitionsrechnung(n_clicks, I_al, I_pr, I_l2, I_l3, AS,K_PGrund, c_main, c_int, t, npvRevProProduct):
-    data = {'I_al': I_al, 'I_pr': I_pr, 'I_l2': I_l2, 'I_l3': I_l3,
+        data2 = {'I_al': I_al, 'I_pr': I_pr, 'I_l2': I_l2, 'I_l3': I_l3,
             'AS': AS, 'K_PGrund':K_PGrund,'c_main': c_main, 'c_int': c_int,
             't': t,
             'npvRevProProduct': npvRevProProduct}
-    df = pd.DataFrame([data])
-    df.to_csv('parameter_Investitionsrechnung.csv', index=False)
-    return None
+        df2 = pd.DataFrame([data2])
+        df2.to_csv('parameter_Investitionsrechnung.csv', index=False)
+    
+    # now read the csv files and generate graphs and output tables
+    res = pd.read_csv('default_result.csv')
+    if n_clicks1 is not None or n_clicks2 is not None:
+        c = calculator.Calculator()
+        c.calculate_results()
+        res = pd.read_csv('result.csv')
+        name = ["Option {}".format(x) for x in range(1, len(res))]
+        
+
+        # sort dataframes
+        sorted_by_npv = res.sort_values(by=["npv"], ascending=False)
+        sorted_by_cost = res.sort_values(by=["comparison"], ascending=True)
+        sorted_by_time = res.sort_values(by=['improved_time'], ascending=True)
+        sorted_by_matLevel = res.sort_values(by=['matLevel'], ascending=True)
 
 
+        ifCost = True
+
+        if resultSort == "money":
+            if calMethod == "comparison":
+                ifCost = True
+                df = sorted_by_cost
+                name.insert(0, "Ist-Situation")
+                # df['name'] = name
+                g = px.bar(df, x='name', y='comparison', labels={'name': "", 'comparison': "Kosten"},
+                          color="comparison")
+            else:
+                ifCost = False
+                df = sorted_by_npv
+                if df.iloc[1]['npv']<=0:
+                    name.insert(0, "Ist-Situation")
+                else: 
+                    name.insert(len(df),"Ist-Situation")
+                # df['name'] = name
+                g = px.bar(df, x='name', y='npv', labels={'name': "", 'npv': "Kapitalwert"}, color='npv')
+
+
+        elif resultSort == "timeSaving":
+            df = sorted_by_time
+            name.insert(len(df),"Ist-Situation")
+            # df['name'] = name
+            g = px.bar(df, x='name', y='improved_time',
+                          labels={'name': "", 'improved_time': "Zeit nachher"}, color='improved_time')
+
+        else:
+            df = sorted_by_matLevel
+            name.insert(0,"Ist-Situation")
+            # df['name'] = name
+            g = px.bar(df, x='name', y='matLevel', labels={'name': "", 'matLevel': "Reifegrad"},
+                         color="matLevel")
+
+        results_output = [html_table(df.iloc[x]["name"], df.iloc[x][calMethod], \
+                                     df.iloc[x]['investition'], df.iloc[x]['improved_time'], \
+                                     df.iloc[x]['t_unsupported'], df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"],
+                                     df.iloc[x]["matLevel"], ifCost).table for x in range(0, len(df))]
+        try:
+            n = clickData.get('points')[0].get('pointIndex')
+            results_output.insert(0, results_output.pop(n))
+        except:
+            print("graph not rendered yet")
+
+        results_output[0].style = {"width": "100%", "background-color": "#e6e6e6"}
+        results_output.insert(0,html.P(style={"text-align":"center","font-size":"small"},children=["Mit dem Clicken auf die Säule können Sie eine Option zum Anzeigen auswählen."]))
+
+        return g, results_output
+
+    else:
+        return px.bar(res, x='comparison', y='npv', labels={'comparison': "", 'npv': ""}), html.H6(
+            style={"color":"red"},
+            children=["Bitte Parameter eingeben."])
+    
+
+# this class is for the output tables: each option is a html_table object
 class html_table:
     def __init__(self, name, money, investition, time, time_before, treeMatchAlgo, prodFeat, matLevel, ifCost):
         support_functions = []
         if treeMatchAlgo == 1:
-            support_functions.append("Tree-Matching")
+            support_functions.append("Stücklisten-Ähnlichkeit")
         if prodFeat == 1:
-            support_functions.append("Produktmerkmale*")
+            support_functions.append("Bauteil-Ähnlichkeit")
         support_functions = str(support_functions).strip("[]'").replace("'", "")
 
         self.table = html.Table(style={"width": "100%"},
@@ -865,98 +929,8 @@ class html_table:
                                         ]
                                     ),
 
-                                    html.Tr(
-                                        children=[
-                                            html.Td(children=[""]),
-                                            html.Td(colSpan=3,
-                                                    children=["*Bei Produktmermale wird der Standardwert 9 benutzt"],
-                                                    style={"font-size": "small"})
-                                        ] if prodFeat == 1 else None
-                                    ),
-
                                     html.Br()
                                 ])
-
-
-@app.callback(
-    Output('figure_output', 'figure'),
-    Output('results_output', 'children'),
-    Input("saveTable2Input", 'n_clicks'),
-    Input('resultSort', 'value'),
-    Input('calMethod', 'value'),
-    Input("figure_output", "clickData")
-)
-def generate_graphs(n_clicks, resultSort, calMethod, clickData):
-    res = pd.read_csv('default_result.csv')
-    if n_clicks is not None:
-        c = calculator.Calculator()
-        c.calculate_results()
-        res = pd.read_csv('result.csv')
-        name = ["Option {}".format(x) for x in range(1, len(res))]
-        
-
-        # sort dataframes
-        sorted_by_npv = res.sort_values(by=["npv"], ascending=False)
-        sorted_by_cost = res.sort_values(by=["comparison"], ascending=True)
-        sorted_by_time = res.sort_values(by=['improved_time'], ascending=True)
-        sorted_by_matLevel = res.sort_values(by=['matLevel'], ascending=True)
-
-        best_time = sorted_by_time.iloc[0]['improved_time']
-
-        ifCost = True
-
-        if resultSort == "money":
-            if calMethod == "comparison":
-                ifCost = True
-                df = sorted_by_cost
-                name.insert(0, "Ist-Situation")
-                df['name'] = name
-                g = px.bar(df, x='name', y='comparison', labels={'name': "", 'comparison': "Kosten"},
-                          color="comparison")
-            else:
-                ifCost = False
-                df = sorted_by_npv
-                if df.iloc[1]['npv']<=0:
-                    name.insert(0, "Ist-Situation")
-                else: 
-                    name.insert(len(df),"Ist-Situation")
-                df['name'] = name
-                g = px.bar(df, x='name', y='npv', labels={'name': "", 'npv': "Kapitalwert"}, color='npv')
-
-
-        elif resultSort == "timeSaving":
-            df = sorted_by_time
-            name.insert(len(df),"Ist-Situation")
-            df['name'] = name
-            g = px.bar(df, x='name', y='improved_time',
-                          labels={'name': "", 'improved_time': "Zeit nachher"}, color='improved_time')
-
-        else:
-            df = sorted_by_matLevel
-            name.insert(0,"Ist-Situation")
-            df['name'] = name
-            g = px.bar(df, x='name', y='matLevel', labels={'name': "", 'matLevel': "Reifegrad"},
-                         color="matLevel")
-
-        results_output = [html_table(df.iloc[x]["name"], df.iloc[x][calMethod], \
-                                     df.iloc[x]['investition'], df.iloc[x]['improved_time'], \
-                                     df.iloc[x]['t_unsupported'], df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"],
-                                     df.iloc[x]["matLevel"], ifCost).table for x in range(0, len(df))]
-        try:
-            n = clickData.get('points')[0].get('pointIndex')
-            results_output.insert(0, results_output.pop(n))
-        except:
-            print("not rendered yet")
-
-        results_output[0].style = {"width": "100%", "background-color": "#fdff99"}
-        results_output.insert(0,html.P(style={"text-align":"center","font-size":"small"},children=["Mit dem Clicken auf die Säule können Sie eine Option zum Anzeigen auswählen."]))
-
-        return g, results_output
-
-    else:
-        return px.bar(res, x='comparison', y='npv', labels={'comparison': "", 'npv': ""}), html.H6(
-            style={"color":"red"},
-            children=["Bitte Parameter eingeben."])
 
 
 # run the app

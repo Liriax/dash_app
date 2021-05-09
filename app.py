@@ -40,7 +40,7 @@ app.layout = html.Div(
                              # row 1
                              html.Tr(
                                  children=[
-                                     html.Td(colSpan=2, children=["Aktueller Reifegrad"]),
+                                     html.Td(colSpan=2, children=["Aktueller Reifegrad (RF)"]),
                                      html.Td(children=[
                                          dcc.Dropdown(
                                              id='matLevel',
@@ -559,7 +559,7 @@ app.layout = html.Div(
                                              type='number', min=0, value=30
                                          )
                                      ]),
-                                     html.Td(children=["35-40"])  # calculate standard cost
+                                     html.Td(children=["35-40 Stunden"])  # calculate standard cost
                                  ]
                              ),
                              html.Tr(
@@ -571,7 +571,7 @@ app.layout = html.Div(
                                              type='number', min=0, value=1000
                                          )
                                      ]),
-                                     html.Td(children=["-"])  # calculate standard cost
+                                     html.Td(children=["3200€"])  # calculate standard cost
                                  ]
                              ),
                              html.Tr(
@@ -912,9 +912,9 @@ class html_table:
 
                                     html.Tr(
                                         children=[
-                                            html.Td(children=["Durchsatzzeit vorher: "]),
+                                            html.Td(children=["Suchzeit vorher: "]),
                                             html.Td(children=[str(time_before)]),
-                                            html.Td(children=["Durchsatzzeit nachher: "]),
+                                            html.Td(children=["Suchzeit nachher: "]),
                                             html.Td(children=[str(time)])
                                         ]
                                     ),

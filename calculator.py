@@ -145,7 +145,7 @@ class Calculator:
             res.append([npv, comparison, investition, t_unsupported,  improved_time, matLevel, prodFeat, treeMatchAlgo, alreadyImplemented, n_prodFeat])
         res_df = pd.DataFrame(res, columns = ['npv', 'comparison', 'investition', 't_unsupported', 'improved_time', 'matLevel', 'prodFeat', 'treeMatchAlgo', 'alreadyImplemented', 'n_prodFeat'])
         
-        name = ["RG {}{}{}".format(int(res_df.iloc[x]['matLevel']), " SÄ" if res_df.iloc[x]['treeMatchAlgo']==1 else "", " BÄ" if res_df.iloc[x]['prodFeat']==1 else "") if res_df.iloc[x]['investition'] >0 else "Ist-Situation" for x in range(0, len(res_df))]
+        name = ["RG {}{}{}".format(int(res_df.iloc[x]['matLevel']), ", SÄ" if res_df.iloc[x]['treeMatchAlgo']==1 else "", ", BÄ" if res_df.iloc[x]['prodFeat']==1 else "") if res_df.iloc[x]['investition'] >0 else "Ist-Situation" for x in range(0, len(res_df))]
         res_df['name']=name
         res_df.to_csv('result.csv', index=False)
 

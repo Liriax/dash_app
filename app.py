@@ -861,8 +861,8 @@ def generateOutput(n_clicks1, n_clicks2, resultSort, calMethod, clickData,
             name.insert(len(df), "Ist-Situation")
             # df['name'] = name
 
-            g = px.bar(df, x='name', y='improved_time',
-                       labels={'name': "", 'improved_time': "Zeit nachher"}, color='improved_time')
+            g = px.bar(df, x='name', y='t_supported',
+                       labels={'name': "", 't_supported': "Zeit nachher"}, color='t_supported')
 
 
         else:

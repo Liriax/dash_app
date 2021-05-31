@@ -61,8 +61,8 @@ app.layout = html.Div(
                                          dcc.Checklist(
                                              id='supFunction',
                                              options=[
-                                                 {'label': 'Stücklisten-Ähnlichkeit (SÄ)', 'value': 'treeMatching'},
-                                                 {'label': 'Bauteil-Ähnlichkeit (BÄ)', 'value': 'prodFeature'}
+                                                 {'label': 'Struktur-Analyse (SA)', 'value': 'treeMatching'},
+                                                 {'label': 'Bauteil-Analyse (BA)', 'value': 'prodFeature'}
                                              ],
                                              value=[]
 
@@ -494,7 +494,7 @@ app.layout = html.Div(
                              ),
                              html.Tr(
                                  children=[
-                                     html.Td(colSpan=2, children=["Investition für Stücklisten-Ähnlichkeit"]),
+                                     html.Td(colSpan=2, children=["Investition für Struktur-Analyse"]),
                                      html.Td(
                                          children=[
                                              dcc.Input(
@@ -507,7 +507,7 @@ app.layout = html.Div(
                              ),
                              html.Tr(
                                  children=[
-                                     html.Td(colSpan=2, children=["Investition für Bauteil-Ähnlichkeit"]),
+                                     html.Td(colSpan=2, children=["Investition für Bauteil-Analyse"]),
                                      html.Td(
                                          children=[
                                              dcc.Input(
@@ -612,7 +612,7 @@ app.layout = html.Div(
                              ),
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Anzahl Bauteil-Ähnlichkeit"]),
+                                     html.Td(children=["Anzahl ähnlicher Bauteile"]),
                                      html.Td(children=[
                                          dcc.Input(
                                              id='n_prodFeat',
@@ -823,7 +823,7 @@ def generateOutput(n_clicks1, n_clicks2, resultSort, calMethod, clickData,
         # sort dataframes
         sorted_by_npv = res.sort_values(by=["npv"], ascending=False)
         sorted_by_cost = res.sort_values(by=["comparison"], ascending=True)
-        sorted_by_time = res.sort_values(by=['improved_time'], ascending=True)
+        sorted_by_time = res.sort_values(by=['t_supported'], ascending=True)
         sorted_by_matLevel = res.sort_values(by=['matLevel'], ascending=True)
 
 
@@ -852,8 +852,8 @@ def generateOutput(n_clicks1, n_clicks2, resultSort, calMethod, clickData,
             df = sorted_by_time
             name.insert(len(df),"Ist-Situation")
             # df['name'] = name
-            g = px.bar(df, x='name', y='improved_time',
-                          labels={'name': "", 'improved_time': "Zeit nachher"}, color='improved_time')
+            g = px.bar(df, x='name', y='t_supported',
+                          labels={'name': "", 't_supported': "Zeit nachher"}, color='t_supported')
 
         else:
             df = sorted_by_matLevel
@@ -863,7 +863,7 @@ def generateOutput(n_clicks1, n_clicks2, resultSort, calMethod, clickData,
                          color="matLevel")
 
         results_output = [html_table(df.iloc[x]["name"], df.iloc[x][calMethod], \
-                                     df.iloc[x]['investition'], df.iloc[x]['improved_time'], \
+                                     df.iloc[x]['investition'], df.iloc[x]['t_supported'], \
                                      df.iloc[x]['t_unsupported'], df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"],
                                      df.iloc[x]["matLevel"], ifCost).table for x in range(0, len(df))]
         try:
@@ -888,9 +888,9 @@ class html_table:
     def __init__(self, name, money, investition, time, time_before, treeMatchAlgo, prodFeat, matLevel, ifCost):
         support_functions = []
         if treeMatchAlgo == 1:
-            support_functions.append("Stücklisten-Ähnlichkeit")
+            support_functions.append("Struktur-Analyse")
         if prodFeat == 1:
-            support_functions.append("Bauteil-Ähnlichkeit")
+            support_functions.append("Bauteil-Analyse")
         support_functions = str(support_functions).strip("[]'").replace("'", "")
 
         self.table = html.Table(style={"width": "100%"},

@@ -37,13 +37,14 @@ def calculate_time(alternative, ist_situation):
     n_prodFeat = ist_situation.n_prodFeat
     sameComponent = 0 if alternative.treeMatchAlgo == 1 else ist_situation.cumTimeSameComponent
     simComponent = 0.036 * (35 + 15 * n_prodFeat) if alternative.prodFeat == 1 else ist_situation.cumTimeSimComponent
-    newComponent = 0.036 * (35 + 15 * n_prodFeat) if alternative.prodFeat == 1 and alternative.treeMatchAlgo == 1 else ist_situation.cumTimeNewComponent
+    newComponent = 0.036 * (35 + 15 * n_prodFeat) if alternative.prodFeat == 1 and alternative.treeMatchAlgo == 1 \
+                                                else ist_situation.cumTimeNewComponent
     sameProcess = 0 if alternative.matLevel >= 2 else ist_situation.cumTimeSameProcess
     simProcess = 0 if alternative.matLevel >= 2 else ist_situation.cumTimeSimProcess
     sameResource = 0 if alternative.matLevel == 3 else ist_situation.cumTimeSameResource
     simResource = 0 if alternative.matLevel == 3 else ist_situation.cumTimeSimResource
 
-    improved_time = newComponent + \
+    t_supported = newComponent + \
                 simComponent + \
                 sameComponent + \
                 ist_situation.cumTimeNewProcess + \
@@ -52,7 +53,7 @@ def calculate_time(alternative, ist_situation):
                 ist_situation.cumTimeNewResource + \
                 simResource + \
                 sameResource
-    return round(improved_time/60, 1)
+    return round(t_supported/60, 1)
 
 
 def create_alternatives(ist_situation):
@@ -100,8 +101,7 @@ class Calculator:
 
     def calculate_comparison(self, alternative):
         
-        # c_person is temporarily substituted by 0.2
-        improved_time = calculate_time(alternative, self.ist_situation)
+        t_supported = calculate_time(alternative, self.ist_situation)
         I_total = calculate_investment(alternative, self.ist_situation, self.invest_params)
 
         t_unsupported = calculate_time(self.ist_situation, self.ist_situation)
@@ -110,23 +110,24 @@ class Calculator:
         C_depr = I_total / self.invest_params.T
         C_int = 0.5 * I_total * self.invest_params.r
         C_main = self.invest_params.c_main * I_total
-        C_person = self.invest_params.k_personal * improved_time
+        C_person = self.invest_params.k_personal * t_supported
         return C_depr + C_int + C_main + C_person
 
     def calculate_npv(self, alternative):
-        improved_time = calculate_time(alternative, self.ist_situation)
+        t_supported = calculate_time(alternative, self.ist_situation)
         t_unsupported = calculate_time(self.ist_situation, self.ist_situation)
          
         I_total = calculate_investment(alternative, self.ist_situation, self.invest_params) 
         C_main = self.invest_params.c_main * I_total
 
         r = self.invest_params.r
-        S_person = self.invest_params.k_personal * (t_unsupported - improved_time)  # personnel cost savings
-        C_person = self.invest_params.k_personal * improved_time
-        R_acc = self.invest_params.r_acc * (t_unsupported - improved_time) / t_unsupported * self.ist_situation.numNewVariant  # R_acc: additional revenues
+        S_person = self.invest_params.k_personal * (t_unsupported - t_supported)  # personnel cost savings
+
+        C_person = self.invest_params.k_personal * t_supported
+        R_acc = self.invest_params.r_acc * (t_unsupported - t_supported) / t_unsupported * self.ist_situation.numNewVariant  # R_acc: additional revenues
         npv = - I_total
         for t in range(1, self.invest_params.T + 1):
-            npv += (R_acc + S_person - C_main) / (1 + r) ** t
+            npv += (R_acc - C_main - C_person) / (1 + r) ** t
         return npv
 
     def calculate_results(self):
@@ -135,17 +136,17 @@ class Calculator:
             npv = int(self.calculate_npv(alternative))
             comparison = int(self.calculate_comparison(alternative))
             investition = int(calculate_investment(alternative, self.ist_situation, self.invest_params))
-            improved_time = calculate_time(alternative, self.ist_situation)
+            t_supported = calculate_time(alternative, self.ist_situation)
             t_unsupported = calculate_time(self.ist_situation, self.ist_situation)
              
             matLevel = alternative.matLevel
             prodFeat = alternative.prodFeat
             treeMatchAlgo = alternative.treeMatchAlgo
             alreadyImplemented = alternative.alreadyImplemented
-            res.append([npv, comparison, investition, t_unsupported,  improved_time, matLevel, prodFeat, treeMatchAlgo, alreadyImplemented, n_prodFeat])
-        res_df = pd.DataFrame(res, columns = ['npv', 'comparison', 'investition', 't_unsupported', 'improved_time', 'matLevel', 'prodFeat', 'treeMatchAlgo', 'alreadyImplemented', 'n_prodFeat'])
+            res.append([npv, comparison, investition, t_unsupported,  t_supported, matLevel, prodFeat, treeMatchAlgo, alreadyImplemented, n_prodFeat])
+        res_df = pd.DataFrame(res, columns = ['npv', 'comparison', 'investition', 't_unsupported', 't_supported', 'matLevel', 'prodFeat', 'treeMatchAlgo', 'alreadyImplemented', 'n_prodFeat'])
         
-        name = ["RG {}{}{}".format(int(res_df.iloc[x]['matLevel']), ", SÄ" if res_df.iloc[x]['treeMatchAlgo']==1 else "", ", BÄ" if res_df.iloc[x]['prodFeat']==1 else "") if res_df.iloc[x]['investition'] >0 else "Ist-Situation" for x in range(0, len(res_df))]
+        name = ["RG {}{}{}".format(int(res_df.iloc[x]['matLevel']), ", SA" if res_df.iloc[x]['treeMatchAlgo']==1 else "", ", BA" if res_df.iloc[x]['prodFeat']==1 else "") if res_df.iloc[x]['investition'] >0 else "Ist-Situation" for x in range(0, len(res_df))]
         res_df['name']=name
         res_df.to_csv('result.csv', index=False)
 

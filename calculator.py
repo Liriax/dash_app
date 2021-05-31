@@ -2,8 +2,6 @@ import currentSituation
 import paramsForCalc
 import alternative
 import pandas as pd
-# amount of opitz product features is 9
-n_prodFeat = 9
 
 # def retrieve_ist_situation():  # the read, try and except are done by creating a CurrentSituation object
 #     return currentSituation.CurrentSituation()
@@ -36,9 +34,9 @@ def calculate_investment(alternative, ist_situation, params):
 def calculate_time(alternative, ist_situation): 
     n_prodFeat = ist_situation.n_prodFeat
     sameComponent = 0 if alternative.treeMatchAlgo == 1 else ist_situation.cumTimeSameComponent
-    simComponent = 0.036 * (35 + 15 * n_prodFeat) if alternative.prodFeat == 1 else ist_situation.cumTimeSimComponent
-    newComponent = 0.036 * (35 + 15 * n_prodFeat) if alternative.prodFeat == 1 and alternative.treeMatchAlgo == 1 \
-                                                else ist_situation.cumTimeNewComponent
+
+    simComponent = 0.036 * (35 + 15 * n_prodFeat) * ist_situation.mean_amount_of_elem_comp if alternative.prodFeat == 1 else ist_situation.cumTimeSimComponent
+    newComponent = 0.036 * (35 + 15 * n_prodFeat) * ist_situation.mean_amount_of_elem_comp if alternative.prodFeat == 1 and alternative.treeMatchAlgo == 1 else ist_situation.cumTimeNewComponent
     sameProcess = 0 if alternative.matLevel >= 2 else ist_situation.cumTimeSameProcess
     simProcess = 0 if alternative.matLevel >= 2 else ist_situation.cumTimeSimProcess
     sameResource = 0 if alternative.matLevel == 3 else ist_situation.cumTimeSameResource
@@ -140,6 +138,7 @@ class Calculator:
             t_unsupported = calculate_time(self.ist_situation, self.ist_situation)
              
             matLevel = alternative.matLevel
+            n_prodFeat = self.ist_situation.n_prodFeat
             prodFeat = alternative.prodFeat
             treeMatchAlgo = alternative.treeMatchAlgo
             alreadyImplemented = alternative.alreadyImplemented

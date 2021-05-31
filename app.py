@@ -67,27 +67,14 @@ app.layout = html.Div(
                                              value=[]
 
                                          )
+                                     ]),
+                                     html.Td(children=[
+                                         html.Button(id='saveTable1Input', n_clicks=None, children="Aktualisieren")
                                      ])
                                  ]
                              ),
                              html.Br(),
 
-                             # Number of new variants
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Anzahl neue Varianten pro Jahr"]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="numNewVariant",
-                                             type="number", min=0, value=5
-                                         )
-                                     ]),
-                                     html.Td(children=[
-                                         html.Button(id='saveTable1Input', n_clicks=None, children="Aktualisieren")
-                                     ])
-
-                                 ]
-                             ),
                              html.Br(),
                              html.Tr(
                                  children=[
@@ -292,21 +279,20 @@ app.layout = html.Div(
                          ], style={'display': 'block'}, id='tableAbsoluteTimes',
                      ),
 
-                     
                      # Suchzeiten mit Prozentualen Anteilen
                      html.Table(
                          children=[
                              html.Br(),
                              html.Tr(children=[
-                                html.Th(children=["Gesamte benötigte Zeit zum Suchen von Bauteilen (Minuten):"]),
-                                html.Td(children=[
-                                    dcc.Input(
-                                        id="totalSearchTimeComponents",
-                                        type="number", min=0, value=5
-                                    )
-                                ])]
+                                 html.Th(children=["Gesamte benötigte Zeit zum Suchen von Bauteilen (Minuten):"]),
+                                 html.Td(children=[
+                                     dcc.Input(
+                                         id="totalSearchTimeComponents",
+                                         type="number", min=0, value=5
+                                     )
+                                 ])]
                              ),
-                             
+
                              # headers Suchzeiten
                              html.Tr(
                                  children=[
@@ -612,7 +598,9 @@ app.layout = html.Div(
                              ),
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Anzahl ähnlicher Bauteile"]),
+
+                                     html.Td(children=["Anzahl genutzter Produktmerkmale"]),
+
                                      html.Td(children=[
                                          dcc.Input(
                                              id='n_prodFeat',
@@ -634,12 +622,28 @@ app.layout = html.Div(
                                      html.Td(children=["9"])  # calculate standard cost
                                  ]
                              ),
+                             # Number of new variants
+                             html.Tr(
+                                 children=[
+                                     html.Td(children=["Anzahl neue Varianten pro Jahr"], id='numNewVariantLabel',
+                                             style={'display': 'none'}),
+                                     html.Td(children=[
+                                         dcc.Input(
+                                             id="numNewVariant",
+                                             type="number", min=0, value=5, style={'display': 'none'}
+                                         )
+                                     ]),
+
+                                 ]
+                             ),
                              html.Br(),
                              html.Tr(id="npvChainOutput",
                                      children=[
-                                         html.Td(children=["Einnahmen pro Produktvariante"], id='npvRevProProductLabel', style={'display': 'none'}),
+                                         html.Td(children=["Einnahmen pro Produktvariante"], id='npvRevProProductLabel',
+                                                 style={'display': 'none'}),
                                          html.Td(children=[
-                                             dcc.Input(id='npvRevProProduct', type='number', min=0, value=500,  style={'display': 'none'})]),
+                                             dcc.Input(id='npvRevProProduct', type='number', min=0, value=500,
+                                                       style={'display': 'none'})]),
                                          html.Td(html.Button(id="saveTable2Input", n_clicks=None, children="Submit"))
                                      ]
                                      ),
@@ -699,14 +703,15 @@ def switch_time_input_variant(visibility_state):
 @app.callback(
     Output(component_id='npvRevProProduct', component_property='style'),
     Output(component_id='npvRevProProductLabel', component_property='style'),
+    Output(component_id='numNewVariant', component_property='style'),
+    Output(component_id='numNewVariantLabel', component_property='style'),
     [Input(component_id='calMethod', component_property='value')]
 )
 def switch_npv_rev_pro_product_visibility(calc_method):
     if calc_method == 'npv':
-        return {'display': 'block'}, {'display': 'block'}
+        return {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}
     else:
-        return {'display': 'none'}, {'display': 'none'}
-
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
 
 
 @app.callback(
@@ -758,7 +763,7 @@ def switch_npv_rev_pro_product_visibility(calc_method):
     State('I_l2', 'value'),
     State('I_l3', 'value'),
     State('AS', 'value'),
-    State('K_PGrund','value'),
+    State('K_PGrund', 'value'),
     State('c_main', 'value'),
     State('c_int', 'value'),
     State('t', 'value'),
@@ -766,20 +771,20 @@ def switch_npv_rev_pro_product_visibility(calc_method):
 )
 # This function generates the output
 def generateOutput(n_clicks1, n_clicks2, resultSort, calMethod, clickData,
-                       matLevel, supFunction,
-                       timeNewComponent, timeSimComponent, timeSameComponent,
-                       timeNewProcess, timeSimProcess, timeSameProcess,
-                       timeNewResource, timeSimResource, timeSameResource,
-                       freqNewComponent, freqSimComponent, freqSameComponent,
-                       freqNewProcess, freqSimProcess, freqSameProcess,
-                       freqNewResource, freqSimResource, freqSameResource,
-                       numNewVariant,
-                       totalSearchTimeComponents, totalSearchTimeProcesses, totalSearchTimeResources,
-                       typeOfTimeMeasurement,
-                       shareNewComponent, shareSimComponent, shareSameComponent,
-                       shareNewProcess, shareSimProcess, shareSameProcess,
-                       shareNewResource, shareSimResource, shareSameResource, n_prodFeat, mean_amount_of_elem_comp, I_al, I_pr, I_l2, I_l3, AS,K_PGrund, c_main, c_int, t, npvRevProProduct):
-    
+                   matLevel, supFunction,
+                   timeNewComponent, timeSimComponent, timeSameComponent,
+                   timeNewProcess, timeSimProcess, timeSameProcess,
+                   timeNewResource, timeSimResource, timeSameResource,
+                   freqNewComponent, freqSimComponent, freqSameComponent,
+                   freqNewProcess, freqSimProcess, freqSameProcess,
+                   freqNewResource, freqSimResource, freqSameResource,
+                   numNewVariant,
+                   totalSearchTimeComponents, totalSearchTimeProcesses, totalSearchTimeResources,
+                   typeOfTimeMeasurement,
+                   shareNewComponent, shareSimComponent, shareSameComponent,
+                   shareNewProcess, shareSimProcess, shareSameProcess,
+                   shareNewResource, shareSimResource, shareSameResource, n_prodFeat, mean_amount_of_elem_comp, I_al,
+                   I_pr, I_l2, I_l3, AS, K_PGrund, c_main, c_int, t, npvRevProProduct):
     # fist save the user input parameters
     if n_clicks1 is not None or n_clicks2 is not None:
         treeMatchAlgo = 1 if "treeMatching" in supFunction else 0
@@ -796,21 +801,26 @@ def generateOutput(n_clicks1, n_clicks2, resultSort, calMethod, clickData,
                 'freqNewResource': freqNewResource, 'freqSimResource': freqSimResource,
                 'freqSameResource': freqSameResource,
                 'numNewVariant': numNewVariant,
-                'totalSearchTimeComponents': totalSearchTimeComponents, 'totalSearchTimeProcesses': totalSearchTimeProcesses, 'totalSearchTimeResources': totalSearchTimeResources,
+                'totalSearchTimeComponents': totalSearchTimeComponents,
+                'totalSearchTimeProcesses': totalSearchTimeProcesses,
+                'totalSearchTimeResources': totalSearchTimeResources,
                 'typeOfTimeMeasurement': typeOfTimeMeasurement,
-                'shareNewComponent': shareNewComponent/100, 'shareSimComponent': shareSimComponent/100, 'shareSameComponent': shareSameComponent/100,
-                'shareNewProcess': shareNewProcess/100, 'shareSimProcess': shareSimProcess/100, 'shareSameProcess': shareSameProcess/100,
-                'shareNewResource': shareNewResource/100, 'shareSimResource': shareSimResource/100, 'shareSameResource': shareSameResource/100,
-                'n_prodFeat':n_prodFeat, 'mean_amount_of_elem_comp': mean_amount_of_elem_comp}
+                'shareNewComponent': shareNewComponent / 100, 'shareSimComponent': shareSimComponent / 100,
+                'shareSameComponent': shareSameComponent / 100,
+                'shareNewProcess': shareNewProcess / 100, 'shareSimProcess': shareSimProcess / 100,
+                'shareSameProcess': shareSameProcess / 100,
+                'shareNewResource': shareNewResource / 100, 'shareSimResource': shareSimResource / 100,
+                'shareSameResource': shareSameResource / 100,
+                'n_prodFeat': n_prodFeat, 'mean_amount_of_elem_comp': mean_amount_of_elem_comp}
         df = pd.DataFrame([data])
         df.to_csv('ist_situation.csv', index=False)
         data2 = {'I_al': I_al, 'I_pr': I_pr, 'I_l2': I_l2, 'I_l3': I_l3,
-            'AS': AS, 'K_PGrund':K_PGrund,'c_main': c_main, 'c_int': c_int,
-            't': t,
-            'npvRevProProduct': npvRevProProduct}
+                 'AS': AS, 'K_PGrund': K_PGrund, 'c_main': c_main, 'c_int': c_int,
+                 't': t,
+                 'npvRevProProduct': npvRevProProduct}
         df2 = pd.DataFrame([data2])
         df2.to_csv('parameter_Investitionsrechnung.csv', index=False)
-    
+
     # now read the csv files and generate graphs and output tables
     res = pd.read_csv('default_result.csv')
     if n_clicks1 is not None or n_clicks2 is not None:
@@ -818,14 +828,12 @@ def generateOutput(n_clicks1, n_clicks2, resultSort, calMethod, clickData,
         c.calculate_results()
         res = pd.read_csv('result.csv')
         name = ["Option {}".format(x) for x in range(1, len(res))]
-        
 
         # sort dataframes
         sorted_by_npv = res.sort_values(by=["npv"], ascending=False)
         sorted_by_cost = res.sort_values(by=["comparison"], ascending=True)
         sorted_by_time = res.sort_values(by=['t_supported'], ascending=True)
         sorted_by_matLevel = res.sort_values(by=['matLevel'], ascending=True)
-
 
         ifCost = True
 
@@ -836,31 +844,33 @@ def generateOutput(n_clicks1, n_clicks2, resultSort, calMethod, clickData,
                 name.insert(0, "Ist-Situation")
                 # df['name'] = name
                 g = px.bar(df, x='name', y='comparison', labels={'name': "", 'comparison': "Kosten"},
-                          color="comparison")
+                           color="comparison")
             else:
                 ifCost = False
                 df = sorted_by_npv
-                if df.iloc[1]['npv']<=0:
+                if df.iloc[1]['npv'] <= 0:
                     name.insert(0, "Ist-Situation")
-                else: 
-                    name.insert(len(df),"Ist-Situation")
+                else:
+                    name.insert(len(df), "Ist-Situation")
                 # df['name'] = name
                 g = px.bar(df, x='name', y='npv', labels={'name': "", 'npv': "Kapitalwert"}, color='npv')
 
 
         elif resultSort == "timeSaving":
             df = sorted_by_time
-            name.insert(len(df),"Ist-Situation")
+            name.insert(len(df), "Ist-Situation")
             # df['name'] = name
-            g = px.bar(df, x='name', y='t_supported',
-                          labels={'name': "", 't_supported': "Zeit nachher"}, color='t_supported')
+
+            g = px.bar(df, x='name', y='improved_time',
+                       labels={'name': "", 'improved_time': "Zeit nachher"}, color='improved_time')
+
 
         else:
             df = sorted_by_matLevel
-            name.insert(0,"Ist-Situation")
+            name.insert(0, "Ist-Situation")
             # df['name'] = name
             g = px.bar(df, x='name', y='matLevel', labels={'name': "", 'matLevel': "Reifegrad"},
-                         color="matLevel")
+                       color="matLevel")
 
         results_output = [html_table(df.iloc[x]["name"], df.iloc[x][calMethod], \
                                      df.iloc[x]['investition'], df.iloc[x]['t_supported'], \
@@ -873,15 +883,16 @@ def generateOutput(n_clicks1, n_clicks2, resultSort, calMethod, clickData,
             print("graph not rendered yet")
 
         results_output[0].style = {"width": "100%", "background-color": "#e6e6e6"}
-        results_output.insert(0,html.P(style={"text-align":"center","font-size":"small"},children=["Mit dem Clicken auf die Säule können Sie eine Option zum Anzeigen auswählen."]))
+        results_output.insert(0, html.P(style={"text-align": "center", "font-size": "small"}, children=[
+            "Mit dem Clicken auf die Säule können Sie eine Option zum Anzeigen auswählen."]))
 
         return g, results_output
 
     else:
         return px.bar(res, x='comparison', y='npv', labels={'comparison': "", 'npv': ""}), html.H6(
-            style={"color":"red"},
+            style={"color": "red"},
             children=["Bitte Parameter eingeben."])
-    
+
 
 # this class is for the output tables: each option is a html_table object
 class html_table:

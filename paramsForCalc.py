@@ -24,6 +24,7 @@ class ParamsForCalc:
             self.r_acc = invest_params.iloc[0]["npvRevProProduct"]
             # 0.726 is german standard for "Personalnebenkosten", k_personal is given in €/h
             self.k_personal = (self.K_PGrund * 12 * 7 * (1 + 0.726)) / (365 * self.AS)
+            self.t_DLZ= invest_params.iloc[0]['t_DLZ']
         except pd.errors.EmptyDataError:
             invest_params = 'could not read parameter_Investitionsrechnung.csv'
 

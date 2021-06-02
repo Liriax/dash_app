@@ -100,10 +100,7 @@ class Calculator:
     def calculate_comparison(self, alternative):
         
         t_supported = calculate_time(alternative, self.ist_situation)
-        I_total = calculate_investment(alternative, self.ist_situation, self.invest_params)
-
-        t_unsupported = calculate_time(self.ist_situation, self.ist_situation)
-         
+        I_total = calculate_investment(alternative, self.ist_situation, self.invest_params)         
 
         C_depr = I_total / self.invest_params.T
         C_int = 0.5 * I_total * self.invest_params.r
@@ -122,7 +119,7 @@ class Calculator:
         S_person = self.invest_params.k_personal * (t_unsupported - t_supported)  # personnel cost savings
 
         C_person = self.invest_params.k_personal * t_supported
-        R_acc = self.invest_params.r_acc * (t_unsupported - t_supported) / t_unsupported * self.ist_situation.numNewVariant  # R_acc: additional revenues
+        R_acc = self.invest_params.r_acc * (t_unsupported - t_supported) / self.invest_params.t_DLZ * self.ist_situation.numNewVariant  # R_acc: additional revenues
         npv = - I_total
         for t in range(1, self.invest_params.T + 1):
             npv += (R_acc - C_main - C_person) / (1 + r) ** t

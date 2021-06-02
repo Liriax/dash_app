@@ -622,6 +622,18 @@ app.layout = html.Div(
                                      html.Td(children=["9"])  # calculate standard cost
                                  ]
                              ),
+                             html.Tr(
+                                 children=[
+                                     html.Td(children=["Produktsdurchlaufzeit in der Montage (Stunden)"]),
+                                     html.Td(children=[
+                                         dcc.Input(
+                                             id='t_DLZ',
+                                             type='number', min=0, value=5
+                                         )
+                                     ]),
+                                     html.Td(children=["5"]) 
+                                 ]
+                             ),
                              # Number of new variants
                              html.Tr(
                                  children=[
@@ -767,7 +779,8 @@ def switch_npv_rev_pro_product_visibility(calc_method):
     State('c_main', 'value'),
     State('c_int', 'value'),
     State('t', 'value'),
-    State('npvRevProProduct', 'value')
+    State('npvRevProProduct', 'value'),
+    State('t_DLZ', 'value')
 )
 # This function generates the output
 def generateOutput(n_clicks1, n_clicks2, resultSort, calMethod, clickData,
@@ -784,7 +797,7 @@ def generateOutput(n_clicks1, n_clicks2, resultSort, calMethod, clickData,
                    shareNewComponent, shareSimComponent, shareSameComponent,
                    shareNewProcess, shareSimProcess, shareSameProcess,
                    shareNewResource, shareSimResource, shareSameResource, n_prodFeat, mean_amount_of_elem_comp, I_al,
-                   I_pr, I_l2, I_l3, AS, K_PGrund, c_main, c_int, t, npvRevProProduct):
+                   I_pr, I_l2, I_l3, AS, K_PGrund, c_main, c_int, t, npvRevProProduct, t_DLZ):
     # fist save the user input parameters
     if n_clicks1 is not None or n_clicks2 is not None:
         treeMatchAlgo = 1 if "treeMatching" in supFunction else 0
@@ -817,7 +830,7 @@ def generateOutput(n_clicks1, n_clicks2, resultSort, calMethod, clickData,
         data2 = {'I_al': I_al, 'I_pr': I_pr, 'I_l2': I_l2, 'I_l3': I_l3,
                  'AS': AS, 'K_PGrund': K_PGrund, 'c_main': c_main, 'c_int': c_int,
                  't': t,
-                 'npvRevProProduct': npvRevProProduct}
+                 'npvRevProProduct': npvRevProProduct, 't_DLZ':t_DLZ}
         df2 = pd.DataFrame([data2])
         df2.to_csv('parameter_Investitionsrechnung.csv', index=False)
 

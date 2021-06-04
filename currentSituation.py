@@ -11,22 +11,12 @@ class CurrentSituation:
             self.timeNewComponent = ist_situation.iloc[0]["timeNewComponent"]
             self.timeSimComponent = ist_situation.iloc[0]["timeSimComponent"]
             self.timeSameComponent = ist_situation.iloc[0]["timeSameComponent"]
-            self.timeNewProcess = ist_situation.iloc[0]["timeNewProcess"]
-            self.timeSimProcess = ist_situation.iloc[0]["timeSimProcess"]
-            self.timeSameProcess = ist_situation.iloc[0]["timeSameProcess"]
-            self.timeNewResource = ist_situation.iloc[0]["timeNewResource"]
-            self.timeSimResource = ist_situation.iloc[0]["timeSimResource"]
-            self.timeSameResource = ist_situation.iloc[0]["timeSameResource"]
+            self.timeProcess = ist_situation.iloc[0]["timeProcess"]
+            
+            self.timeResource = ist_situation.iloc[0]["timeResource"]
+            
             self.numNewVariant = ist_situation.iloc[0]["numNewVariant"]
-            self.freqNewComponent = ist_situation.iloc[0]["freqNewComponent"]
-            self.freqSimComponent = ist_situation.iloc[0]["freqSimComponent"]
-            self.freqSameComponent = ist_situation.iloc[0]["freqSameComponent"]
-            self.freqNewProcess = ist_situation.iloc[0]["freqNewProcess"]
-            self.freqSimProcess = ist_situation.iloc[0]["freqSimProcess"]
-            self.freqSameProcess = ist_situation.iloc[0]["freqSameProcess"]
-            self.freqNewResource = ist_situation.iloc[0]["freqNewResource"]
-            self.freqSimResource = ist_situation.iloc[0]["freqSimResource"]
-            self.freqSameResource = ist_situation.iloc[0]["freqSameResource"]
+            
             self.totalSearchTimeComponents = ist_situation.iloc[0]["totalSearchTimeComponents"]
             self.totalSearchTimeProcesses = ist_situation.iloc[0]["totalSearchTimeProcesses"]
             self.totalSearchTimeResources = ist_situation.iloc[0]["totalSearchTimeResources"]
@@ -34,56 +24,50 @@ class CurrentSituation:
             self.shareNewComponent = ist_situation.iloc[0]["shareNewComponent"]
             self.shareSimComponent = ist_situation.iloc[0]["shareSimComponent"]
             self.shareSameComponent = ist_situation.iloc[0]["shareSameComponent"]
-            self.shareNewProcess = ist_situation.iloc[0]["shareNewProcess"]
-            self.shareSimProcess = ist_situation.iloc[0]["shareSimProcess"]
-            self.shareSameProcess = ist_situation.iloc[0]["shareSameProcess"]
-            self.shareNewResource = ist_situation.iloc[0]["shareNewResource"]
-            self.shareSimResource = ist_situation.iloc[0]["shareSimResource"]
-            self.shareSameResource = ist_situation.iloc[0]["shareSameResource"]
+           
             self.n_prodFeat= ist_situation.iloc[0]["n_prodFeat"]
-            self.mean_amount_of_elem_comp = ist_situation.iloc[0]["mean_amount_of_elem_comp"]
+            self.mean_amount_of_elem_comp = ist_situation.iloc[0]["mean_amount_of_elem_comp"] if self.n_prodFeat != 0 else 0
 
             # calculate cumulative times by using either abs. time * freq or share of total time * total time
             if self.typeOfTimeMeasurement == 'absolute':
-                self.cumTimeNewComponent = self.timeNewComponent * self.freqNewComponent
-                self.cumTimeSimComponent = self.timeSimComponent * self.freqSimComponent
-                self.cumTimeSameComponent = self.timeSameComponent * self.freqSameComponent
-                self.cumTimeNewProcess = self.timeNewProcess * self.freqNewProcess
-                self.cumTimeSimProcess = self.timeSimProcess * self.freqSimProcess
-                self.cumTimeSameProcess = self.timeSameProcess * self.freqNewProcess
-                self.cumTimeNewResource = self.timeNewResource * self.freqNewResource
-                self.cumTimeSimResource = self.timeSimResource * self.freqSimResource
-                self.cumTimeSameResource = self.timeSameResource * self.freqSameResource
+                self.cumTimeNewComponent = self.timeNewComponent
+                self.cumTimeSimComponent = self.timeSimComponent
+                self.cumTimeSameComponent = self.timeSameComponent 
+                self.cumtimeProcess = self.timeProcess
+                self.cumtimeResource = self.timeResource 
             if self.typeOfTimeMeasurement == 'relative':
                 self.cumTimeNewComponent = self.shareNewComponent * self.totalSearchTimeComponents
                 self.cumTimeSimComponent = self.shareSimComponent * self.totalSearchTimeComponents
                 self.cumTimeSameComponent = self.shareSameComponent * self.totalSearchTimeComponents
-                self.cumTimeNewProcess = self.shareNewProcess * self.totalSearchTimeProcesses
-                self.cumTimeSimProcess = self.shareSimProcess * self.totalSearchTimeProcesses
-                self.cumTimeSameProcess = self.shareSameProcess * self.totalSearchTimeProcesses
-                self.cumTimeNewResource = self.shareNewResource * self.totalSearchTimeResources
-                self.cumTimeSimResource = self.shareSimResource * self.totalSearchTimeResources
-                self.cumTimeSameResource = self.shareSameResource * self.totalSearchTimeResources
+                self.cumtimeProcess = self.totalSearchTimeProcesses
+                self.cumtimeResource = self.totalSearchTimeResources
+                
 
 
-
-            sameComponent = 0 if self.treeMatchAlgo == 1 else self.cumTimeSameComponent
-            simComponent = 0.036 * (35 + 15 * 9) * self.mean_amount_of_elem_comp if self.prodFeat == 1 else self.cumTimeSimComponent
-            newComponent = 0.036 * (35 + 15 * 9) * self.mean_amount_of_elem_comp if self.prodFeat == 1 and self.treeMatchAlgo == 1 else self.cumTimeNewComponent
-            sameProcess = 0 if self.matLevel >= 2 else self.cumTimeSameProcess
-            simProcess = 0 if self.matLevel >= 2 else self.cumTimeSimProcess
-            sameResource = 0 if self.matLevel == 3 else self.cumTimeSameResource
-            simResource = 0 if self.matLevel == 3 else self.cumTimeSimResource
-            self.t_unsupported = \
+            if self.treeMatchAlgo == 1:
+                sameComponent=0
+            else:
+                sameComponent=self.cumTimeSameComponent
+            
+            if self.prodFeat == 1:
+                simComponent = 0.036*(35+15*self.n_prodFeat)*self.mean_amount_of_elem_comp
+            else:
+                simComponent = self.cumTimeSimComponent
+            
+            if self.treeMatchAlgo == 1 and self.prodFeat == 1:
+                newComponent = 0
+            else: 
+                newComponent = self.cumTimeNewComponent
+            
+            Process = 0 if self.matLevel >= 2 else self.cumtimeProcess
+            Resource = 0 if self.matLevel == 3 else self.cumtimeResource
+            t_unsupported = \
                 newComponent + \
                 simComponent + \
                 sameComponent + \
-                self.cumTimeNewProcess + \
-                simProcess + \
-                sameProcess + \
-                self.cumTimeNewResource + \
-                simResource + \
-                sameResource
+                Process + \
+                Resource
+            self.t_unsupported = round(t_unsupported/60, 1)
 
         except pd.errors.EmptyDataError:
             ist_situation = 'could not read ist_situation.csv!'

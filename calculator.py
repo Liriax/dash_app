@@ -32,25 +32,24 @@ def calculate_investment(alternative, ist_situation, params):
 
 #"calculate_time" takes in time durations in minutes but returns the total time in hours!
 def calculate_time(alternative, ist_situation): 
+
     n_prodFeat = ist_situation.n_prodFeat
+
     sameComponent = 0 if alternative.treeMatchAlgo == 1 else ist_situation.cumTimeSameComponent
+    simComponent = 0.036*(35+15*n_prodFeat)*ist_situation.mean_amount_of_elem_comp if alternative.prodFeat == 1 else ist_situation.cumTimeSimComponent
+    newComponent = 0 if alternative.treeMatchAlgo == 1 and alternative.prodFeat == 1 else ist_situation.cumTimeNewComponent
+    
+    
+    Process = 0 if alternative.matLevel >= 2 else ist_situation.cumtimeProcess
+    Resource = 0 if alternative.matLevel == 3 else ist_situation.cumtimeResource
 
-    simComponent = 0.036 * (35 + 15 * n_prodFeat) * ist_situation.mean_amount_of_elem_comp if alternative.prodFeat == 1 else ist_situation.cumTimeSimComponent
-    newComponent = 0.036 * (35 + 15 * n_prodFeat) * ist_situation.mean_amount_of_elem_comp if alternative.prodFeat == 1 and alternative.treeMatchAlgo == 1 else ist_situation.cumTimeNewComponent
-    sameProcess = 0 if alternative.matLevel >= 2 else ist_situation.cumTimeSameProcess
-    simProcess = 0 if alternative.matLevel >= 2 else ist_situation.cumTimeSimProcess
-    sameResource = 0 if alternative.matLevel == 3 else ist_situation.cumTimeSameResource
-    simResource = 0 if alternative.matLevel == 3 else ist_situation.cumTimeSimResource
+    t_supported = \
+        newComponent + \
+        simComponent + \
+        sameComponent + \
+        Process + \
+        Resource
 
-    t_supported = newComponent + \
-                simComponent + \
-                sameComponent + \
-                ist_situation.cumTimeNewProcess + \
-                simProcess + \
-                sameProcess + \
-                ist_situation.cumTimeNewResource + \
-                simResource + \
-                sameResource
     return round(t_supported/60, 1)
 
 
@@ -142,7 +141,7 @@ class Calculator:
             res.append([npv, comparison, investition, t_unsupported,  t_supported, matLevel, prodFeat, treeMatchAlgo, alreadyImplemented, n_prodFeat])
         res_df = pd.DataFrame(res, columns = ['npv', 'comparison', 'investition', 't_unsupported', 't_supported', 'matLevel', 'prodFeat', 'treeMatchAlgo', 'alreadyImplemented', 'n_prodFeat'])
         
-        name = ["RG {}{}{}".format(int(res_df.iloc[x]['matLevel']), ", SA" if res_df.iloc[x]['treeMatchAlgo']==1 else "", ", BA" if res_df.iloc[x]['prodFeat']==1 else "") if res_df.iloc[x]['investition'] >0 else "Ist-Situation" for x in range(0, len(res_df))]
+        name = ["RG {}{}{}".format(int(res_df.iloc[x]['matLevel']), ", SgB" if res_df.iloc[x]['treeMatchAlgo']==1 else "", ", SäB" if res_df.iloc[x]['prodFeat']==1 else "") if res_df.iloc[x]['investition'] >0 else "Ist-Situation" for x in range(0, len(res_df))]
         res_df['name']=name
         res_df.to_csv('result.csv', index=False)
 

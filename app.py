@@ -61,8 +61,8 @@ app.layout = html.Div(
                                          dcc.Checklist(
                                              id='supFunction',
                                              options=[
-                                                 {'label': 'Struktur-Analyse (SA)', 'value': 'treeMatching'},
-                                                 {'label': 'Bauteil-Analyse (BA)', 'value': 'prodFeature'}
+                                                 {'label': 'Strukturanalyse unter Berücksichtigung gleicher Bauteile (SgB)', 'value': 'treeMatching'},
+                                                 {'label': 'Strukturanalyse unter Berücksichtigung ähnlicher Bauteile (SäB)', 'value': 'prodFeature'}
                                              ],
                                              value=[]
 
@@ -100,26 +100,19 @@ app.layout = html.Div(
                              # headers Suchzeiten
                              html.Tr(
                                  children=[
-                                     html.Th(children=["Suchzeiten zum Identifizieren"]),
-                                     html.Th(children=["Dauer (Minuten)"]),
-                                     html.Th(children=["Häufigkeit je Variante"])
+                                     html.Th(colSpan=2, children=["Suchzeiten zum Identifizieren"]),
+                                     html.Th(colSpan=2, children=["Dauer (Minuten)"])
                                  ]
                              ),
 
                              # Bauteile 1
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Neuer Bauteile/Baugruppen"]),
+                                     html.Td(colSpan=2,children=["Neuer Bauteile/Baugruppen"]),
                                      html.Td(children=[
                                          dcc.Input(
                                              id="timeNewComponent",
                                              type="number", min=0, value=10
-                                         )
-                                     ]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="freqNewComponent",
-                                             type="number", min=1, value=5
                                          )
                                      ])
                                  ]
@@ -128,17 +121,11 @@ app.layout = html.Div(
                              # Bauteile 2
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Ähnlicher Bauteile/Baugruppen"]),
+                                     html.Td(colSpan=2,children=["Ähnlicher Bauteile/Baugruppen"]),
                                      html.Td(children=[
                                          dcc.Input(
                                              id="timeSimComponent",
                                              type="number", min=0, value=5
-                                         )
-                                     ]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="freqSimComponent",
-                                             type="number", min=1, value=20
                                          )
                                      ])
                                  ]
@@ -146,17 +133,11 @@ app.layout = html.Div(
                              # Bauteile 3
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Gleicher Bauteile/Baugruppen"]),
+                                     html.Td(colSpan=2,children=["Gleicher Bauteile/Baugruppen"]),
                                      html.Td(children=[
                                          dcc.Input(
                                              id="timeSameComponent",
                                              type="number", min=0, value=15
-                                         )
-                                     ]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="freqSameComponent",
-                                             type="number", min=1, value=10
                                          )
                                      ])
                                  ]
@@ -168,53 +149,11 @@ app.layout = html.Div(
                              # Prozess 1
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Neue Prozessinformation"]),
+                                     html.Td(colSpan=2,children=["Prozessinformation"]),
                                      html.Td(children=[
                                          dcc.Input(
-                                             id="timeNewProcess",
+                                             id="timeProcess",
                                              type="number", min=0, value=10
-                                         )
-                                     ]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="freqNewProcess",
-                                             type="number", min=1, value=10
-                                         )
-                                     ])
-                                 ]
-                             ),
-                             # Prozess 2
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Ähnliche Prozessinformation"]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="timeSimProcess",
-                                             type="number", min=0, value=10
-                                         )
-                                     ]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="freqSimProcess",
-                                             type="number", min=1, value=10
-                                         )
-                                     ])
-                                 ]
-                             ),
-                             # Prozess 3
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Gleiche Prozessinformation"]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="timeSameProcess",
-                                             type="number", min=0, value=10
-                                         )
-                                     ]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="freqSameProcess",
-                                             type="number", min=1, value=10
                                          )
                                      ])
                                  ]
@@ -225,58 +164,17 @@ app.layout = html.Div(
                              # ressource 1
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Neue Ressource-Information"]),
+                                     html.Td(colSpan=2,children=["Ressource-Information"]),
                                      html.Td(children=[
                                          dcc.Input(
-                                             id="timeNewResource",
+                                             id="timeResource",
                                              type="number", min=0, value=10
-                                         )
-                                     ]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="freqNewResource",
-                                             type="number", min=1, value=10
                                          )
                                      ])
                                  ]
-                             ),
-                             # ressource 2
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Ähnliche Ressource-Information"]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="timeSimResource",
-                                             type="number", min=0, value=10
-                                         )
-                                     ]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="freqSimResource",
-                                             type="number", min=1, value=10
-                                         )
-                                     ])
-                                 ]
-                             ),
-                             # ressource 3
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Gleiche Ressource-Information"]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="timeSameResource",
-                                             type="number", min=0, value=10
-                                         )
-                                     ]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="freqSameResource",
-                                             type="number", min=1, value=10
-                                         )
-                                     ])
-                                 ]
-                             ),
-                         ], style={'display': 'block'}, id='tableAbsoluteTimes',
+                             )
+
+                         ], style={'display': 'table'}, id='tableAbsoluteTimes',
                      ),
 
                      # Suchzeiten mit Prozentualen Anteilen
@@ -284,7 +182,7 @@ app.layout = html.Div(
                          children=[
                              html.Br(),
                              html.Tr(children=[
-                                 html.Th(children=["Gesamte benötigte Zeit zum Suchen von Bauteilen (Minuten):"]),
+                                 html.Th(children=["Gesamte benötigte Zeit zum Suchen von Bauteilen (Minuten)"]),
                                  html.Td(children=[
                                      dcc.Input(
                                          id="totalSearchTimeComponents",
@@ -353,42 +251,6 @@ app.layout = html.Div(
                                  ])]
                              ),
 
-                             # Prozess 1
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Neue Prozessinformation"]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="shareNewProcess",
-                                             type="number", min=0, value=10
-                                         )
-                                     ]),
-                                 ]
-                             ),
-                             # Prozess 2
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Ähnliche Prozessinformation"]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="shareSimProcess",
-                                             type="number", min=0, value=10
-                                         )
-                                     ]),
-                                 ]
-                             ),
-                             # Prozess 3
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Gleiche Prozessinformation"]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="shareSameProcess",
-                                             type="number", min=0, value=10
-                                         )
-                                     ]),
-                                 ]
-                             ),
 
                              html.Br(),
 
@@ -403,42 +265,6 @@ app.layout = html.Div(
                                  ])]
                              ),
 
-                             # resource 1
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Neue Resource-Information"]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="shareNewResource",
-                                             type="number", min=0, value=10
-                                         )
-                                     ]),
-                                 ]
-                             ),
-                             # ressource 2
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Ähnliche Resource-Information"]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="shareSimResource",
-                                             type="number", min=0, value=10
-                                         )
-                                     ]),
-                                 ]
-                             ),
-                             # ressource 3
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Gleiche Resource-Information"]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id="shareSameResource",
-                                             type="number", min=0, value=10
-                                         )
-                                     ]),
-                                 ]
-                             ),
                          ], id='tableRelativeTimes'
                      ),
                      html.Br(),
@@ -480,7 +306,7 @@ app.layout = html.Div(
                              ),
                              html.Tr(
                                  children=[
-                                     html.Td(colSpan=2, children=["Investition für Struktur-Analyse"]),
+                                     html.Td(colSpan=2, children=["Investition für Strukturanalyse unter Berücksichtigung gleicher Bauteile"]),
                                      html.Td(
                                          children=[
                                              dcc.Input(
@@ -493,7 +319,7 @@ app.layout = html.Div(
                              ),
                              html.Tr(
                                  children=[
-                                     html.Td(colSpan=2, children=["Investition für Bauteil-Analyse"]),
+                                     html.Td(colSpan=2, children=["Investition für Strukturanalyse unter Berücksichtigung ähnlicher Bauteile"]),
                                      html.Td(
                                          children=[
                                              dcc.Input(
@@ -528,6 +354,8 @@ app.layout = html.Div(
                                      ])
                                  ]
                              ),
+                            html.Br(),
+
                              # weitere Parameter header
                              html.Tr(
                                  children=[
@@ -599,7 +427,7 @@ app.layout = html.Div(
                              html.Tr(
                                  children=[
 
-                                     html.Td(children=["Anzahl genutzter Produktmerkmale"]),
+                                     html.Td(children=["Anzahl manueller Eingaben pro Bauteil (z.B. Produktmerkmale)"]),
 
                                      html.Td(children=[
                                          dcc.Input(
@@ -737,23 +565,10 @@ def switch_npv_rev_pro_product_visibility(calc_method):
     State('matLevel', 'value'),
     State('supFunction', 'value'),
     State('timeNewComponent', 'value'),
-    State('freqNewComponent', 'value'),
     State('timeSimComponent', 'value'),
-    State('freqSimComponent', 'value'),
     State('timeSameComponent', 'value'),
-    State('freqSameComponent', 'value'),
-    State('timeNewProcess', 'value'),
-    State('freqNewProcess', 'value'),
-    State('timeSimProcess', 'value'),
-    State('freqSimProcess', 'value'),
-    State('timeSameProcess', 'value'),
-    State('freqSameProcess', 'value'),
-    State('timeNewResource', 'value'),
-    State('freqNewResource', 'value'),
-    State('timeSimResource', 'value'),
-    State('freqSimResource', 'value'),
-    State('timeSameResource', 'value'),
-    State('freqSameResource', 'value'),
+    State('timeProcess', 'value'), 
+    State('timeResource', 'value'),
     State('numNewVariant', 'value'),
     State('totalSearchTimeComponents', 'value'),
     State('totalSearchTimeProcesses', 'value'),
@@ -762,12 +577,7 @@ def switch_npv_rev_pro_product_visibility(calc_method):
     State('shareNewComponent', 'value'),
     State('shareSimComponent', 'value'),
     State('shareSameComponent', 'value'),
-    State('shareNewProcess', 'value'),
-    State('shareSimProcess', 'value'),
-    State('shareSameProcess', 'value'),
-    State('shareNewResource', 'value'),
-    State('shareSimResource', 'value'),
-    State('shareSameResource', 'value'),
+    
     State('n_prodFeat', 'value'),
     State('mean_amount_of_elem_comp', 'value'),
     State('I_al', 'value'),
@@ -786,17 +596,13 @@ def switch_npv_rev_pro_product_visibility(calc_method):
 def generateOutput(n_clicks1, n_clicks2, resultSort, calMethod, clickData,
                    matLevel, supFunction,
                    timeNewComponent, timeSimComponent, timeSameComponent,
-                   timeNewProcess, timeSimProcess, timeSameProcess,
-                   timeNewResource, timeSimResource, timeSameResource,
-                   freqNewComponent, freqSimComponent, freqSameComponent,
-                   freqNewProcess, freqSimProcess, freqSameProcess,
-                   freqNewResource, freqSimResource, freqSameResource,
+                   timeProcess,
+                   timeResource,
                    numNewVariant,
                    totalSearchTimeComponents, totalSearchTimeProcesses, totalSearchTimeResources,
                    typeOfTimeMeasurement,
                    shareNewComponent, shareSimComponent, shareSameComponent,
-                   shareNewProcess, shareSimProcess, shareSameProcess,
-                   shareNewResource, shareSimResource, shareSameResource, n_prodFeat, mean_amount_of_elem_comp, I_al,
+                   n_prodFeat, mean_amount_of_elem_comp, I_al,
                    I_pr, I_l2, I_l3, AS, K_PGrund, c_main, c_int, t, npvRevProProduct, t_DLZ):
     # fist save the user input parameters
     if n_clicks1 is not None or n_clicks2 is not None:
@@ -805,14 +611,8 @@ def generateOutput(n_clicks1, n_clicks2, resultSort, calMethod, clickData,
         data = {'matLevel': matLevel, 'treeMatchAlgo': treeMatchAlgo, 'prodFeat': prodFeat,
                 'timeNewComponent': timeNewComponent, 'timeSimComponent': timeSimComponent,
                 'timeSameComponent': timeSameComponent,
-                'timeNewProcess': timeNewProcess, 'timeSimProcess': timeSimProcess, 'timeSameProcess': timeSameProcess,
-                'timeNewResource': timeNewResource, 'timeSimResource': timeSimResource,
-                'timeSameResource': timeSameResource,
-                'freqNewComponent': freqNewComponent, 'freqSimComponent': freqSimComponent,
-                'freqSameComponent': freqSameComponent,
-                'freqNewProcess': freqNewProcess, 'freqSimProcess': freqSimProcess, 'freqSameProcess': freqSameProcess,
-                'freqNewResource': freqNewResource, 'freqSimResource': freqSimResource,
-                'freqSameResource': freqSameResource,
+                'timeProcess': timeProcess, 
+                'timeResource': timeResource,
                 'numNewVariant': numNewVariant,
                 'totalSearchTimeComponents': totalSearchTimeComponents,
                 'totalSearchTimeProcesses': totalSearchTimeProcesses,
@@ -820,10 +620,6 @@ def generateOutput(n_clicks1, n_clicks2, resultSort, calMethod, clickData,
                 'typeOfTimeMeasurement': typeOfTimeMeasurement,
                 'shareNewComponent': shareNewComponent / 100, 'shareSimComponent': shareSimComponent / 100,
                 'shareSameComponent': shareSameComponent / 100,
-                'shareNewProcess': shareNewProcess / 100, 'shareSimProcess': shareSimProcess / 100,
-                'shareSameProcess': shareSameProcess / 100,
-                'shareNewResource': shareNewResource / 100, 'shareSimResource': shareSimResource / 100,
-                'shareSameResource': shareSameResource / 100,
                 'n_prodFeat': n_prodFeat, 'mean_amount_of_elem_comp': mean_amount_of_elem_comp}
         df = pd.DataFrame([data])
         df.to_csv('ist_situation.csv', index=False)
@@ -912,9 +708,9 @@ class html_table:
     def __init__(self, name, money, investition, time, time_before, treeMatchAlgo, prodFeat, matLevel, ifCost):
         support_functions = []
         if treeMatchAlgo == 1:
-            support_functions.append("Struktur-Analyse")
+            support_functions.append("SgB")
         if prodFeat == 1:
-            support_functions.append("Bauteil-Analyse")
+            support_functions.append("SäB")
         support_functions = str(support_functions).strip("[]'").replace("'", "")
 
         self.table = html.Table(style={"width": "100%"},

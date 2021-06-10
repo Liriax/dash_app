@@ -127,11 +127,11 @@ class Calculator:
     def calculate_results(self):
         res = []
         for alternative in self.alternatives:
-            npv = round(self.calculate_npv(alternative))
-            comparison = round(self.calculate_comparison(alternative))
-            investition = round(calculate_investment(alternative, self.ist_situation, self.invest_params))
-            t_supported = calculate_time(alternative, self.ist_situation)
-            t_unsupported = calculate_time(self.ist_situation, self.ist_situation)
+            npv = round(self.calculate_npv(alternative),2)
+            comparison = round(self.calculate_comparison(alternative),2)
+            investition = round(calculate_investment(alternative, self.ist_situation, self.invest_params),2)
+            t_supported = round(calculate_time(alternative, self.ist_situation),2)
+            t_unsupported = round(calculate_time(self.ist_situation, self.ist_situation),2)
              
             matLevel = alternative.matLevel
             n_prodFeat = self.ist_situation.n_prodFeat

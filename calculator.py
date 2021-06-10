@@ -50,7 +50,7 @@ def calculate_time(alternative, ist_situation):
         Process + \
         Resource
 
-    return round(t_supported/60, 1)
+    return t_supported
 
 
 def create_alternatives(ist_situation):
@@ -98,7 +98,7 @@ class Calculator:
 
     def calculate_comparison(self, alternative):
         
-        t_supported = calculate_time(alternative, self.ist_situation)
+        t_supported = calculate_time(alternative, self.ist_situation)/60
         I_total = calculate_investment(alternative, self.ist_situation, self.invest_params)         
 
         C_depr = I_total / self.invest_params.T
@@ -108,8 +108,8 @@ class Calculator:
         return C_depr + C_int + C_main + C_person
 
     def calculate_npv(self, alternative):
-        t_supported = calculate_time(alternative, self.ist_situation)
-        t_unsupported = calculate_time(self.ist_situation, self.ist_situation)
+        t_supported = calculate_time(alternative, self.ist_situation)/60
+        t_unsupported = calculate_time(self.ist_situation, self.ist_situation)/60
          
         I_total = calculate_investment(alternative, self.ist_situation, self.invest_params) 
         C_main = self.invest_params.c_main * I_total
@@ -127,9 +127,9 @@ class Calculator:
     def calculate_results(self):
         res = []
         for alternative in self.alternatives:
-            npv = int(self.calculate_npv(alternative))
-            comparison = int(self.calculate_comparison(alternative))
-            investition = int(calculate_investment(alternative, self.ist_situation, self.invest_params))
+            npv = round(self.calculate_npv(alternative))
+            comparison = round(self.calculate_comparison(alternative))
+            investition = round(calculate_investment(alternative, self.ist_situation, self.invest_params))
             t_supported = calculate_time(alternative, self.ist_situation)
             t_unsupported = calculate_time(self.ist_situation, self.ist_situation)
              

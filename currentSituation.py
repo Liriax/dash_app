@@ -67,7 +67,7 @@ class CurrentSituation:
                 sameComponent + \
                 Process + \
                 Resource
-            self.t_unsupported = round(t_unsupported/60, 1)
+            self.t_unsupported = t_unsupported
 
         except pd.errors.EmptyDataError:
             ist_situation = 'could not read ist_situation.csv!'

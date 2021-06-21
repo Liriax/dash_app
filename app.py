@@ -56,7 +56,7 @@ app.layout = html.Div(
                              # row 2
                              html.Tr(
                                  children=[
-                                     html.Td(colSpan=2, children=["Bestehende Unterstützungen"]),
+                                     html.Td(colSpan=2, children=["Bestehende Unterstützungen", html.Br(), "(Eine Analyse der Struktur ist nur notwendig, wenn die Erzeugnisstruktur mehr als 2 Ebenen enthält. Ansonsten ist eine Analyse der Mengenstückliste ausreichend)"]),
                                      html.Td(children=[
                                          dcc.Checklist(
                                              id='supFunction',

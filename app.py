@@ -373,7 +373,7 @@ app.layout = html.Div(
                                              type='number', min=0, value=30
                                          )
                                      ]),
-                                     html.Td(children=["35-40 Stunden"])  # calculate standard cost
+                                     html.Td(children=["38,5 Stunden"])  # calculate standard cost
                                  ]
                              ),
                              html.Tr(
@@ -409,19 +409,19 @@ app.layout = html.Div(
                                              type='number', min=0, value=6
                                          )
                                      ]),
-                                     html.Td(children=["maximal 6%"])  # standard interest
+                                     html.Td(children=["0,5%, wird aber meist zur Berechnung höher angesetzt (~12%)"])  # standard interest
                                  ]
                              ),
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Nutzungsdauer, Jahren"]),
+                                     html.Td(children=["Betrachtungszeitraum"]),
                                      html.Td(children=[
                                          dcc.Input(
                                              id='t',
                                              type='number', min=1, value=3
                                          )
                                      ]),
-                                     html.Td(children=["3 bzw. 5 für ERP-System"])  # standard duration
+                                     html.Td(children=["5"])  # standard duration
                                  ]
                              ),
                              html.Tr(
@@ -435,31 +435,31 @@ app.layout = html.Div(
                                              type='number', min=0, value=9
                                          )
                                      ]),
-                                     html.Td(children=["9"])  # calculate standard cost
+                                     html.Td(children=["5"])  # calculate standard cost
                                  ]
                              ),
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Durschnittliche Anzahl an elementaren Bauteilen"]),
+                                     html.Td(children=["Durschnittliche Anzahl an unbekannten Bauteilen"]),
                                      html.Td(children=[
                                          dcc.Input(
                                              id='mean_amount_of_elem_comp',
                                              type='number', min=0, value=9
                                          )
                                      ]),
-                                     html.Td(children=["9"])  # calculate standard cost
+                                     html.Td(children=[""])  # calculate standard cost
                                  ]
                              ),
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Produktsdurchlaufzeit in der Montage (Stunden)"]),
+                                     html.Td(children=["Gesamte Durchlaufzeit des Produkts (Stunden)"]),
                                      html.Td(children=[
                                          dcc.Input(
                                              id='t_DLZ',
                                              type='number', min=0, value=5
                                          )
                                      ]),
-                                     html.Td(children=["5"]) 
+                                     html.Td(children=[" "])
                                  ]
                              ),
                              # Number of new variants

@@ -1,2 +1,2 @@
-matLevel,treeMatchAlgo,prodFeat,timeNewComponent,timeSimComponent,timeSameComponent,timeProcess,timeResource,numNewVariant,totalSearchTimeComponents,totalSearchTimeProcesses,totalSearchTimeResources,typeOfTimeMeasurement,shareNewComponent,shareSimComponent,shareSameComponent,n_prodFeat,mean_amount_of_elem_comp
-2,1,0,10,5,15,10,10,5,5,5,5,absolute,0.1,0.05,0.15,9,9
+matLevel,treeMatchAlgo,prodFeat,typeOfTimeMeasurement
+2,1,0,absolute

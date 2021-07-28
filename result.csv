@@ -1,5 +1,5 @@
-npv,comparison,investition,t_unsupported,t_supported,matLevel,prodFeat,treeMatchAlgo,alreadyImplemented,n_prodFeat,name
--14,5,0,0.4,0.4,2,0,1,1,9,Ist-Situation
--2509,577,1000,0.4,1.1,2,1,1,0,9,"RG 2, SgB, SäB"
--1274,565,1000,0.4,0.2,3,0,1,0,9,"RG 3, SgB"
--3769,1138,2000,0.4,0.9,3,1,1,0,9,"RG 3, SgB, SäB"
+npv,investition,t_unsupported,t_supported,matLevel,prodFeat,treeMatchAlgo,alreadyImplemented,name
+-176.96,0,30,30.0,2,0,1,1,Ist-Situation
+-4287.57,1000,30,188.5,2,1,1,0,"RG 2, SgB, SäB"
+-1549.04,1000,30,20.0,3,0,1,0,"RG 3, SgB"
+-5659.65,2000,30,178.5,3,1,1,0,"RG 3, SgB, SäB"

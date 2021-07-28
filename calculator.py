@@ -3,12 +3,6 @@ import paramsForCalc
 import alternative
 import pandas as pd
 
-# def retrieve_ist_situation():  # the read, try and except are done by creating a CurrentSituation object
-#     return currentSituation.CurrentSituation()
-
-
-# def retrieve_invest_params():  # the read, try and except are done by creating a ParamsForCalc object
-#     return paramsForCalc.ParamsForCalc()
 
 
 def calculate_investment(alternative, ist_situation, params):
@@ -30,25 +24,19 @@ def calculate_investment(alternative, ist_situation, params):
     
     return I_total
 
-#"calculate_time" takes in time durations in minutes but returns the total time in hours!
 def calculate_time(alternative, ist_situation): 
 
     n_prodFeat = ist_situation.n_prodFeat
-
-    sameComponent = 0 if alternative.treeMatchAlgo == 1 else ist_situation.cumTimeSameComponent
-    simComponent = 0.036*(35+15*n_prodFeat)*ist_situation.mean_amount_of_elem_comp if alternative.prodFeat == 1 else ist_situation.cumTimeSimComponent
-    newComponent = 0 if alternative.treeMatchAlgo == 1 and alternative.prodFeat == 1 else ist_situation.cumTimeNewComponent
+    all_zeros = [0 for x in range(0, ist_situation.n_prodFam)]
+    sameComponent = all_zeros if alternative.treeMatchAlgo == 1 else ist_situation.cumTimeSameComponent
+    simComponent = [(0.036*35+15*0.035)*n*m if alternative.prodFeat == 1 else t for n,m,t in zip(n_prodFeat,ist_situation.mean_amount_of_elem_comp,ist_situation.cumTimeSimComponent)]
+    newComponent = all_zeros if alternative.treeMatchAlgo == 1 and alternative.prodFeat == 1 else ist_situation.cumTimeNewComponent
     
     
-    Process = 0 if alternative.matLevel >= 2 else ist_situation.cumtimeProcess
-    Resource = 0 if alternative.matLevel == 3 else ist_situation.cumtimeResource
+    Process = all_zeros if alternative.matLevel >= 2 else ist_situation.cumtimeProcess
+    Resource = all_zeros if alternative.matLevel == 3 else ist_situation.cumtimeResource
 
-    t_supported = \
-        newComponent + \
-        simComponent + \
-        sameComponent + \
-        Process + \
-        Resource
+    t_supported = [newComponent[x] + simComponent[x] + sameComponent[x] + Process[x] + Resource[x] for x in range(0, ist_situation.n_prodFam)]
 
     return t_supported
 
@@ -95,51 +83,57 @@ class Calculator:
         self.invest_params = paramsForCalc.ParamsForCalc()
         self.alternatives = create_alternatives(self.ist_situation)
         
-
-    def calculate_comparison(self, alternative):
+    # # no longer needed!
+    # def calculate_comparison(self, alternative):
         
-        t_supported = calculate_time(alternative, self.ist_situation)/60
-        I_total = calculate_investment(alternative, self.ist_situation, self.invest_params)         
+    #     t_supported = [x/60 for x in calculate_time(alternative, self.ist_situation)]
+    #     I_total = calculate_investment(alternative, self.ist_situation, self.invest_params)         
 
-        C_depr = I_total / self.invest_params.T
-        C_int = 0.5 * I_total * self.invest_params.r
-        C_main = self.invest_params.c_main * I_total
-        C_person = self.invest_params.k_personal * t_supported
-        return C_depr + C_int + C_main + C_person
+    #     C_depr = I_total / self.invest_params.T
+    #     C_int = 0.5 * I_total * self.invest_params.r
+    #     C_main = self.invest_params.c_main * I_total
+    #     C_person = [self.invest_params.k_personal * x for x in t_supported]
+    #     return C_depr + C_int + C_main + C_person
 
     def calculate_npv(self, alternative):
-        t_supported = calculate_time(alternative, self.ist_situation)/60
-        t_unsupported = calculate_time(self.ist_situation, self.ist_situation)/60
+        t_supported = [x/60 for x in calculate_time(alternative, self.ist_situation)]
+        t_unsupported = [x/60 for x in calculate_time(self.ist_situation, self.ist_situation)]
          
         I_total = calculate_investment(alternative, self.ist_situation, self.invest_params) 
-        C_main = self.invest_params.c_main * I_total
+        C_main = self.invest_params.c_main * I_total # K_IHJ=k_IH*I_0
 
         r = self.invest_params.r
-        S_person = self.invest_params.k_personal * (t_unsupported - t_supported)  # personnel cost savings
-
-        C_person = self.invest_params.k_personal * t_supported
-        R_acc = self.invest_params.r_acc * (t_unsupported - t_supported) / self.invest_params.t_DLZ * self.ist_situation.numNewVariant  # R_acc: additional revenues
+        S_person = [self.invest_params.k_personal * (x - y) for x, y in zip(t_unsupported, t_supported)]  # personnel cost savings
+        C_person = [self.invest_params.k_personal * x for x in t_supported] # K_(P,x)=k_P*t_(Nachher,x)
+        K_PJ=sum([c*x for c,x in zip(C_person, self.invest_params.P_x)]) # K_PJ=∑_(x=1)^X▒〖K_(P,x)*P_x 〗_
+        K_J = K_PJ+C_main # K_J=K_PJ+K_IHJ
+        # E_(Beschl,x) = e_(Var,x)*l_(M,x)*t_(s,x)/t_(DLZ,x) 
+        R_acc = [e_Vx * (x - y) / t * z  for e_Vx, x, y, z, t in zip(self.invest_params.r_acc, t_unsupported, t_supported, self.invest_params.l_Mx, self.invest_params.t_DLZ)] # R_acc: additional revenues
+        
+        #E_J=∑(E_(P,x)+E_(Beschl,x))*P_x 〗
+        E_J=sum([(x+y)*z for x,y,z in zip(S_person,R_acc,self.invest_params.P_x)])
+        
+        # KW_0=-I_0+∑(E_J-K_J)/(1+r)^t 
         npv = - I_total
         for t in range(1, self.invest_params.T + 1):
-            npv += (R_acc - C_main - C_person) / (1 + r) ** t
+            npv += (E_J - K_J) / (1 + r) ** t
         return npv
 
     def calculate_results(self):
         res = []
         for alternative in self.alternatives:
             npv = round(self.calculate_npv(alternative),2)
-            comparison = round(self.calculate_comparison(alternative),2)
             investition = round(calculate_investment(alternative, self.ist_situation, self.invest_params),2)
-            t_supported = round(calculate_time(alternative, self.ist_situation),2)
-            t_unsupported = round(calculate_time(self.ist_situation, self.ist_situation),2)
+            t_supported = sum([round(x,2) for x in calculate_time(alternative, self.ist_situation)])
+            t_unsupported = sum([round(x,2) for x in calculate_time(self.ist_situation, self.ist_situation)])
              
             matLevel = alternative.matLevel
-            n_prodFeat = self.ist_situation.n_prodFeat
+            # n_prodFeat = self.ist_situation.n_prodFeat
             prodFeat = alternative.prodFeat
             treeMatchAlgo = alternative.treeMatchAlgo
             alreadyImplemented = alternative.alreadyImplemented
-            res.append([npv, comparison, investition, t_unsupported,  t_supported, matLevel, prodFeat, treeMatchAlgo, alreadyImplemented, n_prodFeat])
-        res_df = pd.DataFrame(res, columns = ['npv', 'comparison', 'investition', 't_unsupported', 't_supported', 'matLevel', 'prodFeat', 'treeMatchAlgo', 'alreadyImplemented', 'n_prodFeat'])
+            res.append([npv, investition, t_unsupported,  t_supported, matLevel, prodFeat, treeMatchAlgo, alreadyImplemented])
+        res_df = pd.DataFrame(res, columns = ['npv', 'investition', 't_unsupported', 't_supported', 'matLevel', 'prodFeat', 'treeMatchAlgo', 'alreadyImplemented'])
         
         name = ["RG {}{}{}".format(int(res_df.iloc[x]['matLevel']), ", SgB" if res_df.iloc[x]['treeMatchAlgo']==1 else "", ", SäB" if res_df.iloc[x]['prodFeat']==1 else "") if res_df.iloc[x]['investition'] >0 else "Ist-Situation" for x in range(0, len(res_df))]
         res_df['name']=name
@@ -151,7 +145,6 @@ class Calculator:
 # for alt in c.alternatives:
 #     print(calculate_time(alt, c.ist_situation))
 
-# print(c.calculate_npv(calculate_time(c.alternatives[0], c.ist_situation)))
 
 # c = Calculator()
 # for alt in c.alternatives:
@@ -159,6 +152,5 @@ class Calculator:
 #     print(calculate_investment(alt, c.ist_situation, c.invest_params))
 #     print(calculate_time(alt, c.ist_situation))
 #     print("npv:" + str(c.calculate_npv(alt)))
-#     print("costs:" + str(c.calculate_comparison(alt)))
 
 # print(c.calculate_results())

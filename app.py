@@ -140,7 +140,6 @@ app.layout = html.Div(
                                 editable=True,
                                 row_deletable=True
                             ),
-                            html.Button('Neue Produktfamilie', id='editing-rows-button', n_clicks=0),
 
                         ],
                      id="div_datatable_absolute"
@@ -158,7 +157,7 @@ app.layout = html.Div(
                                     [{'id': p[0], 'name': p[1]} for p in params_dict]
                         ),
                         data=[
-                             dict(prodFam2=i, **{param[0]: 10 for param in params_dict})
+                             dict(prodFam2=i, **{param[0]: 0 for param in params_dict})
                                     for i in range(1, 2)
                         ],
                         editable=True,
@@ -166,10 +165,11 @@ app.layout = html.Div(
                         style_header=headerStyle,
                         style_cell = style_cell,
                      ),
-                     html.Button('Neue Produktfamilie', id='editing-rows-button2', n_clicks=0),
                      ],
                         id='div_datatable_relative'
                     ),
+                    html.Button('Neue Produktfamilie', id='editing-rows-button', n_clicks=0),
+
                      html.Br(),
                      # ------table 2-----------------------------------
                      html.Table(
@@ -308,14 +308,13 @@ app.layout = html.Div(
                                      html.Td(children=["5"])  # standard duration
                                  ]
                              ),
-                             html.Tr(
-                                 children=[
-                                     html.Th(colSpan=1, children=["Nebenbedingungen je Produkt/Produktfamilie"])]
-                             )
+                             html.Br()
                          ]
                      ),
                      html.Div(
+                         
                                 children=[
+                                    html.P("Nebenbedingungen je Produkt/Produktfamilie", style={"font-weight": "bold"}),
                                     dash_table.DataTable(
                                         id='datatable_conditions',
                                         columns=(
@@ -331,7 +330,6 @@ app.layout = html.Div(
                                         style_header=headerStyle,
                                         style_cell = style_cell,
                                     ),
-                                    html.Button('Neue Produktfamilie', id='editing-rows-button3', n_clicks=0),
 
                                 ],
                             id="div_datatable_conditions"
@@ -355,7 +353,7 @@ app.layout = html.Div(
                      dcc.Dropdown(
                          id='resultSort',
                          options=[
-                             {'label': 'Nach Kosten/Kapitalwert sortieren', 'value': 'money'},
+                             {'label': 'Nach Kapitalwert sortieren', 'value': 'money'},
                              {'label': 'Nach Reifegrad sortieren', 'value': 'matLevel'},
                              {'label': 'Nach Zeit sortieren', 'value': 'timeSaving'}
                          ],
@@ -371,37 +369,22 @@ app.layout = html.Div(
 
 @app.callback(
     Output('datatable_absolute', 'data'),
+    Output('datatable_relative', 'data'),
+    Output('datatable_conditions', 'data'),
     Input('editing-rows-button', 'n_clicks'),
     State('datatable_absolute', 'data'),
-    State('datatable_absolute', 'columns'))
-def add_row(n_clicks, rows, columns):
-    if n_clicks > 0:
-        rows.append({c['id']: len(rows)+1 if c['id']=='prodFam' else 10 for c in columns})
-    return rows
-    
-@app.callback(
-    Output('datatable_relative', 'data'),
-    Input('editing-rows-button2', 'n_clicks'),
+    State('datatable_absolute', 'columns'),
     State('datatable_relative', 'data'),
-    State('datatable_relative', 'columns'))
-def add_row2(n_clicks, rows, columns):
-    if n_clicks > 0:
-        rows.append({c['id']: len(rows)+1 if c['id']=='prodFam2' else 10 for c in columns})
-    return rows
-
-  
-@app.callback(
-    Output('datatable_conditions', 'data'),
-    Input('editing-rows-button3', 'n_clicks'),
+    State('datatable_relative', 'columns'),
     State('datatable_conditions', 'data'),
     State('datatable_conditions', 'columns'))
-def add_row2(n_clicks, rows, columns):
+def add_row(n_clicks, rows1, columns1,rows2, columns2, rows3, columns3):
     if n_clicks > 0:
-        rows.append({c['id']: len(rows)+1 if c['id']=='prodFam3' else 10 for c in columns})
-    return rows
-
-
-
+        rows1.append({c['id']: len(rows1)+1 if c['id']=='prodFam' else 10 for c in columns1})
+        rows2.append({c['id']: len(rows2)+1 if c['id']=='prodFam2' else 0 for c in columns2})
+        rows3.append({c['id']: len(rows3)+1 if c['id']=='prodFam3' else 10 for c in columns3})
+    return rows1, rows2, rows3
+    
 
 # this switches the visibility of input fields for absolute and relative time
 @app.callback(

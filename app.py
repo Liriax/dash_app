@@ -11,6 +11,7 @@ import plotly.express as px
 import pandas as pd
 import gunicorn
 from dash.dependencies import Input, Output, State
+from ast import literal_eval
 
 # import the classes
 import calculator
@@ -493,7 +494,8 @@ def generateOutput(n_clicks1, resultSort, clickData,
             g = px.bar(df, x='name', y='matLevel', labels={'name': "", 'matLevel': "Reifegrad"},
                        color="matLevel")
 
-      
+        print(literal_eval(df.iloc[0]["t_supported_x"]))
+
         results_output = [html_table(df.iloc[x]["name"],df.iloc[x]["npv"], df.iloc[x]['investition'], df.iloc[x]['t_supported'], 
                                      df.iloc[x]['t_unsupported'], df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"], 
                                      df.iloc[x]["matLevel"],len(rows),df.iloc[x]["t_supported_x"],df.iloc[x]["t_unsupported_x"]).table for x in range(0, len(df))]
@@ -524,7 +526,8 @@ class html_table:
         if prodFeat == 1:
             support_functions.append("SäB")
         support_functions = str(support_functions).strip("[]'").replace("'", "")
-      
+        time_x = literal_eval(time_x)
+        time_before_x = literal_eval(time_before_x)
         self.table = html.Table(style={"width": "100%"},
                                 children=[
                                     html.Tr(

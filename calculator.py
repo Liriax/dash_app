@@ -38,7 +38,6 @@ def calculate_time(alternative, ist_situation):
 
     t_supported = [newComponent[x] + simComponent[x] + sameComponent[x] + Process[x] + Resource[x] for x in range(0, ist_situation.n_prodFam)]
 
-    print(t_supported)
     return t_supported
 
 

@@ -510,10 +510,10 @@ def generateOutput(n_clicks1, resultSort, clickData,
             g = px.bar(df, x='name', y='matLevel', labels={'name': "", 'matLevel': "Reifegrad"},
                        color="matLevel")
 
-         
-        results_output = [html_table(df.iloc[x]["name"],df.iloc[x]["npv"], df.iloc[x]['investition'], df.iloc[x]['t_supported'], \
-                                     df.iloc[x]['t_unsupported'], df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"],
-                                     df.iloc[x]["matLevel"]).table for x in range(0, len(df))]
+      
+        results_output = [html_table(df.iloc[x]["name"],df.iloc[x]["npv"], df.iloc[x]['investition'], df.iloc[x]['t_supported'], 
+                                     df.iloc[x]['t_unsupported'], df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"], 
+                                     df.iloc[x]["matLevel"],len(rows),df.iloc[x]["t_supported_x"],df.iloc[x]["t_unsupported_x"]).table for x in range(0, len(df))]
         try:
             n = clickData.get('points')[0].get('pointIndex')
             results_output.insert(0, results_output.pop(n))
@@ -534,14 +534,14 @@ def generateOutput(n_clicks1, resultSort, clickData,
 
 # this class is for the output tables: each option is a html_table object
 class html_table:
-    def __init__(self, name, money, investition, time, time_before, treeMatchAlgo, prodFeat, matLevel):
+    def __init__(self, name, money, investition, time, time_before, treeMatchAlgo, prodFeat, matLevel, n_prodFam, time_x, time_before_x):
         support_functions = []
         if treeMatchAlgo == 1:
             support_functions.append("SgB")
         if prodFeat == 1:
             support_functions.append("SäB")
         support_functions = str(support_functions).strip("[]'").replace("'", "")
-
+      
         self.table = html.Table(style={"width": "100%"},
                                 children=[
                                     html.Tr(
@@ -567,7 +567,16 @@ class html_table:
                                             html.Td(children=[str(time)])
                                         ]
                                     ),
-
+                                ]+[
+                                    html.Tr(
+                                        [
+                                            html.Td(children=["Produktfamilie "+str(n+1)], style={"text-align":"right"}),
+                                            html.Td(children=[time_before_x[n]]),
+                                            html.Td(children=["Produktfamilie "+str(n+1)], style={"text-align":"right"}),
+                                            html.Td(children=[time_x[n]])
+                                        ]
+                                    ) for n in range(0,n_prodFam)
+                                ]+[
                                     # header support function outputs
                                     html.Tr(
                                         children=[

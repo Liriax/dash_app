@@ -38,6 +38,7 @@ def calculate_time(alternative, ist_situation):
 
     t_supported = [newComponent[x] + simComponent[x] + sameComponent[x] + Process[x] + Resource[x] for x in range(0, ist_situation.n_prodFam)]
 
+    print(t_supported)
     return t_supported
 
 
@@ -121,19 +122,23 @@ class Calculator:
 
     def calculate_results(self):
         res = []
+     
         for alternative in self.alternatives:
             npv = round(self.calculate_npv(alternative),2)
             investition = round(calculate_investment(alternative, self.ist_situation, self.invest_params),2)
-            t_supported = sum([round(x,2) for x in calculate_time(alternative, self.ist_situation)])
-            t_unsupported = sum([round(x,2) for x in calculate_time(self.ist_situation, self.ist_situation)])
+            t_supported_x =[round(x,2) for x in calculate_time(alternative, self.ist_situation)]
+            t_unsupported_x = [round(x,2) for x in calculate_time(self.ist_situation, self.ist_situation)]
+            print(t_supported_x)
+            t_supported = sum(t_supported_x)
+            t_unsupported = sum(t_unsupported_x)
              
             matLevel = alternative.matLevel
             # n_prodFeat = self.ist_situation.n_prodFeat
             prodFeat = alternative.prodFeat
             treeMatchAlgo = alternative.treeMatchAlgo
             alreadyImplemented = alternative.alreadyImplemented
-            res.append([npv, investition, t_unsupported,  t_supported, matLevel, prodFeat, treeMatchAlgo, alreadyImplemented])
-        res_df = pd.DataFrame(res, columns = ['npv', 'investition', 't_unsupported', 't_supported', 'matLevel', 'prodFeat', 'treeMatchAlgo', 'alreadyImplemented'])
+            res.append([npv, investition, t_unsupported,  t_supported, matLevel, prodFeat, treeMatchAlgo, alreadyImplemented,t_supported_x,t_unsupported_x])
+        res_df = pd.DataFrame(res, columns = ['npv', 'investition', 't_unsupported', 't_supported', 'matLevel', 'prodFeat', 'treeMatchAlgo', 'alreadyImplemented',"t_supported_x","t_unsupported_x"])
         
         name = ["RG {}{}{}".format(int(res_df.iloc[x]['matLevel']), ", SgB" if res_df.iloc[x]['treeMatchAlgo']==1 else "", ", SäB" if res_df.iloc[x]['prodFeat']==1 else "") if res_df.iloc[x]['investition'] >0 else "Ist-Situation" for x in range(0, len(res_df))]
         res_df['name']=name

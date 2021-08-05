@@ -6,8 +6,8 @@ import pandas as pd
 
 def calculate_investment(alternative, ist_situation):
     # find out if extra investment is to be made:
-    invest_tree_matching = alternative.treeMatchAlgo - ist_situation.treeMatchAlgo
-    invest_prod_feature = alternative.prodFeat - ist_situation.prodFeat
+    invest_SgB = alternative.SgB - ist_situation.SgB
+    invest_SaB = alternative.SaB - ist_situation.SaB
     # find out investment needed for the increase of maturity level:
     mat_increase = 0
     if alternative.matLevel > ist_situation.matLevel:
@@ -19,17 +19,17 @@ def calculate_investment(alternative, ist_situation):
             mat_increase += ist_situation.I_l2 + ist_situation.I_l3
     
     # calculate amount of investment needed:
-    I_total = invest_tree_matching * ist_situation.I_al + invest_prod_feature * ist_situation.I_pr + mat_increase
+    I_total = invest_SgB * ist_situation.I_al + invest_SaB * ist_situation.I_pr + mat_increase
     
     return I_total
 
 def calculate_time(alternative, ist_situation): 
 
-    n_prodFeat = ist_situation.n_prodFeat
+    n_SaB = ist_situation.n_SaB
     all_zeros = [0 for x in range(0, ist_situation.n_prodFam)]
-    sameComponent = all_zeros if alternative.treeMatchAlgo == 1 else ist_situation.cumTimeSameComponent
-    simComponent = [(0.036*35+15*0.035)*n*m if alternative.prodFeat == 1 else t for n,m,t in zip(n_prodFeat,ist_situation.mean_amount_of_elem_comp,ist_situation.cumTimeSimComponent)]
-    newComponent = all_zeros if alternative.treeMatchAlgo == 1 and alternative.prodFeat == 1 else ist_situation.cumTimeNewComponent
+    sameComponent = all_zeros if alternative.SgB == 1 else ist_situation.cumTimeSameComponent
+    simComponent = [(0.036*35+15*0.035)*n*m if alternative.SaB == 1 else t for n,m,t in zip(n_SaB,ist_situation.mean_amount_of_elem_comp,ist_situation.cumTimeSimComponent)]
+    newComponent = all_zeros if alternative.SgB == 1 and alternative.SaB == 1 else ist_situation.cumTimeNewComponent
     
     
     Process = all_zeros if alternative.matLevel >= 2 else ist_situation.cumtimeProcess
@@ -46,32 +46,32 @@ def create_alternatives(ist_situation):
     # for i in range(1, 3): -> should be 4 because range(1,3) is only 1 and 2
     for i in range(1, 4):
         if ist_situation.matLevel < i:
-            if ist_situation.treeMatchAlgo == 0 and ist_situation.prodFeat == 0:
+            if ist_situation.SgB == 0 and ist_situation.SaB == 0:
                 alternatives.append(alternative.Alternative(0, 0, i))
                 alternatives.append(alternative.Alternative(0, 1, i))
                 alternatives.append(alternative.Alternative(1, 0, i))
                 alternatives.append(alternative.Alternative(1, 1, i))
-            if ist_situation.treeMatchAlgo == 0 and ist_situation.prodFeat == 1:
+            if ist_situation.SgB == 0 and ist_situation.SaB == 1:
                 alternatives.append(alternative.Alternative(0, 1, i))
                 alternatives.append(alternative.Alternative(1, 1, i))
-            if ist_situation.treeMatchAlgo == 1 and ist_situation.prodFeat == 0:
+            if ist_situation.SgB == 1 and ist_situation.SaB == 0:
                 alternatives.append(alternative.Alternative(1, 0, i))
                 alternatives.append(alternative.Alternative(1, 1, i))
-            if ist_situation.treeMatchAlgo == 1 and ist_situation.prodFeat == 1:
+            if ist_situation.SgB == 1 and ist_situation.SaB == 1:
                 alternatives.append(alternative.Alternative(1, 1, i))
         if ist_situation.matLevel == i:
-            if ist_situation.treeMatchAlgo == 0 and ist_situation.prodFeat == 0:
+            if ist_situation.SgB == 0 and ist_situation.SaB == 0:
                 alternatives.append(alternative.Alternative(0, 0, i))
                 alternatives.append(alternative.Alternative(0, 1, i))
                 alternatives.append(alternative.Alternative(1, 0, i))
                 alternatives.append(alternative.Alternative(1, 1, i))
-            if ist_situation.treeMatchAlgo == 0 and ist_situation.prodFeat == 1:
+            if ist_situation.SgB == 0 and ist_situation.SaB == 1:
                 alternatives.append(alternative.Alternative(0, 1, i))
                 alternatives.append(alternative.Alternative(1, 1, i))
-            if ist_situation.treeMatchAlgo == 1 and ist_situation.prodFeat == 0:
+            if ist_situation.SgB == 1 and ist_situation.SaB == 0:
                 alternatives.append(alternative.Alternative(1, 0, i))
                 alternatives.append(alternative.Alternative(1, 1, i))
-            if ist_situation.treeMatchAlgo == 1 and ist_situation.prodFeat == 1:
+            if ist_situation.SgB == 1 and ist_situation.SaB == 1:
                 alternatives.append(alternative.Alternative(1, 1, i))
     return alternatives
 
@@ -92,8 +92,9 @@ class Calculator:
         r = self.ist_situation.r
         S_person = [self.ist_situation.k_personal * (x - y) for x, y in zip(t_unsupported, t_supported)]  # personnel cost savings
         C_person = [self.ist_situation.k_personal * x for x in t_supported] # K_(P,x)=k_P*t_(Nachher,x)
-        K_PJ=sum([c*x for c,x in zip(C_person, self.ist_situation.P_x)]) # K_PJ=∑_(x=1)^X▒〖K_(P,x)*P_x 〗_
+        K_PJ=sum([c*x for c,x in zip(C_person, self.ist_situation.P_x)]) # K_PJ=∑_(x=1)^X〖K_(P,x)*P_x 〗
         K_J = K_PJ+C_main # K_J=K_PJ+K_IHJ
+
         # E_(Beschl,x) = e_(Var,x)*l_(M,x)*t_(s,x)/t_(DLZ,x) 
         R_acc = [e_Vx * (x - y) / t * z  for e_Vx, x, y, z, t in zip(self.ist_situation.r_acc, t_unsupported, t_supported, self.ist_situation.l_Mx, self.ist_situation.t_DLZ)] # R_acc: additional revenues
         
@@ -118,13 +119,13 @@ class Calculator:
             t_unsupported = sum(t_unsupported_x)
              
             matLevel = alternative.matLevel
-            # n_prodFeat = self.ist_situation.n_prodFeat
-            prodFeat = alternative.prodFeat
-            treeMatchAlgo = alternative.treeMatchAlgo
-            res.append([npv, investition, t_unsupported,  t_supported, matLevel, prodFeat, treeMatchAlgo,t_supported_x,t_unsupported_x])
-        res_df = pd.DataFrame(res, columns = ['npv', 'investition', 't_unsupported', 't_supported', 'matLevel', 'prodFeat', 'treeMatchAlgo',"t_supported_x","t_unsupported_x"])
+            # n_SaB = self.ist_situation.n_SaB
+            SaB = alternative.SaB
+            SgB = alternative.SgB
+            res.append([npv, investition, t_unsupported,  t_supported, matLevel, SaB, SgB,t_supported_x,t_unsupported_x])
+        res_df = pd.DataFrame(res, columns = ['npv', 'investition', 't_unsupported', 't_supported', 'matLevel', 'SaB', 'SgB',"t_supported_x","t_unsupported_x"])
         
-        name = ["RG {}{}{}".format(int(res_df.iloc[x]['matLevel']), ", SgB" if res_df.iloc[x]['treeMatchAlgo']==1 else "", ", SäB" if res_df.iloc[x]['prodFeat']==1 else "") if res_df.iloc[x]['investition'] >0 else "Ist-Situation" for x in range(0, len(res_df))]
+        name = ["RG {}{}{}".format(int(res_df.iloc[x]['matLevel']), ", SgB" if res_df.iloc[x]['SgB']==1 else "", ", SäB" if res_df.iloc[x]['SaB']==1 else "") if res_df.iloc[x]['investition'] >0 else "Ist-Situation" for x in range(0, len(res_df))]
         res_df['name']=name
         res_df.to_csv(r'assets/result.csv', index=False)
 
@@ -137,7 +138,7 @@ class Calculator:
 
 # c = Calculator()
 # for alt in c.alternatives:
-#     print(alt.matLevel,alt.treeMatchAlgo, alt.prodFeat)
+#     print(alt.matLevel,alt.SgB, alt.SaB)
 #     print(calculate_investment(alt, c.ist_situation))
 #     print(calculate_time(alt, c.ist_situation))
 #     print("npv:" + str(c.calculate_npv(alt)))

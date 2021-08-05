@@ -1,5 +1,5 @@
 class Alternative:
-    def __init__(self, treeMatchAlgo, prodFeat, matLevel):
-        self.prodFeat = prodFeat
-        self.treeMatchAlgo = treeMatchAlgo
+    def __init__(self, SgB, SaB, matLevel):
+        self.SaB = SaB
+        self.SgB = SgB
         self.matLevel = matLevel

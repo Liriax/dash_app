@@ -31,7 +31,7 @@ params_dict = [('totalSearchTimeComponents','Gesamte benötigte Zeit zum Suchen 
                                 ('totalSearchTimeResources',  'Gesamte benötigte Zeit zum Suchen von Resourcen (Minuten)')]
                                 
 
-cond = [("Anzahl manueller Eingaben pro Bauteil (z.B. Produktmerkmale)","n_prodFeat"),("Durschnittliche Anzahl an unbekannten Bauteilen","mean_amount_of_elem_comp"),
+cond = [("Anzahl manueller Eingaben pro Bauteil (z.B. Produktmerkmale)","n_SaB"),("Durschnittliche Anzahl an unbekannten Bauteilen","mean_amount_of_elem_comp"),
         ("Gesamte Durchlaufzeit des Produkts (Stunden)","t_DLZ"),
         ("Einnahmen pro Produktvariante","npvRevProProduct"),
         ("Anzahl an eingeführten Produktvarianten pro Jahr","P_x"),
@@ -87,8 +87,8 @@ app.layout = html.Div(
                                          dcc.Checklist(
                                              id='supFunction',
                                              options=[
-                                                 {'label': 'Strukturanalyse unter Berücksichtigung gleicher Bauteile (SgB)', 'value': 'treeMatching'},
-                                                 {'label': 'Strukturanalyse unter Berücksichtigung ähnlicher Bauteile (SäB)', 'value': 'prodFeature'}
+                                                 {'label': 'Strukturanalyse unter Berücksichtigung gleicher Bauteile (SgB)', 'value': 'SgB'},
+                                                 {'label': 'Strukturanalyse unter Berücksichtigung ähnlicher Bauteile (SäB)', 'value': 'SaB'}
                                              ],
                                              value=[]
 
@@ -442,9 +442,9 @@ def generateOutput(n_clicks1, resultSort, clickData,
         df = pd.DataFrame(rows3, columns=[c['id'] for c in columns3])
         df.to_csv(r"assets/product_family_conditions.csv", index=False)
 
-        treeMatchAlgo = 1 if "treeMatching" in supFunction else 0
-        prodFeat = 1 if "prodFeature" in supFunction else 0
-        data = {'matLevel': matLevel, 'treeMatchAlgo': treeMatchAlgo, 'prodFeat': prodFeat,
+        SgB = 1 if "SgB" in supFunction else 0
+        SaB = 1 if "SaB" in supFunction else 0
+        data = {'matLevel': matLevel, 'SgB': SgB, 'SaB': SaB,
                 'typeOfTimeMeasurement': typeOfTimeMeasurement}
         df = pd.DataFrame([data])
         df.to_csv(r'assets/ist_situation.csv', index=False)
@@ -494,7 +494,7 @@ def generateOutput(n_clicks1, resultSort, clickData,
                        color="matLevel")
 
         results_output = [html_table(df.iloc[x]["name"],df.iloc[x]["npv"], df.iloc[x]['investition'], df.iloc[x]['t_supported'], 
-                                     df.iloc[x]['t_unsupported'], df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"], 
+                                     df.iloc[x]['t_unsupported'], df.iloc[x]["SgB"], df.iloc[x]["SaB"], 
                                      df.iloc[x]["matLevel"],len(rows),df.iloc[x]["t_supported_x"],df.iloc[x]["t_unsupported_x"]).table for x in range(0, len(df))]
         try:
             n = clickData.get('points')[0].get('pointIndex')
@@ -516,11 +516,11 @@ def generateOutput(n_clicks1, resultSort, clickData,
 
 # this class is for the output tables: each option is a html_table object
 class html_table:
-    def __init__(self, name, money, investition, time, time_before, treeMatchAlgo, prodFeat, matLevel, n_prodFam, time_x, time_before_x):
+    def __init__(self, name, money, investition, time, time_before, SgB, SaB, matLevel, n_prodFam, time_x, time_before_x):
         support_functions = []
-        if treeMatchAlgo == 1:
+        if SgB == 1:
             support_functions.append("SgB")
-        if prodFeat == 1:
+        if SaB == 1:
             support_functions.append("SäB")
         support_functions = str(support_functions).strip("[]'").replace("'", "")
         time_x = literal_eval(time_x)

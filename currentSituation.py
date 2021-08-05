@@ -26,14 +26,14 @@ class CurrentSituation:
             self.P_x =   list(conditions['P_x'])
 
             self.matLevel = ist_situation.iloc[0]["matLevel"]
-            self.treeMatchAlgo = ist_situation.iloc[0]["treeMatchAlgo"]
-            self.prodFeat = ist_situation.iloc[0]["prodFeat"]
+            self.SgB = ist_situation.iloc[0]["SgB"]
+            self.SaB = ist_situation.iloc[0]["SaB"]
             self.typeOfTimeMeasurement = ist_situation.iloc[0]["typeOfTimeMeasurement"]
           
             
             self.n_prodFam = len(conditions)
-            self.n_prodFeat=     list(conditions["n_prodFeat"])
-            self.mean_amount_of_elem_comp = [list(conditions["mean_amount_of_elem_comp"])[x] if self.n_prodFeat[x] != 0 else 0 for x in range(0, len(conditions))]
+            self.n_SaB=     list(conditions["n_SaB"])
+            self.mean_amount_of_elem_comp = [list(conditions["mean_amount_of_elem_comp"])[x] if self.n_SaB[x] != 0 else 0 for x in range(0, len(conditions))]
             
             # calculate cumulative times by using either abs. time * freq or share of total time * total time
             if self.typeOfTimeMeasurement == 'absolute':

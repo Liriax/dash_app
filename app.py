@@ -17,9 +17,9 @@ from ast import literal_eval
 import calculator
 
 # style the app
-# external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 # define the app
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 
 params = [("Neuer Bauteile/Baugruppen", "timeNewComponent"),("Ähnlicher Bauteile/Baugruppen", "timeSimComponent"), ("Gleicher Bauteile/Baugruppen", "timeSameComponent"),("Prozessinformation","timeProcess"),("Ressource-Information", "timeResource")]
@@ -39,7 +39,6 @@ cond = [("Anzahl manueller Eingaben pro Bauteil (z.B. Produktmerkmale)","n_prodF
 
 headerStyle={
             'backgroundColor': 'white',
-            # 'fontWeight': 'bold',
             'font-size': '15px'}
 
 style_cell={
@@ -437,30 +436,30 @@ def generateOutput(n_clicks1, resultSort, clickData,
     # fist save the user input parameters
     if n_clicks1 is not None :
         df = pd.DataFrame(rows, columns=[c['id'] for c in columns])
-        df.to_csv("product_family_absolute.csv", index=False)
+        df.to_csv(r"assets/product_family_absolute.csv", index=False)
         df = pd.DataFrame(rows2, columns=[c['id'] for c in columns2])
-        df.to_csv("product_family_relative.csv", index=False)
+        df.to_csv(r"assets/product_family_relative.csv", index=False)
         df = pd.DataFrame(rows3, columns=[c['id'] for c in columns3])
-        df.to_csv("product_family_conditions.csv", index=False)
+        df.to_csv(r"assets/product_family_conditions.csv", index=False)
 
         treeMatchAlgo = 1 if "treeMatching" in supFunction else 0
         prodFeat = 1 if "prodFeature" in supFunction else 0
         data = {'matLevel': matLevel, 'treeMatchAlgo': treeMatchAlgo, 'prodFeat': prodFeat,
                 'typeOfTimeMeasurement': typeOfTimeMeasurement}
         df = pd.DataFrame([data])
-        df.to_csv('ist_situation.csv', index=False)
+        df.to_csv(r'assets/ist_situation.csv', index=False)
         data2 = {'I_al': I_al, 'I_pr': I_pr, 'I_l2': I_l2, 'I_l3': I_l3,
                  'AS': AS, 'K_PGrund': K_PGrund, 'c_main': c_main, 'c_int': c_int,
                  't': t}
         df2 = pd.DataFrame([data2])
-        df2.to_csv('parameter_Investitionsrechnung.csv', index=False)
+        df2.to_csv(r'assets/parameter_Investitionsrechnung.csv', index=False)
 
     # now read the csv files and generate graphs and output tables
-    res = pd.read_csv('default_result.csv')
+    res = pd.read_csv(r'assets/default_result.csv')
     if n_clicks1 is not None :
         c = calculator.Calculator()
         c.calculate_results()
-        res = pd.read_csv('result.csv')
+        res = pd.read_csv(r'assets/result.csv')
         name = ["Option {}".format(x) for x in range(1, len(res))]
 
         # sort dataframes
@@ -493,8 +492,6 @@ def generateOutput(n_clicks1, resultSort, clickData,
             # df['name'] = name
             g = px.bar(df, x='name', y='matLevel', labels={'name': "", 'matLevel': "Reifegrad"},
                        color="matLevel")
-
-        print(literal_eval(df.iloc[0]["t_supported_x"]))
 
         results_output = [html_table(df.iloc[x]["name"],df.iloc[x]["npv"], df.iloc[x]['investition'], df.iloc[x]['t_supported'], 
                                      df.iloc[x]['t_unsupported'], df.iloc[x]["treeMatchAlgo"], df.iloc[x]["prodFeat"], 
@@ -579,4 +576,4 @@ class html_table:
 
 # run the app
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, dev_tools_hot_reload=False)

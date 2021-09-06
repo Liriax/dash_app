@@ -28,7 +28,7 @@ def calculate_time(alternative, ist_situation):
     n_SaB = ist_situation.n_SaB
     all_zeros = [0 for x in range(0, ist_situation.n_prodFam)]
     sameComponent = all_zeros if alternative.SgB == 1 else ist_situation.cumTimeSameComponent
-    simComponent = [(0.036*35+15*0.035)*n*m if alternative.SaB == 1 else t for n,m,t in zip(n_SaB,ist_situation.mean_amount_of_elem_comp,ist_situation.cumTimeSimComponent)]
+    simComponent = [(0.0006*35+15*0.0006)*n*m if alternative.SaB == 1 else t for n,m,t in zip(n_SaB,ist_situation.mean_amount_of_elem_comp,ist_situation.cumTimeSimComponent)]
     newComponent = all_zeros if alternative.SgB == 1 and alternative.SaB == 1 else ist_situation.cumTimeNewComponent
     
     
@@ -83,8 +83,8 @@ class Calculator:
         
 
     def calculate_npv(self, alternative):
-        t_supported = [x/60 for x in calculate_time(alternative, self.ist_situation)]
-        t_unsupported = [x/60 for x in calculate_time(self.ist_situation, self.ist_situation)]
+        t_supported = [x for x in calculate_time(alternative, self.ist_situation)]
+        t_unsupported = [x for x in calculate_time(self.ist_situation, self.ist_situation)]
          
         I_total = calculate_investment(alternative, self.ist_situation) 
         C_main = self.ist_situation.c_main * I_total # K_IHJ=k_IH*I_0
@@ -103,7 +103,8 @@ class Calculator:
         
         # KW_0=-I_0+∑(E_J-K_J)/(1+r)^t 
         npv = - I_total
-        for t in range(1, self.ist_situation.T + 1):
+        assert isinstance(int(self.ist_situation.T), int), str(self.ist_situation.T)
+        for t in range(1, int(self.ist_situation.T) + 1): 
             npv += (E_J - K_J) / (1 + r) ** t
         return npv
 

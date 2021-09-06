@@ -22,8 +22,8 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 
-params = [("Neuer Bauteile/Baugruppen", "timeNewComponent"),("Ähnlicher Bauteile/Baugruppen", "timeSimComponent"), ("Gleicher Bauteile/Baugruppen", "timeSameComponent"),("Prozessinformation","timeProcess"),("Ressource-Information", "timeResource")]
-params_dict = [('totalSearchTimeComponents','Gesamte benötigte Zeit zum Suchen von Bauteilen (Minuten)'),
+params = [("Neuer Bauteile/Baugruppen (Minuten)", "timeNewComponent"),("Ähnlicher Bauteile/Baugruppen (Minuten)", "timeSimComponent"), ("Gleicher Bauteile/Baugruppen (Minuten)", "timeSameComponent"),("Gesamte benötigte Zeit zum Suchen von Prozessen (Minuten)","timeProcess"),("Gesamte benötigte Zeit zum Suchen von Ressource (Minuten)", "timeResource")]
+params_dict = [('totalSearchTimeComponents','Gesamte benötigte Zeit zum Suchen von BT/BG (Minuten)'),
                                 ('shareNewComponent', 'Prozentualer Anteil von Suchen neuer BT/BG'),
                                 ('shareSimComponent',  'Prozentualer Anteil von Suchen ähnlicher BT/BG'),
                                 ( 'shareSameComponent','Prozentualer Anteil von Suchen gleicher BT/BG'),
@@ -32,10 +32,10 @@ params_dict = [('totalSearchTimeComponents','Gesamte benötigte Zeit zum Suchen 
                                 
 
 cond = [("Anzahl manueller Eingaben pro Bauteil (z.B. Produktmerkmale)","n_SaB"),("Durschnittliche Anzahl an unbekannten Bauteilen","mean_amount_of_elem_comp"),
-        ("Gesamte Durchlaufzeit des Produkts (Stunden)","t_DLZ"),
+        ("Gesamte Durchlaufzeit des Produkts (Minuten)","t_DLZ"),
         ("Einnahmen pro Produktvariante","npvRevProProduct"),
         ("Anzahl an eingeführten Produktvarianten pro Jahr","P_x"),
-        ("zeitgleich nutzbaren Montagelinien mit DAS", "l_Mx")]
+        ("zeitgleich nutzbaren Produktionslinien mit DAS", "l_Mx")]
 
 headerStyle={
             'backgroundColor': 'white',
@@ -74,7 +74,8 @@ app.layout = html.Div(
                                                  {'label': 'Reifegrad 1', 'value': 1},
                                                  {'label': 'Reifegrad 2', 'value': 2},
                                                  {'label': 'Reifegrad 3', 'value': 3},
-                                             ]
+                                             ],
+                                             value = 1
                                          )
                                      ])
                                  ]
@@ -254,7 +255,7 @@ app.layout = html.Div(
                                      html.Td(children=[
                                          dcc.Input(
                                              id='AS',
-                                             type='number', min=0, value=30
+                                             type='number', min=0, value=38.5, step = 0.1
                                          )
                                      ]),
                                      html.Td(children=["38,5 Stunden"])  # calculate standard cost
@@ -266,7 +267,7 @@ app.layout = html.Div(
                                      html.Td(children=[
                                          dcc.Input(
                                              id='K_PGrund',
-                                             type='number', min=0, value=1000
+                                             type='number', min=0, value=3200, step = 0.01
                                          )
                                      ]),
                                      html.Td(children=["3200€"])  # calculate standard cost
@@ -278,7 +279,7 @@ app.layout = html.Div(
                                      html.Td(children=[
                                          dcc.Input(
                                              id='c_main',
-                                             type='number', min=0, value=20
+                                             type='number', min=0, value=20, step = 0.1
                                          )
                                      ]),
                                      html.Td(children=["20-30%"])  # calculate standard cost
@@ -290,7 +291,7 @@ app.layout = html.Div(
                                      html.Td(children=[
                                          dcc.Input(
                                              id='c_int',
-                                             type='number', min=0, value=6
+                                             type='number', min=0, value=12, step=0.1
                                          )
                                      ]),
                                      html.Td(children=["0,5%, wird aber meist zur Berechnung höher angesetzt (~12%)"])  # standard interest
@@ -298,11 +299,11 @@ app.layout = html.Div(
                              ),
                              html.Tr(
                                  children=[
-                                     html.Td(children=["Betrachtungszeitraum"]),
+                                     html.Td(children=["Betrachtungszeitraum (Jahr)"]),
                                      html.Td(children=[
                                          dcc.Input(
                                              id='t',
-                                             type='number', min=1, value=3
+                                             type='number', min=1, value=5
                                          )
                                      ]),
                                      html.Td(children=["5"])  # standard duration
@@ -536,18 +537,18 @@ class html_table:
                                     html.Tr(
                                         children=[
                                             html.Td(children=["Kapitalwert: "]),
-                                            html.Td(children=[str(money)]),
+                                            html.Td(children=[money]),
                                             html.Td(children=["Investitionssumme: "]),
-                                            html.Td(children=[str(investition)])
+                                            html.Td(children=[investition])
                                         ]
                                     ),
 
                                     html.Tr(
                                         children=[
                                             html.Td(children=["Suchzeit vorher: "]),
-                                            html.Td(children=[str(time_before)]),
+                                            html.Td(children=[time_before]),
                                             html.Td(children=["Suchzeit nachher: "]),
-                                            html.Td(children=[str(time)])
+                                            html.Td(children=[time])
                                         ]
                                     ),
                                 ]+[

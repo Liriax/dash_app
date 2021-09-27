@@ -88,24 +88,27 @@ class Calculator:
          
         I_total = calculate_investment(alternative, self.ist_situation) 
         C_main = self.ist_situation.c_main * I_total # K_IHJ=k_IH*I_0
-
+        k_P=self.ist_situation.k_personal / 60 # convert to minutes
         r = self.ist_situation.r
-        S_person = [self.ist_situation.k_personal * (x - y) for x, y in zip(t_unsupported, t_supported)]  # personnel cost savings
-        C_person = [self.ist_situation.k_personal * x for x in t_supported] # K_(P,x)=k_P*t_(Nachher,x)
-        K_PJ=sum([c*x for c,x in zip(C_person, self.ist_situation.P_x)]) # K_PJ=∑_(x=1)^X〖K_(P,x)*P_x 〗
-        K_J = K_PJ+C_main # K_J=K_PJ+K_IHJ
-
-        # E_(Beschl,x) = e_(Var,x)*l_(M,x)*t_(s,x)/t_(DLZ,x) 
-        R_acc = [e_Vx * (x - y) / t * z  for e_Vx, x, y, z, t in zip(self.ist_situation.r_acc, t_unsupported, t_supported, self.ist_situation.l_Mx, self.ist_situation.t_DLZ)] # R_acc: additional revenues
+        x_specific = sum([(k_P*(t_vorher-t_nachher)+e_Var*l_M*(t_vorher-t_nachher)/t_DLZ)*P-k_P*t_nachher*P for t_vorher, t_nachher, e_Var, l_M,t_DLZ,P in zip(t_unsupported,t_supported,self.ist_situation.r_acc,self.ist_situation.l_Mx, self.ist_situation.t_DLZ,self.ist_situation.P_x)])
         
-        #E_J=∑(E_(P,x)+E_(Beschl,x))*P_x 〗
-        E_J=sum([(x+y)*z for x,y,z in zip(S_person,R_acc,self.ist_situation.P_x)])
+        # S_person = [self.ist_situation.k_personal * (x - y) for x, y in zip(t_unsupported, t_supported)]  # personnel cost savings
+        # C_person = [self.ist_situation.k_personal * x for x in t_supported] # K_(P,x)=k_P*t_(Nachher,x)
+        # K_PJ=sum([c*x for c,x in zip(C_person, self.ist_situation.P_x)]) # K_PJ=∑_(x=1)^X〖K_(P,x)*P_x 〗
+        # K_J = K_PJ+C_main # K_J=K_PJ+K_IHJ
+
+        # # E_(Beschl,x) = e_(Var,x)*l_(M,x)*t_(s,x)/t_(DLZ,x) 
+        # R_acc = [e_Vx * z * (x - y) / t   for e_Vx, x, y, z, t in zip(self.ist_situation.r_acc, t_unsupported, t_supported, self.ist_situation.l_Mx, self.ist_situation.t_DLZ)] # R_acc: additional revenues
+        
+        # #E_J=∑(E_(P,x)+E_(Beschl,x))*P_x 〗
+        # E_J=sum([(x+y)*z for x,y,z in zip(S_person,R_acc,self.ist_situation.P_x)])
         
         # KW_0=-I_0+∑(E_J-K_J)/(1+r)^t 
         npv = - I_total
         assert isinstance(int(self.ist_situation.T), int), str(self.ist_situation.T)
         for t in range(1, int(self.ist_situation.T) + 1): 
-            npv += (E_J - K_J) / (1 + r) ** t
+            # npv += (E_J - K_J) / ((1 + r) ** t)
+            npv += (x_specific - C_main)/ ((1 + r) ** t)
         return npv
 
     def calculate_results(self):
@@ -145,3 +148,28 @@ class Calculator:
 #     print("npv:" + str(c.calculate_npv(alt)))
 
 # print(c.calculate_results())
+
+I_total=3000
+c_main=0.2
+r=0.12
+T=5
+t_w=38.5
+K_PGrund=3200 # Monatsgehalt
+k_PGrund=K_PGrund*12*7/(365*t_w)
+k_PNeben=0.726
+k_P=k_PGrund+k_PGrund*k_PNeben # pro Stunde
+k_P/=60.0 # pro Minute
+t_unsupported=[40]
+t_supported=[3]
+r_acc=[10]
+l_Mx=[10] 
+t_DLZ=[10]
+P_x=[10]
+C_main = I_total*c_main
+x_specific = sum([(k_P*(t_vorher-2*t_nachher)+e_Var*l_M*(t_vorher-t_nachher)/t_DLZ)*P for t_vorher, t_nachher, e_Var, l_M,t_DLZ,P in zip(t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)])
+
+npv = - I_total
+for t in range(1, int(T) + 1): 
+    npv += (x_specific - C_main)/ ((1 + r) ** t)
+
+# print(npv)

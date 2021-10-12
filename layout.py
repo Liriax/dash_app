@@ -1,7 +1,6 @@
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_bootstrap_components as dbc
 from util import *
 
 MainPanel=html.Div(
@@ -326,28 +325,16 @@ MainPanel=html.Div(
                      html.Header("Ergebnis", style={'text-align': 'center', "font-weight": "bold"}),
                      html.Br(),
                      html.P("--------Erhöhung auf Reifegrad 2--------",style={ "font-weight": "bold","text-align":"center"}),
-                     dbc.Row(
-                         [
-                         dbc.Col([html.Div(id='R2_KW')])]
-                     ),
+                     html.Div(id='R2_KW'),
                      html.Br(),
                      html.P("--------Erhöhung auf Reifegrad 3--------",style={ "font-weight": "bold","text-align":"center"}),
-                     dbc.Row(
-                         [
-                         dbc.Col([html.Div(id='R3_KW')])]
-                     ),
+                     html.Div(id='R3_KW'),
                      html.Br(),
                      html.P("--------Identifizierung identischer Produktinformationen--------",style={ "font-weight": "bold","text-align":"center"}),
-                     dbc.Row(
-                         [
-                         dbc.Col([html.Div(id='IiP_KW')])]
-                     ),
+                     html.Div(id='IiP_KW'),
                      html.Br(),
                      html.P("--------Klassifizierung ähnlicher Produktinformationen--------",style={ "font-weight": "bold","text-align":"center"}),
-                     dbc.Row(
-                         [
-                         dbc.Col([html.Div(id='KäP_KW')])]
-                     ),
+                     html.Div(id='KäP_KW'),
                      html.Br(),
                      html.P("--------Identifizierung neuer Produktinformationen--------",style={ "font-weight": "bold","text-align":"center"}),
                      html.Div(id="checklist-new-prod-info"),

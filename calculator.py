@@ -90,20 +90,7 @@ class Calculator:
         C_main = self.ist_situation.c_main * I_total # K_IHJ=k_IH*I_0
         k_P=self.ist_situation.k_personal / 60 # convert to minutes
         r = self.ist_situation.r
-        x_specific = sum([(k_P*(t_vorher-t_nachher)+e_Var*l_M*(t_vorher-t_nachher)/t_DLZ)*P-k_P*t_nachher*P for t_vorher, t_nachher, e_Var, l_M,t_DLZ,P in zip(t_unsupported,t_supported,self.ist_situation.r_acc,self.ist_situation.l_Mx, self.ist_situation.t_DLZ,self.ist_situation.P_x)])
-        
-        # S_person = [self.ist_situation.k_personal * (x - y) for x, y in zip(t_unsupported, t_supported)]  # personnel cost savings
-        # C_person = [self.ist_situation.k_personal * x for x in t_supported] # K_(P,x)=k_P*t_(Nachher,x)
-        # K_PJ=sum([c*x for c,x in zip(C_person, self.ist_situation.P_x)]) # K_PJ=∑_(x=1)^X〖K_(P,x)*P_x 〗
-        # K_J = K_PJ+C_main # K_J=K_PJ+K_IHJ
-
-        # # E_(Beschl,x) = e_(Var,x)*l_(M,x)*t_(s,x)/t_(DLZ,x) 
-        # R_acc = [e_Vx * z * (x - y) / t   for e_Vx, x, y, z, t in zip(self.ist_situation.r_acc, t_unsupported, t_supported, self.ist_situation.l_Mx, self.ist_situation.t_DLZ)] # R_acc: additional revenues
-        
-        # #E_J=∑(E_(P,x)+E_(Beschl,x))*P_x 〗
-        # E_J=sum([(x+y)*z for x,y,z in zip(S_person,R_acc,self.ist_situation.P_x)])
-        
-        # KW_0=-I_0+∑(E_J-K_J)/(1+r)^t 
+        x_specific = sum([(k_P*(t_vorher-t_nachher)+e_Var*l_M*(t_vorher-t_nachher)/t_DLZ)*P-k_P*t_nachher*P for t_vorher, t_nachher, e_Var, l_M,t_DLZ,P in zip(t_unsupported,t_supported,self.ist_situation.r_acc,self.ist_situation.l_Mx, self.ist_situation.t_DLZ,self.ist_situation.P_x)]) 
         npv = - I_total
         assert isinstance(int(self.ist_situation.T), int), str(self.ist_situation.T)
         for t in range(1, int(self.ist_situation.T) + 1): 
@@ -128,8 +115,7 @@ class Calculator:
             SgB = alternative.SgB
             res.append([npv, investition, t_unsupported,  t_supported, matLevel, SaB, SgB,t_supported_x,t_unsupported_x])
         res_df = pd.DataFrame(res, columns = ['npv', 'investition', 't_unsupported', 't_supported', 'matLevel', 'SaB', 'SgB',"t_supported_x","t_unsupported_x"])
-        
-        name = ["RG {}{}{}".format(int(res_df.iloc[x]['matLevel']), ", SgB" if res_df.iloc[x]['SgB']==1 else "", ", SäB" if res_df.iloc[x]['SaB']==1 else "") if res_df.iloc[x]['investition'] >0 else "Ist-Situation" for x in range(0, len(res_df))]
+        name = ["RG {}{}{}".format(int(res_df.iloc[x]['matLevel']), ", IiP" if res_df.iloc[x]['SgB']==1 else "", ", KäP" if res_df.iloc[x]['SaB']==1 else "") if res_df.iloc[x]['investition'] >0 else "Ist-Situation" for x in range(0, len(res_df))]
         res_df['name']=name
         res_df.to_csv(r'assets/result.csv', index=False)
 

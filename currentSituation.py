@@ -1,12 +1,12 @@
 import pandas as pd
 
-
 class CurrentSituation:
     def __init__(self):
         try:
             ist_situation = pd.read_csv(r'assets/ist_situation.csv')
             invest_params = pd.read_csv(r'assets/parameter_Investitionsrechnung.csv')
             conditions = pd.read_csv(r'assets/product_family_conditions.csv')
+            methods = pd.read_csv(r'assets/similar_prod_info_methods.csv')
 
             self.I_l2 = invest_params.iloc[0]["I_l2"]
             self.I_l3 = invest_params.iloc[0]["I_l3"]
@@ -32,9 +32,9 @@ class CurrentSituation:
           
             
             self.n_prodFam = len(conditions)
-            self.n_SaB=     list(conditions["n_SaB"])
+            self.n_SaB = [invest_params.iloc[0]['n_SaB'] for x in range(0, self.n_prodFam)]
             self.mean_amount_of_elem_comp = [list(conditions["mean_amount_of_elem_comp"])[x] if self.n_SaB[x] != 0 else 0 for x in range(0, len(conditions))]
-            
+
             # calculate cumulative times by using either abs. time * freq or share of total time * total time
             if self.typeOfTimeMeasurement == 'absolute':
                 product_families = pd.read_csv(r'assets/product_family_absolute.csv')

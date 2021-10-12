@@ -11,10 +11,9 @@ import plotly.express as px
 import pandas as pd
 import gunicorn
 from dash.dependencies import Input, Output, State
-from ast import literal_eval
-
 # import the classes
 import calculator
+from layout import *
 
 # style the app
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -22,357 +21,25 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 
-params = [("Neuer Bauteile/Baugruppen (Minuten)", "timeNewComponent"),("Ähnlicher Bauteile/Baugruppen (Minuten)", "timeSimComponent"), ("Gleicher Bauteile/Baugruppen (Minuten)", "timeSameComponent"),("Gesamte benötigte Zeit zum Suchen von Prozessen (Minuten)","timeProcess"),("Gesamte benötigte Zeit zum Suchen von Ressource (Minuten)", "timeResource")]
-params_dict = [('totalSearchTimeComponents','Gesamte benötigte Zeit zum Suchen von BT/BG (Minuten)'),
-                                ('shareNewComponent', 'Prozentualer Anteil von Suchen neuer BT/BG'),
-                                ('shareSimComponent',  'Prozentualer Anteil von Suchen ähnlicher BT/BG'),
-                                ( 'shareSameComponent','Prozentualer Anteil von Suchen gleicher BT/BG'),
-                                ('totalSearchTimeProcesses',  'Gesamte benötigte Zeit zum Suchen von Prozessen (Minuten)'),
-                                ('totalSearchTimeResources',  'Gesamte benötigte Zeit zum Suchen von Resourcen (Minuten)')]
-                                
 
-cond = [("Anzahl manueller Eingaben pro Bauteil (z.B. Produktmerkmale)","n_SaB"),("Durschnittliche Anzahl an unbekannten Bauteilen","mean_amount_of_elem_comp"),
-        ("Gesamte Durchlaufzeit des Produkts (Minuten)","t_DLZ"),
-        ("Einnahmen pro Produktvariante","npvRevProProduct"),
-        ("Anzahl an eingeführten Produktvarianten pro Jahr","P_x"),
-        ("zeitgleich nutzbaren Produktionslinien mit DAS", "l_Mx")]
+app.layout = MainPanel
 
-headerStyle={
-            'backgroundColor': 'white',
-            'font-size': '15px'}
-
-style_cell={
-        'font-family':'Open Sans',
-        'whiteSpace': 'normal',
-        'height': 'auto',
-        'font-size': '15px'
-    }
-
-app.layout = html.Div(
-    style={'display': 'grid', 'grid-template-columns': '1fr 1fr', 'grid-gap': '2vw'},
-    children=[
-        html.Div(className='col1', style={'margin-left': '1vw', 'margin-top': '3vw'},
-
-                 children=[
-                     # table 1
-                     html.Table(
-                         children=[
-                             html.Tr(
-                                 children=[
-                                     html.Th(colSpan=3, style={'text-align': 'center'}, children=["Ist-Situation"])
-                                 ]
-                             ),
-
-                             # row 1
-                             html.Tr(
-                                 children=[
-                                     html.Td(colSpan=2, children=["Aktueller Reifegrad (RF)"]),
-                                     html.Td(children=[
-                                         dcc.Dropdown(
-                                             id='matLevel',
-                                             options=[
-                                                 {'label': 'Reifegrad 1', 'value': 1},
-                                                 {'label': 'Reifegrad 2', 'value': 2},
-                                                 {'label': 'Reifegrad 3', 'value': 3},
-                                             ],
-                                             value = 1
-                                         )
-                                     ])
-                                 ]
-                             ),
-                             # row 2
-                             html.Tr(
-                                 children=[
-                                     html.Td(colSpan=2, children=["Bestehende Unterstützungen", html.Br(), "(Eine Analyse der Struktur ist nur notwendig, wenn die Erzeugnisstruktur mehr als 2 Ebenen enthält. Ansonsten ist eine Analyse der Mengenstückliste ausreichend)"]),
-                                     html.Td(children=[
-                                         dcc.Checklist(
-                                             id='supFunction',
-                                             options=[
-                                                 {'label': 'Strukturanalyse unter Berücksichtigung gleicher Bauteile (SgB)', 'value': 'SgB'},
-                                                 {'label': 'Strukturanalyse unter Berücksichtigung ähnlicher Bauteile (SäB)', 'value': 'SaB'}
-                                             ],
-                                             value=[]
-
-                                         )
-                                     ]),
-                                     html.Td(children=[
-                                         html.Button(id='saveTable1Input', n_clicks=None, children="Aktualisieren")
-                                     ])
-                                 ]
-                             ),
-                             html.Br(),
-                            
-                             html.Br(),
-                             html.Tr(
-                                 children=[
-                                     dcc.Dropdown(
-                                         id='dropdown-to-switch-between-absolute-and-relative-time',
-                                         options=[
-                                             {'label': 'Absolute Zeitangaben', 'value': 'absolute'},
-                                             {'label': 'Relative Zeitangaben', 'value': 'relative'}
-                                         ],
-                                         value='absolute'
-                                     ),
-
-                                 ]
-                             ),
-
-                             html.Tr(id="dummyOutput1")
-                         ],
-
-                     ),
-
-                     html.Br(),
-                     # Suchzeiten mit absoluten Werten
-                     html.Div(
-                         children=[
-                            dash_table.DataTable(
-                                id='datatable_absolute',
-                                columns=(
-                                    [{'id': 'prodFam', 'name': 'Produktfamilie'}] +
-                                    [{'id': p[1], 'name': p[0]} for p in params]
-                                ),
-                                data=[
-                                    dict(prodFam=i, **{param[1]: 10 for param in params})
-                                    for i in range(1, 2)
-                                ],
-                                style_header=headerStyle,
-                                style_cell = style_cell,
-                                editable=True,
-                                row_deletable=True
-                            ),
-
-                        ],
-                     id="div_datatable_absolute"
-
-                    ),
-                     
-
-                     # Suchzeiten mit Prozentualen Anteilen
-
-                    html.Div(
-                        children=[
-                     dash_table.DataTable(
-                        id='datatable_relative',
-                        columns=([{'id': 'prodFam2', 'name': 'Produktfamilie'}] +
-                                    [{'id': p[0], 'name': p[1]} for p in params_dict]
-                        ),
-                        data=[
-                             dict(prodFam2=i, **{param[0]: 0 for param in params_dict})
-                                    for i in range(1, 2)
-                        ],
-                        editable=True,
-                        row_deletable=True,
-                        style_header=headerStyle,
-                        style_cell = style_cell,
-                     ),
-                     ],
-                        id='div_datatable_relative'
-                    ),
-                    html.Button('Neue Produktfamilie', id='editing-rows-button', n_clicks=0),
-
-                     html.Br(),
-                     # ------table 2-----------------------------------
-                     html.Table(
-                         children=[
-                             html.Tr(
-                                 children=[
-                                     html.Th(colSpan=3, style={'text-align': 'center'},
-                                             children=["Parameter für Investitionsrechnung"])
-                                 ]
-                             ),
-                             
-                             # Investition Dropdown
-                             html.Tr(
-                                 children=[
-                                     html.Th(colSpan=2, children=["Investition"]),
-                                     html.Th(children=["Summe"])
-                                 ]
-                             ),
-                             html.Tr(
-                                 children=[
-                                     html.Td(colSpan=2, children=["Investition für Strukturanalyse unter Berücksichtigung gleicher Bauteile"]),
-                                     html.Td(
-                                         children=[
-                                             dcc.Input(
-                                                 id='I_al',
-                                                 type='number', min=0, value=1000
-                                             )
-                                         ]
-                                     )
-                                 ]
-                             ),
-                             html.Tr(
-                                 children=[
-                                     html.Td(colSpan=2, children=["Investition für Strukturanalyse unter Berücksichtigung ähnlicher Bauteile"]),
-                                     html.Td(
-                                         children=[
-                                             dcc.Input(
-                                                 id='I_pr',
-                                                 type='number', min=0, value=1000
-                                             )
-                                         ]
-                                     )
-                                 ]
-                             ),
-                             # if maturity level = 1:
-                             html.Tr(
-                                 children=[
-                                     html.Td(colSpan=2, children=["Investition für Reifegrad 2"]),
-                                     html.Td(colSpan=2, children=[
-                                         dcc.Input(
-                                             id='I_l2',
-                                             type='number', min=0, value=1000
-                                         )
-                                     ])
-                                 ]
-                             ),
-                             # if maturity level = 2:
-                             html.Tr(
-                                 children=[
-                                     html.Td(colSpan=2, children=["Investition für Reifegrad 3"]),
-                                     html.Td(colSpan=2, children=[
-                                         dcc.Input(
-                                             id='I_l3',
-                                             type='number', min=0, value=1000
-                                         )
-                                     ])
-                                 ]
-                             ),
-                            html.Br(),
-
-                             # weitere Parameter header
-                             html.Tr(
-                                 children=[
-                                     html.Th(colSpan=2, children=["Weitere Parameter"]),
-                                     html.Th(children=["Standard DE"])
-
-                                 ]
-                             ),
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Arbeitsstunden pro Woche"]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id='AS',
-                                             type='number', min=0, value=38.5, step = 0.1
-                                         )
-                                     ]),
-                                     html.Td(children=["38,5 Stunden"])  # calculate standard cost
-                                 ]
-                             ),
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Monatliches Grundgehalt in der Arbeitsvorbereitung"]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id='K_PGrund',
-                                             type='number', min=0, value=3200, step = 0.01
-                                         )
-                                     ]),
-                                     html.Td(children=["3200€"])  # calculate standard cost
-                                 ]
-                             ),
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Instandhaltungskostensatz, %"]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id='c_main',
-                                             type='number', min=0, value=20, step = 0.1
-                                         )
-                                     ]),
-                                     html.Td(children=["20-30%"])  # calculate standard cost
-                                 ]
-                             ),
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Zinssatz, %"]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id='c_int',
-                                             type='number', min=0, value=12, step=0.1
-                                         )
-                                     ]),
-                                     html.Td(children=["0,5%, wird aber meist zur Berechnung höher angesetzt (~12%)"])  # standard interest
-                                 ]
-                             ),
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Betrachtungszeitraum (Jahr)"]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id='t',
-                                             type='number', min=1, value=5
-                                         )
-                                     ]),
-                                     html.Td(children=["5"])  # standard duration
-                                 ]
-                             ),
-                             html.Br()
-                         ]
-                     ),
-                     html.Div(
-                         
-                                children=[
-                                    html.P("Nebenbedingungen je Produkt/Produktfamilie", style={"font-weight": "bold"}),
-                                    dash_table.DataTable(
-                                        id='datatable_conditions',
-                                        columns=(
-                                            [{'id': 'prodFam3', 'name': 'Produktfamilie'}] +
-                                            [{'id': p[1], 'name': p[0]} for p in cond]
-                                        ),
-                                        data=[
-                                            dict(prodFam3=i, **{param[1]: 10 for param in cond})
-                                            for i in range(1, 2)
-                                        ],
-                                        editable=True,
-                                        row_deletable=True,
-                                        style_header=headerStyle,
-                                        style_cell = style_cell,
-                                    ),
-
-                                ],
-                            id="div_datatable_conditions"
-
-                    ),
-
-                 ]),
-
-        #  html.Div(className='col2', style = {'margin-left': '3vw', 'margin-top': '3vw'},
-        #     children=[
-
-        #     ]
-        #  ),
-
-        # ------------------Output Division------------------------------------------------------
-        html.Div(className='col2',
-                 style={'margin-left': '3vw', 'margin-top': '3vw'},
-                 children=[
-                     html.Header("Ergebnis", style={'text-align': 'center', "font-weight": "bold"}),
-                     html.Br(),
-                     dcc.Dropdown(
-                         id='resultSort',
-                         options=[
-                             {'label': 'Nach Kapitalwert sortieren', 'value': 'money'},
-                             {'label': 'Nach Reifegrad sortieren', 'value': 'matLevel'},
-                             {'label': 'Nach Zeit sortieren', 'value': 'timeSaving'}
-                         ],
-                         value='money'
-                     ),
-                     dcc.Graph(id="figure_output"),
-                     html.Div(id="dummy_output"),
-                     html.Div(id="results_output")
-                 ]
-                 )
-    ]
+@app.callback(
+    Output('datatable_similar_prod','data'),
+    Input('new-method-button', 'n_clicks'),
+    Input('datatable_similar_prod','data'),
 )
+def add_new_method(n_clicks,methods):
+    if n_clicks>0:
+        methods.append({'simProd':len(methods)+1, 'I_x':1000,'n_SaB':10})
+    return methods
 
 @app.callback(
     Output('datatable_absolute', 'data'),
     Output('datatable_relative', 'data'),
     Output('datatable_conditions', 'data'),
-    Input('editing-rows-button', 'n_clicks'),
+    
+    Input('editing-rows-button','n_clicks'),
     State('datatable_absolute', 'data'),
     State('datatable_absolute', 'columns'),
     State('datatable_relative', 'data'),
@@ -402,6 +69,12 @@ def switch_time_input_variant(visibility_state):
 @app.callback(
     Output('figure_output', 'figure'),
     Output('results_output', 'children'),
+    Output('R2_KW','children'),
+    Output('R3_KW','children'),
+    Output('IiP_KW','children'),
+    Output('KäP_KW','children'),
+    Output('I_pr', 'children'),
+    Output("checklist-new-prod-info",'children'),
     Input("saveTable1Input", 'n_clicks'),
     Input('resultSort', 'value'),
     Input("figure_output", "clickData"),
@@ -413,12 +86,10 @@ def switch_time_input_variant(visibility_state):
     State('datatable_relative','columns'),
     State('datatable_conditions','data'),
     State('datatable_conditions','columns'),
-   
+    State('datatable_similar_prod','data'),
+    State('datatable_similar_prod','columns'),
     State('dropdown-to-switch-between-absolute-and-relative-time','value'),
-  
-
     State('I_al', 'value'),
-    State('I_pr', 'value'),
     State('I_l2', 'value'),
     State('I_l3', 'value'),
     State('AS', 'value'),
@@ -430,28 +101,108 @@ def switch_time_input_variant(visibility_state):
 # This function generates the output
 def generateOutput(n_clicks1, resultSort, clickData,
                    matLevel, supFunction, 
-                   rows, columns, rows2, columns2, rows3, columns3,
+                   rows, columns, rows2, columns2, rows3, columns3, rows4, columns4,
                    typeOfTimeMeasurement,
-                   I_al, I_pr, I_l2, I_l3, AS, K_PGrund, c_main, c_int, t,
+                   I_al, I_l2, I_l3, 
+                   AS, K_PGrund, c_main, c_int, t,
                     ):
     # fist save the user input parameters
     if n_clicks1 is not None :
-        df = pd.DataFrame(rows, columns=[c['id'] for c in columns])
-        df.to_csv(r"assets/product_family_absolute.csv", index=False)
-        df = pd.DataFrame(rows2, columns=[c['id'] for c in columns2])
-        df.to_csv(r"assets/product_family_relative.csv", index=False)
-        df = pd.DataFrame(rows3, columns=[c['id'] for c in columns3])
-        df.to_csv(r"assets/product_family_conditions.csv", index=False)
+        allgemeine_parameter = {
+            "Arbeitsstunden pro Woche":AS,
+            "Monatliches Grundgehalt in der Arbeitsvorbereitung":K_PGrund,
+            "Instandhaltungskostensatz": c_main,
+            "Zinssatz":c_int,
+            "Betrachtungszeitraum":t
+        }
+        product_family_conditions = pd.DataFrame(rows3, columns=[c['id'] for c in columns3])
+        product_family_conditions.to_csv(r"assets/product_family_conditions.csv", index=False)
+
+        product_family_absolute = pd.DataFrame(rows, columns=[c['id'] for c in columns])
+        product_family_absolute.to_csv(r"assets/product_family_absolute.csv", index=False)
+        product_family_relative = pd.DataFrame(rows2, columns=[c['id'] for c in columns2])
+        product_family_relative.to_csv(r"assets/product_family_relative.csv", index=False)
+
+        if typeOfTimeMeasurement == 'absolute':
+            product_families = product_family_absolute
+            cumTimeNewComponent = list(product_families['timeNewComponent'])
+            cumTimeSimComponent =  list(product_families['timeSimComponent'])
+            cumTimeSameComponent = list(product_families['timeSameComponent'])
+            cumtimeProcess =       list(product_families['timeProcess'])
+            cumtimeResource =      list(product_families['timeResource'])
+
+        elif typeOfTimeMeasurement == 'relative':
+            product_families = product_family_relative
+            totalSearchTimeComponents =list(product_families["totalSearchTimeComponents"])
+            totalSearchTimeProcesses = list(product_families["totalSearchTimeProcesses"])
+            totalSearchTimeResources = list(product_families["totalSearchTimeResources"])
+            shareNewComponent =        list(product_families["shareNewComponent"])
+            shareSimComponent =        list(product_families["shareSimComponent"])
+            shareSameComponent =       list(product_families["shareSameComponent"])
+
+            cumTimeNewComponent = [shareNewComponent[x] * totalSearchTimeComponents[x] for x in range(0, len(product_family_conditions))]
+            cumTimeSimComponent = [shareSimComponent[x] * totalSearchTimeComponents[x]  for x in range(0, len(product_family_conditions))]
+            cumTimeSameComponent = [shareSameComponent[x] * totalSearchTimeComponents[x] for x in range(0, len(product_family_conditions))]
+            cumtimeProcess = totalSearchTimeProcesses
+            cumtimeResource = totalSearchTimeResources
+
+        product_family_time = {
+            "cumTimeNewComponent":cumTimeNewComponent ,
+            "cumTimeSimComponent":cumTimeSimComponent,
+            "cumTimeSameComponent":cumTimeSameComponent,
+            "cumtimeProcess" :cumtimeProcess,
+            "cumtimeResource":cumtimeResource
+        }
+        
+        similar_prod_info_methods = pd.DataFrame(rows4, columns=[c['id'] for c in columns4])
+        similar_prod_info_methods.to_csv(r"assets/similar_prod_info_methods.csv", index=False)
 
         SgB = 1 if "SgB" in supFunction else 0
         SaB = 1 if "SaB" in supFunction else 0
+        checklist=[]
+        if SgB == 1:
+            checklist.append(1)
+        if SaB == 1:
+            checklist.append(2)
+        nicht = "nicht " if checklist!=[1,2] else ""
+        ist_situation = {
+            "matLevel":matLevel,
+            "IiP":SgB,
+            "KäP":SaB,
+        }
+        investition = {
+            "I_l2":I_l2,
+            "I_l3":I_l3,
+            "I_identisch":I_al,
+            "I_ähnlich":similar_prod_info_methods
+        }
+        parameters = {
+            "ist_situation":ist_situation,
+            "investition":investition,
+            "allgemeine_parameter":allgemeine_parameter,
+            "product_family_parameter":product_family_conditions,
+            "product_family_time":product_family_time
+        }
         data = {'matLevel': matLevel, 'SgB': SgB, 'SaB': SaB,
                 'typeOfTimeMeasurement': typeOfTimeMeasurement}
         df = pd.DataFrame([data])
         df.to_csv(r'assets/ist_situation.csv', index=False)
+        KW_l2,KW_l3,KW_IiP,KW_KäP = calculate_separate_npvs(parameters)
+        if SaB ==0:
+            I_pr = KW_KäP[0].investition
+            best_method = KW_KäP[0].name
+            best_method_num = [int(s) for s in best_method.split() if s.isdigit()][0]
+            n_SaB = similar_prod_info_methods.iloc[best_method_num-1]['n_SaB']
+            KW_KäP=[x.table for x in KW_KäP]
+        else:
+            I_pr = similar_prod_info_methods.iloc[0]['I_x']
+            best_method = "bereits umgesetzt"
+            n_SaB = similar_prod_info_methods.iloc[0]['n_SaB']
+
+
         data2 = {'I_al': I_al, 'I_pr': I_pr, 'I_l2': I_l2, 'I_l3': I_l3,
                  'AS': AS, 'K_PGrund': K_PGrund, 'c_main': c_main, 'c_int': c_int,
-                 't': t}
+                 't': t, 'n_SaB':n_SaB}
         df2 = pd.DataFrame([data2])
         df2.to_csv(r'assets/parameter_Investitionsrechnung.csv', index=False)
 
@@ -491,7 +242,7 @@ def generateOutput(n_clicks1, resultSort, clickData,
             df = sorted_by_matLevel
             name.insert(0, "Ist-Situation")
             # df['name'] = name
-            g = px.bar(df, x='name', y='matLevel', labels={'name': "", 'matLevel': "Reifegrad"},
+            g = px.bar(df, x='name', y='matLevel', labels={'name': "", 'matLevel': "Reifegradstufe"},
                        color="matLevel")
 
         results_output = [html_table(df.iloc[x]["name"],df.iloc[x]["npv"], df.iloc[x]['investition'], df.iloc[x]['t_supported'], 
@@ -507,72 +258,23 @@ def generateOutput(n_clicks1, resultSort, clickData,
         results_output.insert(0, html.P(style={"text-align": "center", "font-size": "small"}, children=[
             "Mit dem Clicken auf die Säule können Sie eine Option zum Anzeigen auswählen."]))
 
-        return g, results_output
+        
+        return g, results_output, \
+            KW_l2, KW_l3,KW_IiP,KW_KäP, f"Optimal: {best_method}",[dcc.Checklist(
+                            options=[
+                                {"label": "Identifizierung identischer Produktinformationen (IiP)", "value": 1},
+                                {"label": "Klassifizierung ähnlicher Produktinformationen (KäP)", "value": 2},
+                            ],
+                            value=checklist,
+                            id="checklist-new-prod-info",
+                        ),html.P(f"Bedingung {nicht}erfüllt")]
 
     else:
         return px.bar(res, x='comparison', y='npv', labels={'comparison': "", 'npv': ""}), html.H6(
             style={"color": "red"},
-            children=["Bitte Parameter eingeben."])
+            children=["Bitte Parameter eingeben."]), \
+            None, None,None,None, None,None
 
-
-# this class is for the output tables: each option is a html_table object
-class html_table:
-    def __init__(self, name, money, investition, time, time_before, SgB, SaB, matLevel, n_prodFam, time_x, time_before_x):
-        support_functions = []
-        if SgB == 1:
-            support_functions.append("SgB")
-        if SaB == 1:
-            support_functions.append("SäB")
-        support_functions = str(support_functions).strip("[]'").replace("'", "")
-        time_x = literal_eval(time_x)
-        time_before_x = literal_eval(time_before_x)
-        self.table = html.Table(style={"width": "100%"},
-                                children=[
-                                    html.Tr(
-                                        children=[
-                                            html.Th(colSpan=4, style={'text-align': 'left'},
-                                                    children=[name])]
-                                    ),
-
-                                    html.Tr(
-                                        children=[
-                                            html.Td(children=["Kapitalwert: "]),
-                                            html.Td(children=[money]),
-                                            html.Td(children=["Investitionssumme: "]),
-                                            html.Td(children=[investition])
-                                        ]
-                                    ),
-
-                                    html.Tr(
-                                        children=[
-                                            html.Td(children=["Suchzeit vorher: "]),
-                                            html.Td(children=[time_before]),
-                                            html.Td(children=["Suchzeit nachher: "]),
-                                            html.Td(children=[time])
-                                        ]
-                                    ),
-                                ]+[
-                                    html.Tr(
-                                        [
-                                            html.Td(children=["Produktfamilie "+str(n+1)], style={"text-align":"right"}),
-                                            html.Td(children=[time_before_x[n]]),
-                                            html.Td(children=["Produktfamilie "+str(n+1)], style={"text-align":"right"}),
-                                            html.Td(children=[time_x[n]])
-                                        ]
-                                    ) for n in range(0,n_prodFam)
-                                ]+[
-                                    # header support function outputs
-                                    html.Tr(
-                                        children=[
-                                            html.Td(children=["Unterstützungen: "]),
-                                            html.Td(support_functions),
-                                            html.Td(children=["Reifegrad: "]),
-                                            html.Td(matLevel)
-                                        ]
-                                    ),
-
-                                    html.Br()
-                                ])
 
 
 # run the app

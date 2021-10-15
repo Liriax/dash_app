@@ -2,11 +2,10 @@ import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
 from util import *
+import dash_bootstrap_components as dbc
 
-MainPanel=html.Div(
-    style={'display': 'grid', 'grid-template-columns': '1fr 1fr', 'grid-gap': '2vw'},
-    children=[
-        html.Div(className='col1', style={'margin-left': '1vw', 'margin-top': '3vw'},
+
+left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top': '3vw'},
 
                  children=[
                      # table 1
@@ -49,167 +48,167 @@ MainPanel=html.Div(
                                              value=[]
 
                                          )
-                                     ]),
-                                     html.Td(children=[
-                                         html.Button(id='saveTable1Input', n_clicks=None, children="Aktualisieren")
                                      ])
+                                     
                                  ]
                              ),
-                             html.Br(),
-                            
-                             html.Br(),
+                            html.P("Zeitangaben je Produktfamilie", style={"font-weight": "bold"}),
+
                              html.Tr(
                                  children=[
-                                     dcc.Dropdown(
+                                     html.Td([dcc.Dropdown(
                                          id='dropdown-to-switch-between-absolute-and-relative-time',
                                          options=[
                                              {'label': 'Absolute Zeitangaben (Min)', 'value': 'absolute'},
                                              {'label': 'Relative Zeitangaben (Min)', 'value': 'relative'}
                                          ],
-                                         value='absolute'
-                                     ),
-
+                                         value='absolute',
+                                     )],colSpan=2),
+                                   html.Td(children=[ html.Button('Neue Produktfamilie', id='editing-rows-button', n_clicks=0)]),
                                  ]
                              ),
+                             # Suchzeiten mit absoluten Werten
+                                html.Tr(
+                                    children=[
+                                        html.Td(colSpan=3,children=[
+                                         html.Table(id='table_absolute',children=[
+                                             html.Tr([html.Td(["Produktfamilie"])]+[
+                                                 html.Td([name]) for name, id in absolute
+                                             ]),
+                                         ])                                    
+                                     ]),
+                                    ],
+                                id="div_datatable_absolute"
 
-                             html.Tr(id="dummyOutput1")
+                                ),
+                                # Suchzeiten mit Prozentualen Anteilen
+
+                                html.Tr(
+                                    children=[
+                                        html.Td(colSpan=3,children=[
+                                         html.Table(id='table_relative',children=[
+                                             html.Tr([html.Td(["Produktfamilie"])]+[
+                                                 html.Td([name]) for id, name in relative
+                                             ]),
+                                         ])                                    
+                                     ]),
+                                    ],
+                                    id='div_datatable_relative'
+                                ),
+                                html.P("Nebenbedingungen je Produktfamilie", style={"font-weight": "bold"}),
+                                html.Tr(
+                                 html.Td(colSpan=3,
+                                 children=[
+                                    html.Td(colSpan=3,children=[
+                                         html.Table(id='table_conditions',children=[
+                                             html.Tr([html.Td(["Produktfamilie"])]+[
+                                                 html.Td([name]) for name,comp_id in cond
+                                             ]),
+                                         ])                                    
+                                     ]),
+                                    ],id="div_datatable_conditions"
+
+                                 ),
+                                ),
+                    
+
                          ],
 
                      ),
 
-                     html.Br(),
-                     # Suchzeiten mit absoluten Werten
-                     html.Div(
-                         children=[
-                            dash_table.DataTable(
-                                id='datatable_absolute',
-                                columns=(
-                                    [{'id': 'prodFam', 'name': 'Produktfamilie'}] +
-                                    [{'id': p[1], 'name': p[0]} for p in params]
-                                ),
-                                data=[
-                                    dict(prodFam=i, **{param[1]: 10 for param in params})
-                                    for i in range(1, 2)
-                                ],
-                                style_header=headerStyle,
-                                style_cell = style_cell,
-                                editable=True,
-                                row_deletable=True
-                            ),
-
-                        ],
-                     id="div_datatable_absolute"
-
-                    ),
                      
-
-                     # Suchzeiten mit Prozentualen Anteilen
-
-                    html.Div(
-                        children=[
-                     dash_table.DataTable(
-                        id='datatable_relative',
-                        columns=([{'id': 'prodFam2', 'name': 'Produktfamilie'}] +
-                                    [{'id': p[0], 'name': p[1]} for p in params_dict]
-                        ),
-                        data=[
-                             dict(prodFam2=i, **{param[0]: 0 for param in params_dict})
-                                    for i in range(1, 2)
-                        ],
-                        editable=True,
-                        row_deletable=True,
-                        style_header=headerStyle,
-                        style_cell = style_cell,
-                     ),
-                     ],
-                        id='div_datatable_relative'
-                    ),
-                    html.Button('Neue Produktfamilie', id='editing-rows-button', n_clicks=0),
-
                      html.Br(),
                      # ------table 2-----------------------------------
                      html.Table(
                          children=[
-                             html.Tr(
+                            html.Tr(
                                  children=[
                                      html.Th(colSpan=3, style={'text-align': 'center'},
                                              children=["Parameter für Investitionsrechnung"])
                                  ]
                              ),
-                             html.Tr(
-                                 html.Td(colSpan=4,
-                                 children=[
-                                    html.P("Nebenbedingungen je Produktfamilie", style={"font-weight": "bold"}),
-                                    dash_table.DataTable(
-                                        id='datatable_conditions',
-                                        columns=(
-                                            [{'id': 'prodFam3', 'name': 'Produktfamilie'}] +
-                                            [{'id': p[1], 'name': p[0]} for p in cond]
-                                        ),
-                                        data=[
-                                            dict(prodFam3=i, **{param[1]: 10 for param in cond})
-                                            for i in range(1, 2)
-                                        ],
-                                        editable=True,
-                                        row_deletable=True,
-                                        style_header=headerStyle,
-                                        style_cell = style_cell,
-                                        ),
-
-                                    ],id="div_datatable_conditions"
-
-                                 ),
-                                
-                                    
-
-                            ),
-                             # Investition Dropdown
-                             html.Tr(
-                                 children=[
-                                     html.Th(colSpan=2, children=["Investition"]),
-                                     html.Th(children=["Summe"])
-                                 ]
-                             ),
                              # if maturity level = 1:
                              html.Tr(
                                  children=[
-                                     html.Td(colSpan=2, children=["Investition für Reifegradstufe 2"]),
+                                     html.Th(colSpan=2, children=["Investition für Reifegradstufe 2"]),
                                      html.Td(colSpan=2, children=[
-                                         dcc.Input(
-                                             id='I_l2',
-                                             type='number', min=0, value=1000
-                                         )
-                                     ])
-                                 ]
-                             ),
-                             # if maturity level = 2:
-                             html.Tr(
-                                 children=[
-                                     html.Td(colSpan=2, children=["Investition für Reifegradstufe 3"]),
-                                     html.Td(colSpan=2, children=[
-                                         dcc.Input(
-                                             id='I_l3',
-                                             type='number', min=0, value=1000
-                                         )
-                                     ])
-                                 ]
-                             ),
-                             html.Tr(
-                                 children=[
-                                     html.Td(colSpan=2, children=["Investition für die Identifizierung identischer Produktinformationen"]),
-                                     html.Td(
-                                         children=[
-                                             dcc.Input(
-                                                 id='I_al',
-                                                 type='number', min=0, value=1000
-                                             )
+                                         html.Button('Neue Investition', id='new-invest-button-l2', n_clicks=0),
                                          ]
                                      )
                                  ]
                              ),
                              html.Tr(
                                  children=[
-                                     html.Td(colSpan=2, children=["Investition für die Klassifizierung ähnlicher Produktinformationen"]),
+                                     html.Td(colSpan=4,children=[
+                                         html.Table(id='table_invest_l2',children=[
+                                             html.Tr([
+                                                 html.Td(colSpan=2,children=["Investition"]),
+                                                 html.Td(["Investitionssumme"]),
+                                                 html.Td(["Instandhaltungskostensatz"])
+                                             ]),
+                                         ], style= {'width':'100%'})                                    
+                                     ]),
+                                    
+                                 ]
+                             ),
+                             html.Tr([html.Td(colSpan=4,children=[html.P(id='I_l2')],style={'text-align':'right','color':'#cf7f0e'})]),
+                            
+                             # if maturity level = 2:
+                             html.Tr(
+                                 children=[
+                                     html.Th(colSpan=2, children=["Investition für Reifegradstufe 3"]),
+                                     html.Td(colSpan=2, children=[
+                                            html.Button('Neue Investition', id='new-invest-button-l3', n_clicks=0),
+                                         ]
+                                     )
+                                 ]
+                             ),
+                             html.Tr(
+                                 children=[
+                                     html.Td(colSpan=4,children=[
+                                         html.Table(id='table_invest_l3',children=[
+                                             html.Tr([
+                                                 html.Td(colSpan=2,children=["Investition"]),
+                                                 html.Td(["Investitionssumme"]),
+                                                 html.Td(["Instandhaltungskostensatz"])
+                                             ]),
+                                         ], style= {'width':'100%'})                                    
+                                     ]),
+                                    
+                                 ]
+                             ),
+                             html.Tr([html.Td(colSpan=4,children=[html.P(id='I_l3')],style={'text-align':'right','color':'#cf7f0e'})]),
+                            
+                             html.Tr(
+                                 children=[
+                                     html.Th(colSpan=2, children=["Investition für die Identifizierung identischer Produktinformationen"]),
+                                     html.Td(
+                                         children=[
+                                             html.Button('Neue Methode', id='new-method-button-3', n_clicks=0),
+                                         ]
+                                     )
+                                 ]
+                             ),
+                             html.Tr(
+                                 children=[
+                                     html.Td(colSpan=4,children=[
+                                         html.Table(id='table_same_prod',children=[
+                                             html.Tr([
+                                                 html.Td(colSpan=2,children=["Methode"]),
+                                                 html.Td(["Investitionssumme"]),
+                                                 html.Td(["Instandhaltungskostensatz"])
+                                             ]),
+                                         ], style= {'width':'100%'})                                    
+                                     ]),
+                                    
+                                 ]
+                             ),
+                             html.Tr([html.Td(colSpan=4,children=[html.P(id='I_al')],style={'text-align':'right','color':'#cf7f0e'})]),
+                            
+                            
+                             html.Tr(
+                                 children=[
+                                     html.Th(colSpan=2, children=["Investition für die Klassifizierung ähnlicher Produktinformationen"]),
                                      html.Td(colSpan=2,
                                          children=[
                                              html.Button('Neue Methode', id='new-method-button', n_clicks=0),
@@ -220,29 +219,23 @@ MainPanel=html.Div(
                              html.Tr(
                                  children=[
                                      html.Td(colSpan=4,children=[
-                                         dash_table.DataTable(
-                                        id='datatable_similar_prod',
-                                        columns=(
-                                            [{'id': 'simProd', 'name': 'Methode zur Klassifizierung'}] +
-                                            [{'id': p[1], 'name': p[0], 'type': 'numeric'} for p in simProd]
-                                        ),
-                                        data=[
-                                            {'simProd':1,"I_x":1000,"n_SaB":10}
-                                        ],
-                                        editable=True,
-                                        row_deletable=True,
-                                        style_header=headerStyle,
-                                        style_cell = style_cell,
-                                    ),
-                                    
+                                         html.Table(id='table_similar_prod',children=[
+                                             html.Tr([
+                                                 html.Td(["Methode zur Klassifizierung"]),
+                                                 html.Td(["Investitionssumme"]),
+                                                 html.Td(["Anzahl manueller Eingaben pro Bauteil (z.B. Produktmerkmale)"]),
+                                                 html.Td(["Instandhaltungskostensatz"])
+                                             ]),
+                                         ])                                    
                                      ]),
                                     
                                  ]
                              ),
                              html.Tr([html.Td(colSpan=4,children=[html.P(id='I_pr')],style={'text-align':'right','color':'#cf7f0e'})]),
-                            html.Br(),
+                            
 
-                             # weitere Parameter header
+                             # weitere Parameter hea
+                             # der
                              html.Tr(
                                  children=[
                                      html.Th(colSpan=2, children=["Allgemeine Parameter"]),
@@ -310,36 +303,32 @@ MainPanel=html.Div(
                                      html.Td(children=["5 Jahre"])  # standard duration
                                  ]
                              ),
-                             html.Br()
+                            
                          ]
                      ),
-                     
+                     html.Br(),
+                     html.Button("einzelne Kapitalwerte anzeigen", id='show-kw-button',n_clicks=0,style={'align': 'center', "font-weight": "bold"}),
+                            html.P("--------Erhöhung auf Reifegrad 2--------",style={ "font-weight": "bold","text-align":"center"}),
+                            html.Div(id='R2_KW'),
+                            html.Br(),
+                            html.P("--------Erhöhung auf Reifegrad 3--------",style={ "font-weight": "bold","text-align":"center"}),
+                            html.Div(id='R3_KW'),
+                            html.Br(),
+                            html.P("--------Identifizierung identischer Produktinformationen--------",style={ "font-weight": "bold","text-align":"center"}),
+                            html.Div(id='IiP_KW'),
+                            html.Br(),
+                            html.P("--------Klassifizierung ähnlicher Produktinformationen--------",style={ "font-weight": "bold","text-align":"center"}),
+                            html.Div(id='KäP_KW'),
+                            html.Br(),             
 
-                 ]),
+                 ])
 
-
-        # ------------------Output Division------------------------------------------------------
-        html.Div(className='col2',
+right_side =    html.Div(className='col2',
                  style={'margin-left': '3vw', 'margin-top': '3vw'},
                  children=[
-                     html.Header("Ergebnis", style={'text-align': 'center', "font-weight": "bold"}),
-                     html.Br(),
-                     html.P("--------Erhöhung auf Reifegrad 2--------",style={ "font-weight": "bold","text-align":"center"}),
-                     html.Div(id='R2_KW'),
-                     html.Br(),
-                     html.P("--------Erhöhung auf Reifegrad 3--------",style={ "font-weight": "bold","text-align":"center"}),
-                     html.Div(id='R3_KW'),
-                     html.Br(),
-                     html.P("--------Identifizierung identischer Produktinformationen--------",style={ "font-weight": "bold","text-align":"center"}),
-                     html.Div(id='IiP_KW'),
-                     html.Br(),
-                     html.P("--------Klassifizierung ähnlicher Produktinformationen--------",style={ "font-weight": "bold","text-align":"center"}),
-                     html.Div(id='KäP_KW'),
-                     html.Br(),
-                     html.P("--------Identifizierung neuer Produktinformationen--------",style={ "font-weight": "bold","text-align":"center"}),
-                     html.Div(id="checklist-new-prod-info"),
-                     html.Br(),
-                     html.P("alle Lösungen",style={ "font-weight": "bold"}),
+                     html.Button(id='saveTable1Input', n_clicks=None, children="Gesmatlösungen Aktualisieren"),
+                    
+                     html.Header("alle Lösungen", style={'text-align': 'center', "font-weight": "bold"}),
                      dcc.Dropdown(
                          id='resultSort',
                          options=[
@@ -354,5 +343,13 @@ MainPanel=html.Div(
                      html.Div(id="results_output")
                  ]
                  )
-    ]
+  
+
+MainPanel=html.Div(
+    style={'display': 'grid', 'grid-template-columns': '1fr 1fr', 'grid-gap': '2vw'},
+    children=[
+        left_side,
+        right_side
+        # ------------------Output Division------------------------------------------------------
+       ]
 )

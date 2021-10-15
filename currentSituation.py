@@ -1,13 +1,8 @@
 import pandas as pd
 
 class CurrentSituation:
-    def __init__(self):
+    def __init__(self,ist_situation,invest_params,conditions,product_family_absolute,product_family_relative):
         try:
-            ist_situation = pd.read_csv(r'assets/ist_situation.csv')
-            invest_params = pd.read_csv(r'assets/parameter_Investitionsrechnung.csv')
-            conditions = pd.read_csv(r'assets/product_family_conditions.csv')
-            methods = pd.read_csv(r'assets/similar_prod_info_methods.csv')
-
             self.I_l2 = invest_params.iloc[0]["I_l2"]
             self.I_l3 = invest_params.iloc[0]["I_l3"]
             self.I_al = invest_params.iloc[0]["I_al"]
@@ -37,7 +32,7 @@ class CurrentSituation:
 
             # calculate cumulative times by using either abs. time * freq or share of total time * total time
             if self.typeOfTimeMeasurement == 'absolute':
-                product_families = pd.read_csv(r'assets/product_family_absolute.csv')
+                product_families = product_family_absolute
                 self.cumTimeNewComponent = list(product_families['timeNewComponent'])
                 self.cumTimeSimComponent =  list(product_families['timeSimComponent'])
                 self.cumTimeSameComponent = list(product_families['timeSameComponent'])
@@ -45,7 +40,7 @@ class CurrentSituation:
                 self.cumtimeResource =      list(product_families['timeResource'])
 
             if self.typeOfTimeMeasurement == 'relative':
-                product_families = pd.read_csv(r'assets/product_family_relative.csv')
+                product_families = product_family_relative
 
                 self.totalSearchTimeComponents =list(product_families["totalSearchTimeComponents"])
                 self.totalSearchTimeProcesses = list(product_families["totalSearchTimeProcesses"])

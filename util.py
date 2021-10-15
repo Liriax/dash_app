@@ -1,9 +1,11 @@
 from alternative import Alternative
-from ast import literal_eval
 import dash_html_components as html
 
-params = [("Identische Produktinformationen", "timeSameComponent"),("Ähnliche Produktinformationen", "timeSimComponent"), ("Neue Produktinformationen", "timeNewComponent"), ("Gesamte benötigte Zeit zum Suchen von Prozessinformationen","timeProcess"),("Gesamte benötigte Zeit zum Suchen von Ressourceninformationen", "timeResource")]
-params_dict = [('totalSearchTimeComponents','Identifizierung und Klassifizierung der Produktinformationen'),
+absolute = [("Identische Produktinformationen", "timeSameComponent"),("Ähnliche Produktinformationen", "timeSimComponent"), 
+("Neue Produktinformationen", "timeNewComponent"), ("Gesamte benötigte Zeit zum Suchen von Prozessinformationen","timeProcess"),
+("Gesamte benötigte Zeit zum Suchen von Ressourceninformationen", "timeResource")]
+
+relative = [('totalSearchTimeComponents','Identifizierung und Klassifizierung der Produktinformationen'),
                                 ( 'shareSameComponent','Prozentualer Anteil bei identischen Produktinformationen'),
                                 ('shareSimComponent',  'Prozentualer Anteil bei ähnlichen Produktinformationen'),
                                 ('shareNewComponent', 'Prozentualer Anteil bei neuen Produktinformationen'),
@@ -17,7 +19,9 @@ cond = [("Durschnittliche Anzahl an unbekannten Bauteilen","mean_amount_of_elem_
         ("Durchschnittliche Einnahmen pro Produktvariante","npvRevProProduct"),
         ("zeitgleich nutzbaren Produktionslinien mit DAS", "l_Mx")]
 
-simProd = [("Investitionssumme","I_x"),("Anzahl manueller Eingaben pro Bauteil (z.B. Produktmerkmale)","n_SaB")]
+simProd = [
+    ("Investitionssumme","I_x"),("Anzahl manueller Eingaben pro Bauteil (z.B. Produktmerkmale)","n_SaB"),("Instandhaltungskostensatz","c_main")
+    ]
 
 headerStyle={
             'backgroundColor': 'white',
@@ -85,8 +89,7 @@ class html_table:
         if SaB == 1:
             support_functions.append("KäP")
         support_functions = str(support_functions).strip("[]'").replace("'", "")
-        time_x = literal_eval(time_x)
-        time_before_x = literal_eval(time_before_x)
+        
         self.table = html.Table(style={"width": "100%"},
                                 children=[
                                     html.Tr(
@@ -187,35 +190,32 @@ def calculate_separate_npvs(parameters):
     allgemeine_parameter = parameters.get('allgemeine_parameter')
     product_family_parameter = parameters.get('product_family_parameter')
     product_family_time = parameters.get('product_family_time')
-
     matlevel = ist_situation.get("matLevel")
     IiP = ist_situation.get("IiP")
     KäP = ist_situation.get("KäP")
-
     cumtimeProcess = product_family_time.get('cumtimeProcess')
     cumtimeResource = product_family_time.get('cumtimeResource')
     cumTimeSameComponent = product_family_time.get('cumTimeSameComponent')
     cumTimeSimComponent = product_family_time.get('cumTimeSimComponent')
     cumTimeNewComponent = product_family_time.get('cumTimeNewComponent')
-
-
     AS = allgemeine_parameter.get("Arbeitsstunden pro Woche")
     K_PGrund = allgemeine_parameter.get("Monatliches Grundgehalt in der Arbeitsvorbereitung")
     c_main = allgemeine_parameter.get("Instandhaltungskostensatz")
     r = allgemeine_parameter.get("Zinssatz")
     T=allgemeine_parameter.get("Betrachtungszeitraum")
-
-    I_l2 = investition.get('I_l2')
-    I_l3 = investition.get('I_l3')
-    I_identisch = investition.get('I_identisch')
+    I_l2_df = investition.get('I_l2')
+    I_l3_df = investition.get('I_l3')
+    I_identisch_df = investition.get('I_identisch')
     I_ähnlich_df = investition.get('I_ähnlich')
-
     k_personal = (K_PGrund * 12 * 7 * (1 + 0.726)) / (365 * AS)
 
     
 
     n_SaB_lst = list(I_ähnlich_df['n_SaB'])
     I_pr_lst  = list(I_ähnlich_df['I_x'])
+    c_main_list = list(I_ähnlich_df['c_main'])
+    I_al_lst = list(I_identisch_df['I_x'])
+    c_main_lst_3 = list(I_identisch_df['c_main'])
     mean_amount_of_elem_comp = list(product_family_parameter['mean_amount_of_elem_comp'])
     r_acc = list(product_family_parameter['npvRevProProduct'])
     l_Mx = list(product_family_parameter['l_Mx'])
@@ -223,34 +223,81 @@ def calculate_separate_npvs(parameters):
     P_x = list(product_family_parameter['P_x'])
 
     I_pr = min(I_pr_lst)
+    I_identisch = min(I_al_lst)
     n_SaB = [n_SaB_lst[I_pr_lst.index(I_pr)] for x in range(0, len(cumtimeProcess))]
     t_unsupported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiP,KäP,cumtimeProcess,cumtimeResource,n_SaB,mean_amount_of_elem_comp)
+    
+    # Kapitalwerte für Reifegradstufen berechnen
+    KW_l2_tables=[]
+    KW_l3_tables=[]
+    I_l2_best = 0
+    I_l3_best = 0
     if matlevel == 1:
-        
-        t_supported = calculate_time(2,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiP,KäP,cumtimeProcess,cumtimeResource,n_SaB,mean_amount_of_elem_comp)
-        I_total = calculate_investment(Alternative(IiP, KäP, 2),Alternative(IiP, KäP, matlevel),I_l2,I_l3,I_identisch,I_pr)
-        KW_l2 = calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
-        t_supported = calculate_time(3,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiP,KäP,cumtimeProcess,cumtimeResource,n_SaB,mean_amount_of_elem_comp)
-        KW_l3 = calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
-        KW_l3_table = small_table(KW_l3,I_total,t_supported,t_unsupported).table
+        i = 1
+        KW_l2_max = -10**6
+        for c_main, I_l2 in zip(list(I_l2_df['c_main']), list(I_l2_df['I_l2'])):
+            t_supported = calculate_time(2,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiP,KäP,cumtimeProcess,cumtimeResource,n_SaB,mean_amount_of_elem_comp)
+            I_total = I_l2
+            KW_l2 = calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+            if KW_l2 > KW_l2_max:
+                KW_l2_max = KW_l2
+                I_l2_best = I_total
+            KW_l2_tables.append(small_table(KW_l2,I_total,t_supported,t_unsupported,name=f"Investition {i}"))
+            i+=1
+        KW_l2_table = small_table(KW_l2_max,I_l2_best,t_supported,t_unsupported)
+        KW_l2_tables.sort(key=lambda x: x.KW, reverse=True)
+        KW_l3_max = -10**6
+        i=1
+        for c_main, I_l3 in zip(list(I_l3_df['c_main']), list(I_l3_df['I_l3'])):
+            t_supported = calculate_time(3,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiP,KäP,cumtimeProcess,cumtimeResource,n_SaB,mean_amount_of_elem_comp)
+            I_total = I_l2_best + I_l3
+            KW_l3 = calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+            if KW_l3 > KW_l3_max:
+                KW_l3_max = KW_l3
+                I_l3_best = I_l3
+            KW_l3_tables.append(small_table(KW_l3,I_total,t_supported,t_unsupported,name=f"Investition {i}"))
+            i+=1
+        KW_l3_table = small_table(KW_l3_max,I_l3_best,t_supported,t_unsupported)
+        KW_l3_tables.sort(key=lambda x: x.KW, reverse=True)
+
     elif matlevel == 2: 
         KW_l2 = "bereits umgesetzt"
-        I_total = calculate_investment(Alternative(IiP, KäP, 3),Alternative(IiP, KäP, matlevel),I_l2,I_l3,I_identisch,I_pr)
-        t_supported = calculate_time(3,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiP,KäP,cumtimeProcess,cumtimeResource,n_SaB,mean_amount_of_elem_comp)
-        KW_l3 = calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+        KW_l3_max = -10**6
+        i=1
+        for c_main, I_l3 in zip(list(I_l3_df['c_main']), list(I_l3_df['I_l3'])):
+            I_total = I_l3
+            t_supported = calculate_time(3,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiP,KäP,cumtimeProcess,cumtimeResource,n_SaB,mean_amount_of_elem_comp)
+            KW_l3 = calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+            if KW_l3 > KW_l3_max:
+                KW_l3_max = KW_l3
+                I_l3_best = I_l3
+            KW_l3_tables.append(small_table(KW_l3,I_total,t_supported,t_unsupported,name=f"Investition {i}"))
+            i+=1
+        KW_l3_table = small_table(KW_l3_max,I_l3_best,t_supported,t_unsupported)
+        KW_l3_tables.sort(key=lambda x: x.KW, reverse=True)
+        KW_l2_tables.append(html.P(KW_l2))
     else:
         KW_l2 = "bereits umgesetzt"
         KW_l3 = "bereits umgesetzt"
-    KW_l2_table = small_table(KW_l2,I_total,t_supported,t_unsupported).table
-    KW_l3_table = small_table(KW_l3,I_total,t_supported,t_unsupported).table
+        KW_l2_tables.append(html.P(KW_l2))
+        KW_l3_tables.append(html.P(KW_l3))
 
+    I_l2 = I_l2_best
+    I_l3= I_l3_best
+
+    KW_IiP_tables = []
     if IiP == 1:
         KW_IiP = "bereits umgesetzt"
+        KW_IiP_tables.append(small_table(KW_IiP,I_total,t_supported,t_unsupported).table)
     else:
-        I_total=calculate_investment(Alternative(1, KäP, matlevel),Alternative(IiP, KäP, matlevel),I_l2,I_l3,I_identisch,I_pr)
-        t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,1,KäP,cumtimeProcess,cumtimeResource,n_SaB,mean_amount_of_elem_comp)
-        KW_IiP=calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
-    KW_IiP_table = small_table(KW_IiP,I_total,t_supported,t_unsupported).table
+        i = 1
+        for I_identisch, c_main in zip(I_al_lst,c_main_lst_3):
+            I_total=calculate_investment(Alternative(1, KäP, matlevel),Alternative(IiP, KäP, matlevel),I_l2,I_l3,I_identisch,I_pr)
+            t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,1,KäP,cumtimeProcess,cumtimeResource,n_SaB,mean_amount_of_elem_comp)
+            KW_IiP=calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+            KW_IiP_tables.append(small_table(KW_IiP,I_total,t_supported,t_unsupported,name=f"Methode zur Identifizierung {i}"))
+            i+=1
+        KW_IiP_tables.sort(key=lambda x: x.KW, reverse=True)
 
     KW_KäP_tables = []
     if KäP == 1:
@@ -259,7 +306,7 @@ def calculate_separate_npvs(parameters):
     else:
         # find out for each method
         i=1
-        for n_SaB, I_pr in zip(n_SaB_lst,I_pr_lst):
+        for n_SaB, I_pr, c_main in zip(n_SaB_lst,I_pr_lst, c_main_list):
             n_SaB = [n_SaB for x in range(0, len(cumtimeProcess))]
             I_total=calculate_investment(Alternative(IiP, 1, matlevel),Alternative(IiP, KäP, matlevel),I_l2,I_l3,I_identisch,I_pr)
             t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiP,1,cumtimeProcess,cumtimeResource,n_SaB,mean_amount_of_elem_comp)
@@ -268,7 +315,7 @@ def calculate_separate_npvs(parameters):
             i+=1
         KW_KäP_tables.sort(key=lambda x: x.KW, reverse=True)
         
-    return [KW_l2_table],[KW_l3_table],[KW_IiP_table],KW_KäP_tables
+    return KW_l2_tables,KW_l3_tables,KW_IiP_tables,KW_KäP_tables
 
 
 

@@ -77,8 +77,8 @@ def create_alternatives(ist_situation):
 
 
 class Calculator:
-    def __init__(self):
-        self.ist_situation = currentSituation.CurrentSituation()
+    def __init__(self,ist_situation,invest_params,conditions,product_family_absolute,product_family_relative):
+        self.ist_situation = currentSituation.CurrentSituation(ist_situation,invest_params,conditions,product_family_absolute,product_family_relative)
         self.alternatives = create_alternatives(self.ist_situation)
         
 
@@ -117,8 +117,7 @@ class Calculator:
         res_df = pd.DataFrame(res, columns = ['npv', 'investition', 't_unsupported', 't_supported', 'matLevel', 'SaB', 'SgB',"t_supported_x","t_unsupported_x"])
         name = ["RG {}{}{}".format(int(res_df.iloc[x]['matLevel']), ", IiP" if res_df.iloc[x]['SgB']==1 else "", ", KäP" if res_df.iloc[x]['SaB']==1 else "") if res_df.iloc[x]['investition'] >0 else "Ist-Situation" for x in range(0, len(res_df))]
         res_df['name']=name
-        res_df.to_csv(r'assets/result.csv', index=False)
-
+        return res_df
 
 # test: hat funktioniert 
 # c = Calculator()

@@ -25,14 +25,14 @@ class CurrentSituation:
             self.P_x =   list(conditions['P_x'])
 
             self.matLevel = ist_situation.iloc[0]["matLevel"]
-            self.SgB = ist_situation.iloc[0]["SgB"]
-            self.SaB = ist_situation.iloc[0]["SaB"]
+            self.IiA = ist_situation.iloc[0]["IiA"]
+            self.KäA = ist_situation.iloc[0]["KäA"]
             self.typeOfTimeMeasurement = ist_situation.iloc[0]["typeOfTimeMeasurement"]
           
             
             self.n_prodFam = len(conditions)
-            self.n_SaB = [invest_params.iloc[0]['n_SaB'] for x in range(0, self.n_prodFam)]
-            self.mean_amount_of_elem_comp = [list(conditions["mean_amount_of_elem_comp"])[x] if self.n_SaB[x] != 0 else 0 for x in range(0, len(conditions))]
+            self.n_KäA = [invest_params.iloc[0]['n_KäA'] for x in range(0, self.n_prodFam)]
+            self.mean_amount_of_elem_comp = [list(conditions["mean_amount_of_elem_comp"])[x] if self.n_KäA[x] != 0 else 0 for x in range(0, len(conditions))]
 
             # calculate cumulative times by using either abs. time * freq or share of total time * total time
             if self.typeOfTimeMeasurement == 'absolute':
@@ -45,7 +45,6 @@ class CurrentSituation:
 
             if self.typeOfTimeMeasurement == 'relative':
                 product_families = product_family_relative
-
                 self.totalSearchTimeComponents =list(product_families["totalSearchTimeComponents"])
                 self.totalSearchTimeProcesses = list(product_families["totalSearchTimeProcesses"])
                 self.totalSearchTimeResources = list(product_families["totalSearchTimeResources"])
@@ -59,8 +58,6 @@ class CurrentSituation:
                 self.cumtimeProcess = self.totalSearchTimeProcesses
                 self.cumtimeResource = self.totalSearchTimeResources
                 
-
-
         except pd.errors.EmptyDataError:
             ist_situation = 'could not read ist_situation.csv!'
 

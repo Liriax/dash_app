@@ -4,9 +4,8 @@ import dash_html_components as html
 from util import *
 
 left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top': '3vw'},
-
                  children=[
-                     # table 1
+                     # table 1: Ist-Situation
                      html.Table(
                          children=[
                              html.Tr(
@@ -15,7 +14,6 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                                  ]
                              ),
 
-                             # row 1
                              html.Tr(
                                  children=[
                                      html.Td(colSpan=2, children=["Aktuelle Reifegradstufe (RF)"]),
@@ -32,7 +30,6 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                                      ])
                                  ]
                              ),
-                             # row 2
                              html.Tr(
                                  children=[
                                      html.Td(colSpan=2, children=["Bestehende Unterstützungen", html.Br(), "(Wenn die Erzeugnisstruktur mehr als 2 Ebenen enthält, muss die Unterstützung die Erzeugnisstruktur berücksichtigen)"]),
@@ -40,8 +37,8 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                                          dcc.Checklist(
                                              id='supFunction',
                                              options=[
-                                                 {'label': 'Identifizierung identischer Produktinformationen (IiP)', 'value': 'SgB'},
-                                                 {'label': 'Klassifizierung ähnlicher Produktinformationen (KäP)', 'value': 'SaB'}
+                                                 {'label': 'Identifizierung identischer Artikel (IiA)', 'value': 'IiA'},
+                                                 {'label': 'Klassifizierung ähnlicher Artikel (KäA)', 'value': 'KäA'}
                                              ],
                                              value=[]
 
@@ -52,7 +49,7 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                              ),
                             html.P("Zeitangaben je Produktfamilie", style={"font-weight": "bold"}),
 
-                             html.Tr(
+                            html.Tr(
                                  children=[
                                      html.Td([dcc.Dropdown(
                                          id='dropdown-to-switch-between-absolute-and-relative-time',
@@ -66,7 +63,7 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                                  ]
                              ),
                              # Suchzeiten mit absoluten Werten
-                                html.Tr(
+                            html.Tr(
                                     children=[
                                         html.Td(colSpan=3,children=[
                                          html.Table(id='table_absolute',children=[
@@ -79,9 +76,9 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                                 id="div_datatable_absolute"
 
                                 ),
-                                # Suchzeiten mit Prozentualen Anteilen
+                            # Suchzeiten mit Prozentualen Anteilen
 
-                                html.Tr(
+                            html.Tr(
                                     children=[
                                         html.Td(colSpan=3,children=[
                                          html.Table(id='table_relative',children=[
@@ -93,8 +90,8 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                                     ],
                                     id='div_datatable_relative'
                                 ),
-                                html.P("Nebenbedingungen je Produktfamilie", style={"font-weight": "bold"}),
-                                html.Tr(
+                            html.P("Nebenbedingungen je Produktfamilie", style={"font-weight": "bold"}),
+                            html.Tr(
                                  html.Td(colSpan=3,
                                  children=[
                                     html.Td(colSpan=3,children=[
@@ -107,7 +104,7 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                                     ],id="div_datatable_conditions"
 
                                  ),
-                                ),
+                            ),
                     
 
                          ],
@@ -116,7 +113,7 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
 
                      
                      html.Br(),
-                     # ------table 2-----------------------------------
+                     # ------table 2: Parameter für Investitionsrechnung
                      html.Table(
                          children=[
                             html.Tr(
@@ -125,64 +122,14 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                                              children=["Parameter für Investitionsrechnung"])
                                  ]
                              ),
-                             # if maturity level = 1:
-                             html.Tr(
-                                 children=[
-                                     html.Th(colSpan=2, children=["Investition für Reifegradstufe 2"]),
-                                     html.Td(colSpan=2, children=[
-                                         html.Button('Neue Investition', id='new-invest-button-l2', n_clicks=0),
-                                         ]
-                                     )
-                                 ]
-                             ),
-                             html.Tr(
-                                 children=[
-                                     html.Td(colSpan=4,children=[
-                                         html.Table(id='table_invest_l2',children=[
-                                             html.Tr([
-                                                 html.Td(colSpan=2,children=["Investition"]),
-                                                 html.Td(["Investitionssumme"]),
-                                                 html.Td(["Instandhaltungskostensatz"])
-                                             ]),
-                                         ], style= {'width':'100%'})                                    
-                                     ]),
-                                    
-                                 ]
-                             ),
-                             html.Tr([html.Td(colSpan=4,children=[html.P(id='I_l2')],style={'text-align':'right','color':'#cf7f0e'})]),
-                            
-                             # if maturity level = 2:
-                             html.Tr(
-                                 children=[
-                                     html.Th(colSpan=2, children=["Investition für Reifegradstufe 3"]),
-                                     html.Td(colSpan=2, children=[
-                                            html.Button('Neue Investition', id='new-invest-button-l3', n_clicks=0),
-                                         ]
-                                     )
-                                 ]
-                             ),
-                             html.Tr(
-                                 children=[
-                                     html.Td(colSpan=4,children=[
-                                         html.Table(id='table_invest_l3',children=[
-                                             html.Tr([
-                                                 html.Td(colSpan=2,children=["Investition"]),
-                                                 html.Td(["Investitionssumme"]),
-                                                 html.Td(["Instandhaltungskostensatz"])
-                                             ]),
-                                         ], style= {'width':'100%'})                                    
-                                     ]),
-                                    
-                                 ]
-                             ),
-                             html.Tr([html.Td(colSpan=4,children=[html.P(id='I_l3')],style={'text-align':'right','color':'#cf7f0e'})]),
+                             
                             
                              html.Tr(
                                  children=[
-                                     html.Th(colSpan=2, children=["Investition für die Identifizierung identischer Produktinformationen"]),
+                                     html.Th(colSpan=2, children=["Investition für Unterstützungslösungen zur Identifizierung identischer Artikel"]),
                                      html.Td(
                                          children=[
-                                             html.Button('Neue Methode', id='new-method-button-3', n_clicks=0),
+                                             html.Button('Neue Unterstützungslösung', id='new-method-button-3', n_clicks=0),
                                          ]
                                      )
                                  ]
@@ -192,7 +139,7 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                                      html.Td(colSpan=4,children=[
                                          html.Table(id='table_same_prod',children=[
                                              html.Tr([
-                                                 html.Td(colSpan=2,children=["Methode"]),
+                                                 html.Td(colSpan=2,children=["Unterstützungslösung"]),
                                                  html.Td(["Investitionssumme"]),
                                                  html.Td(["Instandhaltungskostensatz"])
                                              ]),
@@ -203,13 +150,12 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                              ),
                              html.Tr([html.Td(colSpan=4,children=[html.P(id='I_al')],style={'text-align':'right','color':'#cf7f0e'})]),
                             
-                            
                              html.Tr(
                                  children=[
-                                     html.Th(colSpan=2, children=["Investition für die Klassifizierung ähnlicher Produktinformationen"]),
+                                     html.Th(colSpan=2, children=["Investition für Unterstützungslösungen zur Klassifizierung ähnlicher Artikel"]),
                                      html.Td(colSpan=2,
                                          children=[
-                                             html.Button('Neue Methode', id='new-method-button', n_clicks=0),
+                                             html.Button('Neue Unterstützungslösung', id='new-method-button', n_clicks=0),
                                          ]
                                      )
                                  ]
@@ -219,7 +165,7 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                                      html.Td(colSpan=4,children=[
                                          html.Table(id='table_similar_prod',children=[
                                              html.Tr([
-                                                 html.Td(["Methode zur Klassifizierung"]),
+                                                 html.Td(["Unterstützungslösung"]),
                                                  html.Td(["Investitionssumme"]),
                                                  html.Td(["Anzahl manueller Eingaben pro Bauteil (z.B. Produktmerkmale)"]),
                                                  html.Td(["Instandhaltungskostensatz"])
@@ -230,10 +176,56 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                                  ]
                              ),
                              html.Tr([html.Td(colSpan=4,children=[html.P(id='I_pr')],style={'text-align':'right','color':'#cf7f0e'})]),
+                             html.Tr(
+                                 children=[
+                                     html.Th(colSpan=2, children=["Investition für Unterstützungslösungen zur Identifizierung und Klassifizierung der Prozessen (Reifegradstufe 2)"]),
+                                     html.Td(colSpan=2, children=[
+                                         html.Button('Neue Unterstützungslösung', id='new-invest-button-l2', n_clicks=0),
+                                         ]
+                                     )
+                                 ]
+                             ),
+                             html.Tr(
+                                 children=[
+                                     html.Td(colSpan=4,children=[
+                                         html.Table(id='table_invest_l2',children=[
+                                             html.Tr([
+                                                 html.Td(colSpan=2,children=["Unterstützungslösung"]),
+                                                 html.Td(["Investitionssumme"]),
+                                                 html.Td(["Instandhaltungskostensatz"])
+                                             ]),
+                                         ], style= {'width':'100%'})                                    
+                                     ]),
+                                    
+                                 ]
+                             ),
+                             html.Tr([html.Td(colSpan=4,children=[html.P(id='I_l2')],style={'text-align':'right','color':'#cf7f0e'})]),
                             
+                             html.Tr(
+                                 children=[
+                                     html.Th(colSpan=2, children=["Investition für Unterstützungslösungen zur Identifizierung und Klassifizierung der Ressourcen (Reifegradstufe 3)"]),
+                                     html.Td(colSpan=2, children=[
+                                            html.Button('Neue Unterstützungslösung', id='new-invest-button-l3', n_clicks=0),
+                                         ]
+                                     )
+                                 ]
+                             ),
+                             html.Tr(
+                                 children=[
+                                     html.Td(colSpan=4,children=[
+                                         html.Table(id='table_invest_l3',children=[
+                                             html.Tr([
+                                                 html.Td(colSpan=2,children=["Unterstützungslösung"]),
+                                                 html.Td(["Investitionssumme"]),
+                                                 html.Td(["Instandhaltungskostensatz"])
+                                             ]),
+                                         ], style= {'width':'100%'})                                    
+                                     ]),
+                                    
+                                 ]
+                             ),
+                             html.Tr([html.Td(colSpan=4,children=[html.P(id='I_l3')],style={'text-align':'right','color':'#cf7f0e'})]),
 
-                             # weitere Parameter hea
-                             # der
                              html.Tr(
                                  children=[
                                      html.Th(colSpan=2, children=["Allgemeine Parameter"]),
@@ -293,20 +285,21 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                             
                          ]
                      ),
-                     html.Br(),
-                     html.Button("einzelne Kapitalwerte anzeigen", id='show-kw-button',n_clicks=0,style={'align': 'center', "font-weight": "bold"}),
-                            html.P("--------Erhöhung auf Reifegrad 2--------",style={ "font-weight": "bold","text-align":"center"}),
-                            html.Div(id='R2_KW'),
-                            html.Br(),
-                            html.P("--------Erhöhung auf Reifegrad 3--------",style={ "font-weight": "bold","text-align":"center"}),
-                            html.Div(id='R3_KW'),
-                            html.Br(),
-                            html.P("--------Identifizierung identischer Produktinformationen--------",style={ "font-weight": "bold","text-align":"center"}),
-                            html.Div(id='IiP_KW'),
-                            html.Br(),
-                            html.P("--------Klassifizierung ähnlicher Produktinformationen--------",style={ "font-weight": "bold","text-align":"center"}),
-                            html.Div(id='KäP_KW'),
-                            html.Br(),             
+                     
+                    html.Br(),
+                    html.Button("einzelne Kapitalwerte anzeigen", id='show-kw-button',n_clicks=0,style={'align': 'center', "font-weight": "bold"}),
+                    html.P("--------Erhöhung auf Reifegrad 2--------",style={ "font-weight": "bold","text-align":"center"}),
+                    html.Div(id='R2_KW'),
+                    html.Br(),
+                    html.P("--------Erhöhung auf Reifegrad 3--------",style={ "font-weight": "bold","text-align":"center"}),
+                    html.Div(id='R3_KW'),
+                    html.Br(),
+                    html.P("--------Identifizierung identischer Artikel--------",style={ "font-weight": "bold","text-align":"center"}),
+                    html.Div(id='IiA_KW'),
+                    html.Br(),
+                    html.P("--------Klassifizierung ähnlicher Artikel--------",style={ "font-weight": "bold","text-align":"center"}),
+                    html.Div(id='KäA_KW'),
+                    html.Br(),             
 
                  ])
 
@@ -337,6 +330,5 @@ MainPanel=html.Div(
     children=[
         left_side,
         right_side
-        # ------------------Output Division------------------------------------------------------
        ]
 )

@@ -2,8 +2,6 @@ import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
 from util import *
-import dash_bootstrap_components as dbc
-
 
 left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top': '3vw'},
 
@@ -267,18 +265,7 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                                      html.Td(children=["3200€"])  # calculate standard cost
                                  ]
                              ),
-                             html.Tr(
-                                 children=[
-                                     html.Td(children=["Instandhaltungskostensatz"]),
-                                     html.Td(children=[
-                                         dcc.Input(
-                                             id='c_main',
-                                             type='number', min=0, value=20, step = 0.1
-                                         )
-                                     ]),
-                                     html.Td(children=["20-30%"])  # calculate standard cost
-                                 ]
-                             ),
+                             
                              html.Tr(
                                  children=[
                                      html.Td(children=["Zinssatz"]),

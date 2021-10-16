@@ -200,7 +200,6 @@ def calculate_separate_npvs(parameters):
     cumTimeNewComponent = product_family_time.get('cumTimeNewComponent')
     AS = allgemeine_parameter.get("Arbeitsstunden pro Woche")
     K_PGrund = allgemeine_parameter.get("Monatliches Grundgehalt in der Arbeitsvorbereitung")
-    c_main = allgemeine_parameter.get("Instandhaltungskostensatz")
     r = allgemeine_parameter.get("Zinssatz")
     T=allgemeine_parameter.get("Betrachtungszeitraum")
     I_l2_df = investition.get('I_l2')

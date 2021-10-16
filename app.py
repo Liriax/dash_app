@@ -184,7 +184,6 @@ def switch_time_input_variant(visibility_state):
     State('dropdown-to-switch-between-absolute-and-relative-time','value'),
     State('AS', 'value'),
     State('K_PGrund', 'value'),
-    State('c_main', 'value'),
     State('c_int', 'value'),
     State('t', 'value'),
 )
@@ -199,7 +198,7 @@ def generateOutput(n_clicks1,n_clicks2, resultSort, clickData,
                    totalSearchTimeComponents,shareSameComponent,shareSimComponent,shareNewComponent,totalSearchTimeProcesses,totalSearchTimeResources,
                     mean_amount_of_elem_comp,t_DLZ,P_x,npvRevProProduct,l_Mx,
                    typeOfTimeMeasurement,
-                   AS, K_PGrund, c_main, c_int, t,):
+                   AS, K_PGrund, c_int, t,):
 
     
 
@@ -208,7 +207,6 @@ def generateOutput(n_clicks1,n_clicks2, resultSort, clickData,
     allgemeine_parameter = {
         "Arbeitsstunden pro Woche":AS,
         "Monatliches Grundgehalt in der Arbeitsvorbereitung":K_PGrund,
-        "Instandhaltungskostensatz": c_main,
         "Zinssatz":c_int,
         "Betrachtungszeitraum":t
     }
@@ -314,7 +312,7 @@ def generateOutput(n_clicks1,n_clicks2, resultSort, clickData,
 
 
     data2 = {'I_al': I_al, 'I_pr': I_pr, 'I_l2': I_l2, 'I_l3': I_l3,
-                'AS': AS, 'K_PGrund': K_PGrund, 'c_main': c_main, 'c_int': c_int,
+                'AS': AS, 'K_PGrund': K_PGrund, 'c_main_l2': c_main_l2, 'c_main_l3':c_main_l3,"c_main_same":c_main_same, "c_main_sim":c_main_sim, 'c_int': c_int,
                 't': t, 'n_SaB':n_SaB}
     invest_params = pd.DataFrame([data2])
 

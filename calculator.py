@@ -2,6 +2,23 @@ import currentSituation
 import alternative
 import pandas as pd
 
+def calculate_cost_with_diff_c_main(alternative, ist_situation,  c_main_l2,c_main_l3,c_main_same,c_main_sim):
+    # find out if extra investment is to be made:
+    invest_SgB = alternative.SgB - ist_situation.SgB
+    invest_SaB = alternative.SaB - ist_situation.SaB
+    # find out investment needed for the increase of maturity level:
+    mat_increase = 0
+    if alternative.matLevel > ist_situation.matLevel:
+        if alternative.matLevel == 3 and ist_situation.matLevel == 2:
+            mat_increase += ist_situation.I_l3 * c_main_l2
+        if alternative.matLevel == 2 and ist_situation.matLevel == 1:
+            mat_increase += ist_situation.I_l2 * c_main_l3
+        if alternative.matLevel == 3 and ist_situation.matLevel == 1:
+            mat_increase += ist_situation.I_l2 * c_main_l2 + ist_situation.I_l3* c_main_l3
+    
+    I_total = invest_SgB * ist_situation.I_al * c_main_same + invest_SaB * ist_situation.I_pr * c_main_sim+mat_increase
+    
+    return I_total
 
 
 def calculate_investment(alternative, ist_situation):
@@ -86,8 +103,13 @@ class Calculator:
         t_supported = [x for x in calculate_time(alternative, self.ist_situation)]
         t_unsupported = [x for x in calculate_time(self.ist_situation, self.ist_situation)]
          
-        I_total = calculate_investment(alternative, self.ist_situation) 
-        C_main = self.ist_situation.c_main * I_total # K_IHJ=k_IH*I_0
+        c_main_l2 = self.ist_situation.c_main_l2 
+        c_main_l3 = self.ist_situation.c_main_l3 
+        c_main_same = self.ist_situation.c_main_same 
+        c_main_sim = self.ist_situation.c_main_sim 
+        C_main = calculate_cost_with_diff_c_main(alternative, self.ist_situation, c_main_l2,c_main_l3,c_main_same,c_main_sim) 
+        I_total = calculate_investment(alternative,self.ist_situation)
+
         k_P=self.ist_situation.k_personal / 60 # convert to minutes
         r = self.ist_situation.r
         x_specific = sum([(k_P*(t_vorher-t_nachher)+e_Var*l_M*(t_vorher-t_nachher)/t_DLZ)*P-k_P*t_nachher*P for t_vorher, t_nachher, e_Var, l_M,t_DLZ,P in zip(t_unsupported,t_supported,self.ist_situation.r_acc,self.ist_situation.l_Mx, self.ist_situation.t_DLZ,self.ist_situation.P_x)]) 

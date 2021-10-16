@@ -10,7 +10,11 @@ class CurrentSituation:
             self.AS = invest_params.iloc[0]["AS"]
             #K_PGrund is given in €/Month
             self.K_PGrund = invest_params.iloc[0]["K_PGrund"]
-            self.c_main = invest_params.iloc[0]["c_main"] / 100
+            self.c_main_l2 = invest_params.iloc[0]["c_main_l2"] / 100
+            self.c_main_l3 = invest_params.iloc[0]["c_main_l3"] / 100
+            self.c_main_same = invest_params.iloc[0]["c_main_same"] / 100
+            self.c_main_sim = invest_params.iloc[0]["c_main_sim"] / 100
+
             self.r = invest_params.iloc[0]["c_int"] / 100
             self.T = invest_params.iloc[0]["t"]
             # 0.726 is german standard for "Personalnebenkosten", k_personal is given in €/h

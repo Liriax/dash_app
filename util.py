@@ -52,7 +52,7 @@ class small_table:
                 html.Tr(
                         children=[
                             html.Td(children=["Kapitalwert: "]),
-                            html.Td(children=[KW],style={'color':'red' if KW<0 else 'black'}),
+                            html.Td(children=[round(KW,2)],style={'color':'red' if KW<0 else 'black'}),
                             html.Td(children=["Investitionssumme: "]),
                             html.Td(children=[investition])
                         ]

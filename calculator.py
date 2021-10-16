@@ -10,15 +10,15 @@ def calculate_cost_with_diff_c_main(alternative, ist_situation,  c_main_l2,c_mai
     mat_increase = 0
     if alternative.matLevel > ist_situation.matLevel:
         if alternative.matLevel == 3 and ist_situation.matLevel == 2:
-            mat_increase += ist_situation.I_l3 * c_main_l2
+            mat_increase += ist_situation.I_l3 * c_main_l3
         if alternative.matLevel == 2 and ist_situation.matLevel == 1:
-            mat_increase += ist_situation.I_l2 * c_main_l3
+            mat_increase += ist_situation.I_l2 * c_main_l2
         if alternative.matLevel == 3 and ist_situation.matLevel == 1:
             mat_increase += ist_situation.I_l2 * c_main_l2 + ist_situation.I_l3* c_main_l3
     
-    I_total = invest_IiA * ist_situation.I_al * c_main_same + invest_KäA * ist_situation.I_pr * c_main_sim+mat_increase
+    C_main = invest_IiA * ist_situation.I_al * c_main_same + invest_KäA * ist_situation.I_pr * c_main_sim + mat_increase
     
-    return I_total
+    return C_main
 
 # calculate total investment
 def calculate_investment(alternative, ist_situation):
@@ -139,22 +139,8 @@ class Calculator:
         res_df['name']=name
         return res_df
 
-# # test: hat funktioniert 
-# # c = Calculator()
-# # for alt in c.alternatives:
-# #     print(calculate_time(alt, c.ist_situation))
 
-
-# # c = Calculator()
-# # for alt in c.alternatives:
-# #     print(alt.matLevel,alt.IiA, alt.KäA)
-# #     print(calculate_investment(alt, c.ist_situation))
-# #     print(calculate_time(alt, c.ist_situation))
-# #     print("npv:" + str(c.calculate_npv(alt)))
-
-# # print(c.calculate_results())
-
-# I_total=3000
+# I_total=1000
 # c_main=0.2
 # r=0.12
 # T=5
@@ -164,8 +150,8 @@ class Calculator:
 # k_PNeben=0.726
 # k_P=k_PGrund+k_PGrund*k_PNeben # pro Stunde
 # k_P/=60.0 # pro Minute
-# t_unsupported=[40]
-# t_supported=[3]
+# t_unsupported=[50]
+# t_supported=[40]
 # r_acc=[10]
 # l_Mx=[10] 
 # t_DLZ=[10]
@@ -177,4 +163,4 @@ class Calculator:
 # for t in range(1, int(T) + 1): 
 #     npv += (x_specific - C_main)/ ((1 + r) ** t)
 
-# # print(npv)
+# print(npv)

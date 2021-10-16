@@ -288,18 +288,19 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                      
                     html.Br(),
                     html.Button("einzelne Kapitalwerte anzeigen", id='show-kw-button',n_clicks=0,style={'align': 'center', "font-weight": "bold"}),
-                    html.P("--------Erhöhung auf Reifegrad 2--------",style={ "font-weight": "bold","text-align":"center"}),
-                    html.Div(id='R2_KW'),
-                    html.Br(),
-                    html.P("--------Erhöhung auf Reifegrad 3--------",style={ "font-weight": "bold","text-align":"center"}),
-                    html.Div(id='R3_KW'),
-                    html.Br(),
+                    
                     html.P("--------Identifizierung identischer Artikel--------",style={ "font-weight": "bold","text-align":"center"}),
                     html.Div(id='IiA_KW'),
                     html.Br(),
                     html.P("--------Klassifizierung ähnlicher Artikel--------",style={ "font-weight": "bold","text-align":"center"}),
                     html.Div(id='KäA_KW'),
                     html.Br(),             
+                    html.P("--------Erhöhung auf Reifegrad 2--------",style={ "font-weight": "bold","text-align":"center"}),
+                    html.Div(id='R2_KW'),
+                    html.Br(),
+                    html.P("--------Erhöhung auf Reifegrad 3--------",style={ "font-weight": "bold","text-align":"center"}),
+                    html.Div(id='R3_KW'),
+                    html.Br(),
 
                  ])
 

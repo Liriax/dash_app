@@ -151,7 +151,7 @@ def calculate_time(matLevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewC
 
 # Kapitalwerte von einzelnen Unterstützungslösungen berechnen
 def calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x):         
-    C_main = c_main * I_total # K_IHJ=k_IH*I_0
+    C_main = c_main / 100 * I_total # K_IHJ=k_IH*I_0
     k_P=k_personal / 60 # convert to minutes
     x_specific = sum([(k_P*(t_vorher-t_nachher)+e_Var*l_M*(t_vorher-t_nachher)/t_DLZ)*P-k_P*t_nachher*P for t_vorher, t_nachher, e_Var, l_M,t_DLZ,P in zip(t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)]) 
     npv = - I_total
@@ -177,143 +177,167 @@ def calculate_investment(alternative, ist_situation, I_l2, I_l3, I_same, I_sim):
     I_total = invest_IiA * I_same + invest_KäA * I_sim + mat_increase
     return I_total
 
-
+class Situation:
 # Kapitalwerte von einzelnen Unterstützungslösungen berechnen
-def calculate_separate_npvs(parameters):
-    ist_situation = parameters.get('ist_situation')
-    investition = parameters.get('investition')
-    allgemeine_parameter = parameters.get('allgemeine_parameter')
-    product_family_parameter = parameters.get('product_family_parameter')
-    product_family_time = parameters.get('product_family_time')
-    matlevel = ist_situation.get("matLevel")
-    IiA = ist_situation.get("IiA")
-    KäA = ist_situation.get("KäA")
-    cumtimeProcess = product_family_time.get('cumtimeProcess')
-    cumtimeResource = product_family_time.get('cumtimeResource')
-    cumTimeSameComponent = product_family_time.get('cumTimeSameComponent')
-    cumTimeSimComponent = product_family_time.get('cumTimeSimComponent')
-    cumTimeNewComponent = product_family_time.get('cumTimeNewComponent')
-    AS = allgemeine_parameter.get("Arbeitsstunden pro Woche")
-    K_PGrund = allgemeine_parameter.get("Monatliches Grundgehalt in der Arbeitsvorbereitung")
-    r = allgemeine_parameter.get("Zinssatz")
-    T=allgemeine_parameter.get("Betrachtungszeitraum")
-    I_l2_df = investition.get('I_l2')
-    I_l3_df = investition.get('I_l3')
-    I_identisch_df = investition.get('I_identisch')
-    I_ähnlich_df = investition.get('I_ähnlich')
-    k_personal = (K_PGrund * 12 * 7 * (1 + 0.726)) / (365 * AS)
+    def __init__(self,parameters):
+        ist_situation = parameters.get('ist_situation')
+        investition = parameters.get('investition')
+        allgemeine_parameter = parameters.get('allgemeine_parameter')
+        product_family_parameter = parameters.get('product_family_parameter')
+        product_family_time = parameters.get('product_family_time')
+        matlevel = ist_situation.get("matLevel")
+        IiA = ist_situation.get("IiA")
+        KäA = ist_situation.get("KäA")
+        cumtimeProcess = product_family_time.get('cumtimeProcess')
+        cumtimeResource = product_family_time.get('cumtimeResource')
+        cumTimeSameComponent = product_family_time.get('cumTimeSameComponent')
+        cumTimeSimComponent = product_family_time.get('cumTimeSimComponent')
+        cumTimeNewComponent = product_family_time.get('cumTimeNewComponent')
+        AS = allgemeine_parameter.get("Arbeitsstunden pro Woche")
+        K_PGrund = allgemeine_parameter.get("Monatliches Grundgehalt in der Arbeitsvorbereitung")
+        r = allgemeine_parameter.get("Zinssatz") / 100
+        T=allgemeine_parameter.get("Betrachtungszeitraum")
+        I_l2_df = investition.get('I_l2')
+        I_l3_df = investition.get('I_l3')
+        I_identisch_df = investition.get('I_identisch')
+        I_ähnlich_df = investition.get('I_ähnlich')
+        k_personal = (K_PGrund * 12 * 7 * (1 + 0.726)) / (365 * AS)
 
-    
-
-    n_KäA_list = list(I_ähnlich_df['n_KäA'])
-    I_sim_list  = list(I_ähnlich_df['I_x'])
-    c_main_list = list(I_ähnlich_df['c_main'])
-    I_same_list = list(I_identisch_df['I_x'])
-    c_main_list_3 = list(I_identisch_df['c_main'])
-    mean_amount_of_elem_comp = list(product_family_parameter['mean_amount_of_elem_comp'])
-    r_acc = list(product_family_parameter['npvRevProProduct'])
-    l_Mx = list(product_family_parameter['l_Mx'])
-    t_DLZ = list(product_family_parameter['t_DLZ'])
-    P_x = list(product_family_parameter['P_x'])
-
-    # für Reifegraderhöhungen 
-    I_sim = min(I_sim_list)
-    I_identisch = min(I_same_list)
-    n_KäA = [n_KäA_list[I_sim_list.index(I_sim)] for x in range(0, len(cumtimeProcess))]
-    t_unsupported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiA,KäA,cumtimeProcess,cumtimeResource,n_KäA,mean_amount_of_elem_comp)
-    
-    KW_l2_tables=[]
-    KW_l3_tables=[]
-    I_l2_best = 0
-    I_l3_best = 0
-
-    #--------Erhöhung auf Reifegrad 1--------
-    if matlevel == 1:
-        i = 1
-        KW_l2_max = -10**6
-        for c_main, I_l2 in zip(list(I_l2_df['c_main']), list(I_l2_df['I_l2'])):
-            t_supported = calculate_time(2,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiA,KäA,cumtimeProcess,cumtimeResource,n_KäA,mean_amount_of_elem_comp)
-            I_total = I_l2
-            KW_l2 = calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
-            if KW_l2 > KW_l2_max:
-                KW_l2_max = KW_l2
-                I_l2_best = I_total
-            KW_l2_tables.append(small_table(KW_l2,I_total,t_supported,t_unsupported,name=f"Investition {i}"))
-            i+=1
-        KW_l2_tables.sort(key=lambda x: x.KW, reverse=True)
-        KW_l3_max = -10**6
-        i=1
-        for c_main, I_l3 in zip(list(I_l3_df['c_main']), list(I_l3_df['I_l3'])):
-            t_supported = calculate_time(3,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiA,KäA,cumtimeProcess,cumtimeResource,n_KäA,mean_amount_of_elem_comp)
-            I_total = I_l2_best + I_l3
-            KW_l3 = calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
-            if KW_l3 > KW_l3_max:
-                KW_l3_max = KW_l3
-                I_l3_best = I_l3
-            KW_l3_tables.append(small_table(KW_l3,I_total,t_supported,t_unsupported,name=f"Investition {i}"))
-            i+=1
-        KW_l3_table = small_table(KW_l3_max,I_l3_best,t_supported,t_unsupported)
-        KW_l3_tables.sort(key=lambda x: x.KW, reverse=True)
-
-    #--------Erhöhung auf Reifegrad 2--------
-    elif matlevel == 2: 
-        KW_l2 = "bereits umgesetzt"
-        KW_l3_max = -10**6
-        i=1
-        for c_main, I_l3 in zip(list(I_l3_df['c_main']), list(I_l3_df['I_l3'])):
-            I_total = I_l3
-            t_supported = calculate_time(3,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiA,KäA,cumtimeProcess,cumtimeResource,n_KäA,mean_amount_of_elem_comp)
-            KW_l3 = calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
-            if KW_l3 > KW_l3_max:
-                KW_l3_max = KW_l3
-                I_l3_best = I_l3
-            KW_l3_tables.append(small_table(KW_l3,I_total,t_supported,t_unsupported,name=f"Investition {i}"))
-            i+=1
-        KW_l3_tables.sort(key=lambda x: x.KW, reverse=True)
-        KW_l2_tables.append(html.P(KW_l2))
-
-    #--------Erhöhung auf Reifegrad 3--------
-    else:
-        KW_l2 = "bereits umgesetzt"
-        KW_l3 = "bereits umgesetzt"
-        KW_l2_tables.append(html.P(KW_l2))
-        KW_l3_tables.append(html.P(KW_l3))
-
-    I_l2 = I_l2_best
-    I_l3= I_l3_best
-
-    #--------Identifizierung identischer Artikel--------
-    KW_IiA_tables = []
-    if IiA == 1:
-        KW_IiA = "bereits umgesetzt"
-        KW_IiA_tables.append(small_table(KW_IiA,I_total,t_supported,t_unsupported).table)
-    else:
-        i = 1
-        for I_identisch, c_main in zip(I_same_list,c_main_list_3):
-            I_total=calculate_investment(Alternative(1, KäA, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,I_identisch,I_sim)
-            t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,1,KäA,cumtimeProcess,cumtimeResource,n_KäA,mean_amount_of_elem_comp)
-            KW_IiA=calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
-            KW_IiA_tables.append(small_table(KW_IiA,I_total,t_supported,t_unsupported,name=f"Methode zur Identifizierung {i}"))
-            i+=1
-        KW_IiA_tables.sort(key=lambda x: x.KW, reverse=True)
-
-    #--------Klassifizierung ähnlicher Artikel--------
-    KW_KäA_tables = []
-    if KäA == 1:
-        KW_KäA = "bereits umgesetzt"
-        KW_KäA_tables.append(small_table(KW_KäA,I_total,t_supported,t_unsupported).table)
-    else:
-        i=1
-        for n_KäA, I_sim, c_main in zip(n_KäA_list,I_sim_list, c_main_list):
-            n_KäA = [n_KäA for x in range(0, len(cumtimeProcess))]
-            I_total=calculate_investment(Alternative(IiA, 1, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,I_identisch,I_sim)
-            t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiA,1,cumtimeProcess,cumtimeResource,n_KäA,mean_amount_of_elem_comp)
-            KW_KäA=calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
-            KW_KäA_tables.append(small_table(KW_KäA,I_total,t_supported,t_unsupported,name=f"Methode zur Klassifizierung {i}"))
-            i+=1
-        KW_KäA_tables.sort(key=lambda x: x.KW, reverse=True)
         
-    return KW_l2_tables,KW_l3_tables,KW_IiA_tables,KW_KäA_tables
+
+        n_KäA_list = list(I_ähnlich_df['n_KäA'])
+        I_sim_list  = list(I_ähnlich_df['I_x'])
+        c_main_list = list(I_ähnlich_df['c_main'])
+        I_same_list = list(I_identisch_df['I_x'])
+        c_main_list_3 = list(I_identisch_df['c_main'])
+        mean_amount_of_elem_comp = list(product_family_parameter['mean_amount_of_elem_comp'])
+        r_acc = list(product_family_parameter['npvRevProProduct'])
+        l_Mx = list(product_family_parameter['l_Mx'])
+        t_DLZ = list(product_family_parameter['t_DLZ'])
+        P_x = list(product_family_parameter['P_x'])
+
+        # für Reifegraderhöhungen 
+        I_sim = min(I_sim_list)
+        I_identisch = min(I_same_list)
+        n_KäA = [n_KäA_list[I_sim_list.index(I_sim)] for x in range(0, len(cumtimeProcess))]
+        t_unsupported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiA,KäA,cumtimeProcess,cumtimeResource,n_KäA,mean_amount_of_elem_comp)
+        
+        KW_l2_tables=[]
+        KW_l3_tables=[]
+        I_l2_best = 0
+        I_l3_best = 0
+        c_main_l2=0
+        c_main_l3=0
+        c_main_same=0
+        c_main_sim=0
+        #--------Erhöhung auf Reifegrad 1--------
+        if matlevel == 1:
+            i = 1
+            KW_l2_max = -10**6
+            for c_main, I_l2 in zip(list(I_l2_df['c_main']), list(I_l2_df['I_l2'])):
+                t_supported = calculate_time(2,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiA,KäA,cumtimeProcess,cumtimeResource,n_KäA,mean_amount_of_elem_comp)
+                I_total = I_l2
+                KW_l2 = calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                if KW_l2 > KW_l2_max:
+                    KW_l2_max = KW_l2
+                    I_l2_best = I_total
+                    c_main_l2=c_main
+                KW_l2_tables.append(small_table(KW_l2,I_total,t_supported,t_unsupported,name=f"Investition {i}"))
+                i+=1
+            KW_l2_tables.sort(key=lambda x: x.KW, reverse=True)
+            KW_l3_max = -10**6
+            i=1
+            for c_main, I_l3 in zip(list(I_l3_df['c_main']), list(I_l3_df['I_l3'])):
+                t_supported = calculate_time(3,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiA,KäA,cumtimeProcess,cumtimeResource,n_KäA,mean_amount_of_elem_comp)
+                I_total = I_l2_best + I_l3
+                KW_l3 = calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                if KW_l3 > KW_l3_max:
+                    KW_l3_max = KW_l3
+                    I_l3_best = I_l3
+                    c_main_l3=c_main
+                KW_l3_tables.append(small_table(KW_l3,I_total,t_supported,t_unsupported,name=f"Investition {i}"))
+                i+=1
+            KW_l3_tables.sort(key=lambda x: x.KW, reverse=True)
+
+        #--------Erhöhung auf Reifegrad 2--------
+        elif matlevel == 2: 
+            KW_l2 = "bereits umgesetzt"
+            KW_l3_max = -10**6
+            i=1
+            for c_main, I_l3 in zip(list(I_l3_df['c_main']), list(I_l3_df['I_l3'])):
+                I_total = I_l3
+                t_supported = calculate_time(3,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiA,KäA,cumtimeProcess,cumtimeResource,n_KäA,mean_amount_of_elem_comp)
+                KW_l3 = calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                if KW_l3 > KW_l3_max:
+                    KW_l3_max = KW_l3
+                    I_l3_best = I_l3
+                    c_main_l3=c_main
+                KW_l3_tables.append(small_table(KW_l3,I_total,t_supported,t_unsupported,name=f"Investition {i}"))
+                i+=1
+            KW_l3_tables.sort(key=lambda x: x.KW, reverse=True)
+            KW_l2_tables.append(html.P(KW_l2))
+
+        #--------Erhöhung auf Reifegrad 3--------
+        else:
+            KW_l2 = "bereits umgesetzt"
+            KW_l3 = "bereits umgesetzt"
+            KW_l2_tables.append(html.P(KW_l2))
+            KW_l3_tables.append(html.P(KW_l3))
+
+        I_l2 = I_l2_best
+        I_l3= I_l3_best
+        self.I_l2=I_l2
+        self.I_l3=I_l3
+        self.c_main_l2=c_main_l2
+        self.c_main_l3=c_main_l3
+        
+        c_main_same=0
+        c_main_sim=0
+        #--------Identifizierung identischer Artikel--------
+        KW_IiA_tables = []
+        if IiA == 1:
+            KW_IiA = "bereits umgesetzt"
+            KW_IiA_tables.append(small_table(KW_IiA,I_total,t_supported,t_unsupported).table)
+        else:
+            i = 1
+            KW_IiA_max=-10**6
+            for I_identisch, c_main in zip(I_same_list,c_main_list_3):
+                I_total=calculate_investment(Alternative(1, KäA, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,I_identisch,I_sim)
+                t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,1,KäA,cumtimeProcess,cumtimeResource,n_KäA,mean_amount_of_elem_comp)
+                KW_IiA=calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                if KW_IiA>KW_IiA_max:
+                    KW_IiA_max=KW_IiA
+                    c_main_same=c_main
+                KW_IiA_tables.append(small_table(KW_IiA,I_total,t_supported,t_unsupported,name=f"Methode zur Identifizierung {i}"))
+                i+=1
+            KW_IiA_tables.sort(key=lambda x: x.KW, reverse=True)
+
+        #--------Klassifizierung ähnlicher Artikel--------
+        KW_KäA_tables = []
+        if KäA == 1:
+            KW_KäA = "bereits umgesetzt"
+            KW_KäA_tables.append(small_table(KW_KäA,I_total,t_supported,t_unsupported).table)
+        else:
+            i=1
+            KW_KäA_max=-10**6
+            for n_KäA, I_sim, c_main in zip(n_KäA_list,I_sim_list, c_main_list):
+                n_KäA = [n_KäA for x in range(0, len(cumtimeProcess))]
+                I_total=calculate_investment(Alternative(IiA, 1, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,I_identisch,I_sim)
+                t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiA,1,cumtimeProcess,cumtimeResource,n_KäA,mean_amount_of_elem_comp)
+                KW_KäA=calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                if KW_KäA>KW_KäA_max:
+                    KW_KäA_max=KW_KäA
+                    c_main_sim=c_main
+                KW_KäA_tables.append(small_table(KW_KäA,I_total,t_supported,t_unsupported,name=f"Methode zur Klassifizierung {i}"))
+                i+=1
+            KW_KäA_tables.sort(key=lambda x: x.KW, reverse=True)
+            
+        self.KW_l2_tables=KW_l2_tables
+        self.KW_l3_tables=KW_l3_tables
+        self.KW_IiA_tables=KW_IiA_tables
+        self.KW_KäA_tables=KW_KäA_tables
+        self.c_main_same=c_main_same
+        self.c_main_sim=c_main_sim
 
 
 

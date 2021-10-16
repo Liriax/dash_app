@@ -271,46 +271,45 @@ def generateOutput(n_clicks1,n_clicks2, resultSort, clickData,
     data = {'matLevel': matLevel, 'IiA': IiA, 'KäA': KäA,
             'typeOfTimeMeasurement': typeOfTimeMeasurement}
     ist_situation = pd.DataFrame([data])
-    KW_l2,KW_l3,KW_IiA,KW_KäA = calculate_separate_npvs(parameters)
-    I_l2=0
-    I_l3=0
+    sit = Situation(parameters)
+    KW_l2=sit.KW_l2_tables
+    KW_l3=sit.KW_l3_tables
+    KW_IiA=sit.KW_IiA_tables
+    KW_KäA=sit.KW_KäA_tables
+    best_method_l2 = "bereits umgesetzt"
+    best_method_l3 = "bereits umgesetzt"
     if matLevel<2:
-        I_l2 = KW_l2[0].investition 
         best_method_l2 = KW_l2[0].name
-        best_method_l2_num = [int(s) for s in best_method_l2.split() if s.isdigit()][0]
-        c_main_l2 = l2_invest_methods.iloc[best_method_l2_num-1]['c_main']
         KW_l2 = [x.table for x in KW_l2]
         
     if matLevel<3:
-        I_l3 = KW_l3[0].investition         
         best_method_l3 = KW_l3[0].name
-        best_method_l3_num = [int(s) for s in best_method_l3.split() if s.isdigit()][0]
-        c_main_l3 = l3_invest_methods.iloc[best_method_l3_num-1]['c_main']
         KW_l3 = [x.table for x in KW_l3]
 
     if IiA ==0:
         I_al=KW_IiA[0].investition
         best_method_3 = KW_IiA[0].name
-        best_method_3_num = [int(s) for s in best_method_3.split() if s.isdigit()][0]
-        c_main_same = same_prod_info_methods.iloc[best_method_3_num-1]['c_main']
         KW_IiA=[x.table for x in KW_IiA]
     else:
         I_al = same_prod_info_methods.iloc[0]['I_x']
         best_method_3 = "bereits umgesetzt"
-        c_main_same = same_prod_info_methods.iloc[0]['c_main']
     if KäA ==0:
         I_pr = KW_KäA[0].investition
         best_method = KW_KäA[0].name
         best_method_num = [int(s) for s in best_method.split() if s.isdigit()][0]
         n_KäA = similar_prod_info_methods.iloc[best_method_num-1]['n_KäA']
-        c_main_sim = similar_prod_info_methods.iloc[best_method_num-1]['c_main']
         KW_KäA=[x.table for x in KW_KäA]
     else:
         I_pr = similar_prod_info_methods.iloc[0]['I_x']
         best_method = "bereits umgesetzt"
         n_KäA = similar_prod_info_methods.iloc[0]['n_KäA']
 
-
+    I_l2=sit.I_l2
+    I_l3=sit.I_l3
+    c_main_same=sit.c_main_same
+    c_main_sim=sit.c_main_sim
+    c_main_l2=sit.c_main_l2
+    c_main_l3=sit.c_main_l3
     data2 = {'I_al': I_al, 'I_pr': I_pr, 'I_l2': I_l2, 'I_l3': I_l3,
                 'AS': AS, 'K_PGrund': K_PGrund, 'c_main_l2': c_main_l2, 'c_main_l3':c_main_l3,"c_main_same":c_main_same, "c_main_sim":c_main_sim, 'c_int': c_int,
                 't': t, 'n_KäA':n_KäA}

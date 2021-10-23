@@ -39,19 +39,41 @@ def calculate_investment(alternative, ist_situation):
     I_total = invest_IiA * ist_situation.I_al + invest_KäA * ist_situation.I_pr + mat_increase
     
     return I_total
+def convert_decimal_time(time, decimalToTime=True):
+    if decimalToTime:
+        minute=int(time)
+        second=int((time*60)%60)
+        return f"{minute},{second}"
+    else:
+        if "," in str(time):
+            minute=str(time).split(',')[0]
+            second=str(time).split(',')[1]
+            return int(minute)+int(second)/60.0
+        else:
+            return int(time)
+        
 
 def calculate_time(alternative, ist_situation): 
-
+    # convert from time to decimal
+    cumTimeSameComponent=[convert_decimal_time(x,False) for x in ist_situation.cumTimeSameComponent]
+    mean_amount_of_elem_comp=[convert_decimal_time(x,False) for x in ist_situation.mean_amount_of_elem_comp]
+    cumTimeSimComponent = [convert_decimal_time(x,False) for x in ist_situation.cumTimeSimComponent]
+    cumTimeNewComponent= [convert_decimal_time(x,False) for x in ist_situation.cumTimeNewComponent]
+    cumtimeProcess= [convert_decimal_time(x,False) for x in ist_situation.cumtimeProcess]
+    cumtimeResource= [convert_decimal_time(x,False) for x in ist_situation.cumtimeResource]
+    # calculate
     n_KäA = ist_situation.n_KäA
     all_zeros = [0 for x in range(0, ist_situation.n_prodFam)]
-    sameComponent = all_zeros if alternative.IiA == 1 else ist_situation.cumTimeSameComponent
-    simComponent = [(0.0006*35+15*0.0006)*n*m if alternative.KäA == 1 else t for n,m,t in zip(n_KäA,ist_situation.mean_amount_of_elem_comp,ist_situation.cumTimeSimComponent)]
-    newComponent = all_zeros if alternative.IiA == 1 and alternative.KäA == 1 else ist_situation.cumTimeNewComponent
-    Process = all_zeros if alternative.matLevel >= 2 else ist_situation.cumtimeProcess
-    Resource = all_zeros if alternative.matLevel == 3 else ist_situation.cumtimeResource
+    sameComponent = all_zeros if alternative.IiA == 1 else cumTimeSameComponent
+    simComponent = [(0.0006*35+15*0.0006)*n*m if alternative.KäA == 1 else t for n,m,t in zip(n_KäA,mean_amount_of_elem_comp,cumTimeSimComponent)]
+    newComponent = all_zeros if alternative.IiA == 1 and alternative.KäA == 1 else cumTimeNewComponent
 
-    t_supported = [newComponent[x] + simComponent[x] + sameComponent[x] + Process[x] + Resource[x] for x in range(0, ist_situation.n_prodFam)]
-
+    Process = all_zeros if alternative.matLevel >= 2 else cumtimeProcess
+    Resource = all_zeros if alternative.matLevel == 3 else cumtimeResource
+    try:
+        t_supported = [newComponent[x] + simComponent[x] + sameComponent[x] + Process[x] + Resource[x] for x in range(0, ist_situation.n_prodFam)]
+    except:
+        print("error")
     return t_supported
 
 
@@ -110,7 +132,8 @@ class Calculator:
 
         k_P=self.ist_situation.k_personal / 60 # convert to minutes
         r = self.ist_situation.r
-        x_specific = sum([(k_P*(t_vorher-t_nachher)+e_Var*l_M*(t_vorher-t_nachher)/t_DLZ)*P-k_P*t_nachher*P for t_vorher, t_nachher, e_Var, l_M,t_DLZ,P in zip(t_unsupported,t_supported,self.ist_situation.r_acc,self.ist_situation.l_Mx, self.ist_situation.t_DLZ,self.ist_situation.P_x)]) 
+        t_DLZ=[convert_decimal_time(x,False) for x in self.ist_situation.t_DLZ]
+        x_specific = sum([(k_P*(t_vorher-t_nachher)+e_Var*l_M*(t_vorher-t_nachher)/t_DLZ)*P-k_P*t_nachher*P for t_vorher, t_nachher, e_Var, l_M,t_DLZ,P in zip(t_unsupported,t_supported,self.ist_situation.r_acc,self.ist_situation.l_Mx, t_DLZ,self.ist_situation.P_x)]) 
         npv = - I_total
         assert isinstance(int(self.ist_situation.T), int), str(self.ist_situation.T)
         for t in range(1, int(self.ist_situation.T) + 1): 
@@ -124,11 +147,11 @@ class Calculator:
         for alternative in self.alternatives:
             npv = round(self.calculate_npv(alternative),2)
             investition = round(calculate_investment(alternative, self.ist_situation),2)
-            t_supported_x =[round(x,2) for x in calculate_time(alternative, self.ist_situation)]
-            t_unsupported_x = [round(x,2) for x in calculate_time(self.ist_situation, self.ist_situation)]
-            t_supported = sum(t_supported_x)
-            t_unsupported = sum(t_unsupported_x)
-             
+            t_supported_x = calculate_time(alternative, self.ist_situation)
+            t_unsupported_x = calculate_time(self.ist_situation, self.ist_situation)
+            t_supported = (sum(t_supported_x))
+            t_unsupported = (sum(t_unsupported_x))
+            
             matLevel = alternative.matLevel
             KäA = alternative.KäA
             IiA = alternative.IiA
@@ -139,7 +162,7 @@ class Calculator:
         res_df['name']=name
         return res_df
 
-
+# print(convert_decimal_time(3.5,True))
 # I_total=1000
 # c_main=0.2
 # r=0.12

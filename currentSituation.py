@@ -58,6 +58,10 @@ class CurrentSituation:
                 self.cumtimeProcess = self.totalSearchTimeProcesses
                 self.cumtimeResource = self.totalSearchTimeResources
                 
+            # all_zeros = [0 for x in range(0, self.n_prodFam)]
+            # self.IiA = 1 if self.cumTimeSameComponent == all_zeros else 0
+            # self.KäA = 1 if self.newComponent == all_zeros else 0
+
         except pd.errors.EmptyDataError:
             ist_situation = 'could not read ist_situation.csv!'
 

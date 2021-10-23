@@ -33,9 +33,11 @@ app.layout = MainPanel
     State('table_conditions','children')
 )
 def poduct_family_tables_output(n_clicks,table_absolute,table_relative,table_conditions):
-    new_row_absolute=html.Tr([html.Td([n_clicks+1])]+[html.Td([dcc.Input(id={'type':comp_id,'index':n_clicks},type='number',value=10,step=0.1,style={'width':'70%'})]) for comp_id,name in absolute])
-    new_row_relative=html.Tr([html.Td([n_clicks+1])]+[html.Td([dcc.Input(id={'type':comp_id,'index':n_clicks},type='number',value=10,step=0.1,style={'width':'70%'})]) for name, comp_id in relative])
-    new_row_cond=html.Tr([html.Td([n_clicks+1])]+[html.Td([dcc.Input(id={'type':comp_id,'index':n_clicks},type='number',value=10,step=0.1,style={'width':'70%'})]) for  comp_id, name in cond])
+    new_row_absolute=html.Tr([html.Td([n_clicks+1])]+[html.Td([dcc.Input(id={'type':comp_id,'index':n_clicks},type='text',value=10,step=0.1,style={'width':'70%'})]) for name,comp_id in absolute])
+    new_row_relative=html.Tr([html.Td([n_clicks+1])]+[html.Td([dcc.Input(id={'type':comp_id,'index':n_clicks},type='text',value=10,step=0.1,style={'width':'70%'})]) for comp_id, name in relative])
+    new_row_cond=html.Tr([html.Td([n_clicks+1])]+[html.Td([dcc.Input(id={'type':comp_id,'index':n_clicks},type='number',value=10,step=0.1,style={'width':'70%'})]) for  name, comp_id in cond if comp_id!='t_DLZ']+[
+        html.Td([dcc.Input(id={'type':comp_id,'index':n_clicks},type='text',value=10,step=0.1,style={'width':'70%'})]) for  name, comp_id in cond if comp_id=='t_DLZ'
+    ])
     table_absolute.append(new_row_absolute)
     table_relative.append(new_row_relative)
     table_conditions.append(new_row_cond)
@@ -178,9 +180,9 @@ def switch_time_input_variant(visibility_state):
     Input({'type':'c_main_l3','index':ALL},'value'),
     State('matLevel', 'value'),
     State('supFunction', 'value'),
-    [State({'type':comp_id,'index':ALL},'value') for comp_id,name in absolute],
-    [State({'type':comp_id,'index':ALL},'value') for name,comp_id in relative],
-    [State({'type':comp_id,'index':ALL},'value') for comp_id,name in cond],
+    [State({'type':comp_id,'index':ALL},'value') for name,comp_id in absolute],
+    [State({'type':comp_id,'index':ALL},'value') for comp_id,name in relative],
+    [State({'type':comp_id,'index':ALL},'value') for name,comp_id in cond],
     State('dropdown-to-switch-between-absolute-and-relative-time','value'),
     State('AS', 'value'),
     State('K_PGrund', 'value'),

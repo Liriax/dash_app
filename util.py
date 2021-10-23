@@ -1,6 +1,6 @@
 from alternative import Alternative
 import dash_html_components as html
-
+from calculator import convert_decimal_time
 absolute = [("Identifizierung identischer Artikel", "timeSameComponent"),("Klassifizierung ähnlicher Artikel", "timeSimComponent"), 
 ("Identifizierung neuer Artikel", "timeNewComponent"), ("Gesamte benötigte Zeit zur Identifizierung und Klassifizierung von Prozessen","timeProcess"),
 ("Gesamte benötigte Zeit zur Identifizierung und Klassifizierung von Ressourcen", "timeResource")]
@@ -14,10 +14,10 @@ relative = [('totalSearchTimeComponents','Identifizierung und Klassifizierung de
                                 
 
 cond = [("Durschnittliche Anzahl an unbekannten Artikeln","mean_amount_of_elem_comp"),
-        ("Durchschnittliche Durchlaufzeit der Produktfamilie (Min)","t_DLZ"),
         ("Durchschnittliche Anzahl an eingeführten Produktfamilien pro Jahr","P_x"),
         ("Durchschnittliche Einnahmen pro Produktfamilie","npvRevProProduct"),
-        ("zeitgleich nutzbare Produktionslinien mit DAS", "l_Mx")]
+        ("zeitgleich nutzbare Produktionslinien mit DAS", "l_Mx"),
+        ("Durchschnittliche Durchlaufzeit der Produktfamilie (Min,Sek)","t_DLZ")]
 
 simProd = [
     ("Investitionssumme","I_x"),("Anzahl manueller Eingaben pro Bauteil (z.B. Produktmerkmale)","n_KäA"),("Instandhaltungskostensatz","c_main")
@@ -61,18 +61,18 @@ class small_table:
                 html.Tr(
                     children=[
                         html.Td(children=["Suchzeit vorher: "]),
-                        html.Td(children=[sum(time_before)]),
+                        html.Td(children=[convert_decimal_time(sum(time_before))]),
                         html.Td(children=["Suchzeit nachher: "]),
-                        html.Td(children=[sum(time_after)])
+                        html.Td(children=[convert_decimal_time(sum(time_after))])
                     ]
                 ),
             ]+[
                 html.Tr(
                     [
                         html.Td(children=["Produktfamilie "+str(n+1)], style={"text-align":"right"}),
-                        html.Td(children=[time_before[n]]),
+                        html.Td(children=[convert_decimal_time(time_before[n])]),
                         html.Td(children=["Produktfamilie "+str(n+1)], style={"text-align":"right"}),
-                        html.Td(children=[time_after[n]])
+                        html.Td(children=[convert_decimal_time(time_after[n])])
                     ]
                 ) for n in range(0,n_prodFam)
             ]
@@ -109,18 +109,18 @@ class html_table:
                                     html.Tr(
                                         children=[
                                             html.Td(children=["Suchzeit vorher: "]),
-                                            html.Td(children=[time_before]),
+                                            html.Td(children=[convert_decimal_time(time_before)]),
                                             html.Td(children=["Suchzeit nachher: "]),
-                                            html.Td(children=[time])
+                                            html.Td(children=[convert_decimal_time(time)])
                                         ]
                                     ),
                                 ]+[
                                     html.Tr(
                                         [
                                             html.Td(children=["Produktfamilie "+str(n+1)], style={"text-align":"right"}),
-                                            html.Td(children=[time_before_x[n]]),
+                                            html.Td(children=[convert_decimal_time(time_before_x[n])]),
                                             html.Td(children=["Produktfamilie "+str(n+1)], style={"text-align":"right"}),
-                                            html.Td(children=[time_x[n]])
+                                            html.Td(children=[convert_decimal_time(time_x[n])])
                                         ]
                                     ) for n in range(0,n_prodFam)
                                 ]+[
@@ -139,20 +139,33 @@ class html_table:
 
 # Zeit von einzelnen Unterstützungslösungen berechnen
 def calculate_time(matLevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiA,KäA,cumtimeProcess,cumtimeResource,n_KäA,mean_amount_of_elem_comp):
+    # convert from time to decimal
     n_prodFam = len(cumtimeProcess)
+    cumTimeSameComponent=[convert_decimal_time(x,False) for x in cumTimeSameComponent]
+    mean_amount_of_elem_comp=[convert_decimal_time(x,False) for x in mean_amount_of_elem_comp]
+    cumTimeSimComponent = [convert_decimal_time(x,False) for x in cumTimeSimComponent]
+    cumTimeNewComponent= [convert_decimal_time(x,False) for x in cumTimeNewComponent]
+    cumtimeProcess= [convert_decimal_time(x,False) for x in cumtimeProcess]
+    cumtimeResource= [convert_decimal_time(x,False) for x in cumtimeResource]
+    # calculate
     all_zeros = [0 for x in range(0, n_prodFam)]
     sameComponent = all_zeros if IiA == 1 else cumTimeSameComponent
     simComponent = [(0.0006*35+15*0.0006)*n*m if KäA == 1 else t for n,m,t in zip(n_KäA,mean_amount_of_elem_comp,cumTimeSimComponent)]
-    newComponent = all_zeros if IiA == 1 and KäA == 1 else cumTimeNewComponent    
+    newComponent = all_zeros if IiA == 1 and KäA == 1 else cumTimeNewComponent
+
     Process = all_zeros if matLevel >= 2 else cumtimeProcess
     Resource = all_zeros if matLevel == 3 else cumtimeResource
-    time = [newComponent[x] + simComponent[x] + sameComponent[x] + Process[x] + Resource[x] for x in range(0, n_prodFam)]
-    return time
+    try:
+        t_supported = [newComponent[x] + simComponent[x] + sameComponent[x] + Process[x] + Resource[x] for x in range(0, n_prodFam)]
+    except:
+        print("error")
+    return t_supported
 
 # Kapitalwerte von einzelnen Unterstützungslösungen berechnen
 def calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x):         
     C_main = c_main / 100 * I_total # K_IHJ=k_IH*I_0
     k_P=k_personal / 60 # convert to minutes
+    t_DLZ=[convert_decimal_time(x,False) for x in t_DLZ]
     x_specific = sum([(k_P*(t_vorher-t_nachher)+e_Var*l_M*(t_vorher-t_nachher)/t_DLZ)*P-k_P*t_nachher*P for t_vorher, t_nachher, e_Var, l_M,t_DLZ,P in zip(t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)]) 
     npv = - I_total
     for t in range(1, int(T) + 1): 

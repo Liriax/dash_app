@@ -54,8 +54,8 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                                      html.Td([dcc.Dropdown(
                                          id='dropdown-to-switch-between-absolute-and-relative-time',
                                          options=[
-                                             {'label': 'Absolute Zeitangaben (Min)', 'value': 'absolute'},
-                                             {'label': 'Relative Zeitangaben (Min)', 'value': 'relative'}
+                                             {'label': 'Absolute Zeitangaben (Min,Sek)', 'value': 'absolute'},
+                                             {'label': 'Relative Zeitangaben (Min,Sek)', 'value': 'relative'}
                                          ],
                                          value='absolute',
                                      )],colSpan=2),
@@ -90,23 +90,6 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                                     ],
                                     id='div_datatable_relative'
                                 ),
-                            html.P("Nebenbedingungen je Produktfamilie", style={"font-weight": "bold"}),
-                            html.Tr(
-                                 html.Td(colSpan=3,
-                                 children=[
-                                    html.Td(colSpan=3,children=[
-                                         html.Table(id='table_conditions',children=[
-                                             html.Tr([html.Td(["Produktfamilie"])]+[
-                                                 html.Td([name]) for name,comp_id in cond
-                                             ]),
-                                         ])                                    
-                                     ]),
-                                    ],id="div_datatable_conditions"
-
-                                 ),
-                            ),
-                    
-
                          ],
 
                      ),
@@ -123,7 +106,22 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                                  ]
                              ),
                              
-                            
+                            html.P("Nebenbedingungen je Produktfamilie", style={"font-weight": "bold"}),
+                            html.Tr(
+                                 html.Td(colSpan=3,
+                                 children=[
+                                    html.Td(colSpan=3,children=[
+                                         html.Table(id='table_conditions',children=[
+                                             html.Tr([html.Td(["Produktfamilie"])]+[
+                                                 html.Td([name]) for name,comp_id in cond
+                                             ]),
+                                         ])                                    
+                                     ]),
+                                    ],id="div_datatable_conditions"
+
+                                 ),
+                            ),
+
                              html.Tr(
                                  children=[
                                      html.Th(colSpan=2, children=["Investition für Unterstützungslösungen zur Identifizierung identischer Artikel"]),

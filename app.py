@@ -158,9 +158,9 @@ def switch_time_input_variant(visibility_state):
     Output('figure_output', 'figure'),
     Output('results_output', 'children'),
     Output('R2_KW','children'),
-    Output('R3_KW','children'),
-    Output('IiA_KW','children'),
-    Output('KäA_KW','children'),
+    # Output('R3_KW','children'),
+    Output('IiA_KäA_KW','children'),
+    # Output('KäA_KW','children'),
     Output('I_pr', 'children'),
     Output('I_al','children'),
     Output('I_l2', 'children'),
@@ -274,15 +274,15 @@ def generateOutput(n_clicks1,n_clicks2, resultSort, clickData,
             'typeOfTimeMeasurement': typeOfTimeMeasurement}
     ist_situation = pd.DataFrame([data])
     sit = Situation(parameters)
-    KW_l2=sit.KW_l2_tables
+    # KW_l2=sit.KW_l2_tables
     KW_l3=sit.KW_l3_tables
     KW_IiA=sit.KW_IiA_tables
     KW_KäA=sit.KW_KäA_tables
     best_method_l2 = "bereits umgesetzt"
     best_method_l3 = "bereits umgesetzt"
-    if matLevel<2:
-        best_method_l2 = KW_l2[0].name
-        KW_l2 = [x.table for x in KW_l2]
+    # if matLevel<2:
+    #     best_method_l2 = KW_l2[0].name
+    #     KW_l2 = [x.table for x in KW_l2]
         
     if matLevel<3:
         best_method_l3 = KW_l3[0].name
@@ -306,6 +306,8 @@ def generateOutput(n_clicks1,n_clicks2, resultSort, clickData,
         best_method = "bereits umgesetzt"
         n_KäA = similar_prod_info_methods.iloc[0]['n_KäA']
 
+    KW_IiA_KäA = [sit.best_solution.table]+sit.recommend1 if (IiA==0 or KäA==0) else "bereits umgesetzt"
+    best_level_return = [sit.best_level.table]+sit.recommend2 if matLevel<3 else "bereits umgesetzt"
     I_l2=sit.I_l2
     I_l3=sit.I_l3
     c_main_same=sit.c_main_same
@@ -323,10 +325,10 @@ def generateOutput(n_clicks1,n_clicks2, resultSort, clickData,
             html.H6(
             style={"color": "red"},
             children=["Bitte Parameter eingeben und aktualisieren."]), 
-            None,None,None,None,None,None,None,None]
+            None,None,None,None,None,None]
 
     if n_clicks2>0:
-        returns[2:]=[KW_l2,KW_l3,KW_IiA,KW_KäA, f"Optimal: {best_method}", f"Optimal: {best_method_3}", f"Optimal: {best_method_l2}", f"Optimal: {best_method_l3}"]
+        returns[2:]=[best_level_return,KW_IiA_KäA, f"Optimal: {best_method}", f"Optimal: {best_method_3}", f"Optimal: {best_method_l2}", f"Optimal: {best_method_l3}"]
     if n_clicks1 is not None :
         c = calculator.Calculator(ist_situation,invest_params,product_family_conditions,product_family_absolute,product_family_relative)
         res = c.calculate_results()
@@ -374,7 +376,7 @@ def generateOutput(n_clicks1,n_clicks2, resultSort, clickData,
             "Mit dem Clicken auf die Säule können Sie eine Option zum Anzeigen auswählen."]))
 
         returns[0]=g
-        returns[1]=results_output           
+        returns[1]=results_output
 
     return returns
 

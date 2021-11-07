@@ -36,33 +36,43 @@ style_cell={
 
 # Tabelle für das Anzeigen einzelner Kapitalwerte der Unterstützungslösungen
 class small_table:
-    def __init__(self,KW,investition, time_after, time_before,name=None):
+    def __init__(self,KW,investition, time_after, time_before,IiA, KäA, RG, name=None):
         n_prodFam = len(time_after)
         self.KW = KW
-        
-        self.name=name
+        support_functions = []
+        if IiA == 1:
+            support_functions.append("IiA")
+        if KäA == 1:
+            support_functions.append("KäA")
+        if IiA == 1 and KäA == 1:
+            support_functions.append("InA")
+        support_functions = str(support_functions).strip("[]'").replace("'", "")
+        self.support_functions=support_functions
+        self.name=f"Unterstützungslösung {name}" if not isinstance(name, list) else f"Unterstützungslösung {name[0]} und {name[1]}"
+        self.number=name
+        self.RG=RG
         self.investition = investition
         if isinstance(KW,str):
             self.table =  html.P(KW)
         else:
             children = [html.Tr(children=[
                             html.Th(colSpan=4, style={'text-align': 'left'},
-                                    children=[name])])] if name!=None else []
+                                    children=[self.name])])] if name!=None else []
             children +=[
                 html.Tr(
                         children=[
-                            html.Td(children=["Kapitalwert: "]),
+                            html.Td(children=["Kapitalwert (€): "]),
                             html.Td(children=[round(KW,2)],style={'color':'red' if KW<0 else 'black'}),
-                            html.Td(children=["Investitionssumme: "]),
+                            html.Td(children=["Investitionssumme (€): "]),
                             html.Td(children=[investition])
                         ]
                     ),
 
                 html.Tr(
                     children=[
-                        html.Td(children=["Suchzeit vorher: "]),
+                        html.Td(children=["Suchzeit vorher (Min,Sek): "]),
                         html.Td(children=[convert_decimal_time(sum(time_before))]),
-                        html.Td(children=["Suchzeit nachher: "]),
+                        html.Td(children=["Suchzeit nachher (Min,Sek): "]),
                         html.Td(children=[convert_decimal_time(sum(time_after))])
                     ]
                 ),
@@ -75,6 +85,15 @@ class small_table:
                         html.Td(children=[convert_decimal_time(time_after[n])])
                     ]
                 ) for n in range(0,n_prodFam)
+            ]+[
+                html.Tr(
+                    [
+                        html.Td(children=["Unterstützungen: "]),
+                        html.Td(children=[support_functions]),
+                        html.Td(children=["Reifegrad: "]),
+                        html.Td(children=[RG])
+                    ]
+                )
             ]
             self.table = html.Table(style={"width":"100%"},children=children)
 
@@ -87,8 +106,11 @@ class html_table:
             support_functions.append("IiA")
         if KäA == 1:
             support_functions.append("KäA")
+        if IiA == 1 and KäA == 1:
+            support_functions.append("InA")
+        self.I=investition
         support_functions = str(support_functions).strip("[]'").replace("'", "")
-        
+        self.support_functions = support_functions
         self.table = html.Table(style={"width": "100%"},
                                 children=[
                                     html.Tr(
@@ -99,18 +121,18 @@ class html_table:
 
                                     html.Tr(
                                         children=[
-                                            html.Td(children=["Kapitalwert: "]),
+                                            html.Td(children=["Kapitalwert (€): "]),
                                             html.Td(children=[money],style={'color':'red' if money<0 else 'black'}),
-                                            html.Td(children=["Investitionssumme: "]),
+                                            html.Td(children=["Investitionssumme (€): "]),
                                             html.Td(children=[investition])
                                         ]
                                     ),
 
                                     html.Tr(
                                         children=[
-                                            html.Td(children=["Suchzeit vorher: "]),
+                                            html.Td(children=["Suchzeit vorher (Min,Sek): "]),
                                             html.Td(children=[convert_decimal_time(time_before)]),
-                                            html.Td(children=["Suchzeit nachher: "]),
+                                            html.Td(children=["Suchzeit nachher (Min,Sek): "]),
                                             html.Td(children=[convert_decimal_time(time)])
                                         ]
                                     ),
@@ -150,7 +172,10 @@ def calculate_time(matLevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewC
     # calculate
     all_zeros = [0 for x in range(0, n_prodFam)]
     sameComponent = all_zeros if IiA == 1 else cumTimeSameComponent
-    simComponent = [(0.0006*35+15*0.0006)*n*m if KäA == 1 else t for n,m,t in zip(n_KäA,mean_amount_of_elem_comp,cumTimeSimComponent)]
+    if KäA == 1:
+        simComponent = [(0.0006*35+15*0.0006)*n*m for n,m in zip(n_KäA,mean_amount_of_elem_comp)]
+    else:
+        simComponent = cumTimeSimComponent
     newComponent = all_zeros if IiA == 1 and KäA == 1 else cumTimeNewComponent
 
     Process = all_zeros if matLevel >= 2 else cumtimeProcess
@@ -159,6 +184,7 @@ def calculate_time(matLevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewC
         t_supported = [newComponent[x] + simComponent[x] + sameComponent[x] + Process[x] + Resource[x] for x in range(0, n_prodFam)]
     except:
         print("error")
+       
     return t_supported
 
 # Kapitalwerte von einzelnen Unterstützungslösungen berechnen
@@ -171,7 +197,18 @@ def calculate_npv(I_total,c_main,k_personal,r,T,t_unsupported,t_supported,r_acc,
     for t in range(1, int(T) + 1): 
         npv += (x_specific - C_main)/ ((1 + r) ** t)
     return npv
-
+def calculate_npv_separate(I_same,I_sim,c_main_same,c_main_sim,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x):         
+    C_main_same = c_main_same / 100 * I_same # K_IHJ=k_IH*I_0
+    C_main_sim = c_main_sim / 100 * I_sim
+    C_main = C_main_sim+C_main_same
+    I_total = I_same+I_sim
+    k_P=k_personal / 60 # convert to minutes
+    t_DLZ=[convert_decimal_time(x,False) for x in t_DLZ]
+    x_specific = sum([(k_P*(t_vorher-t_nachher)+e_Var*l_M*(t_vorher-t_nachher)/t_DLZ)*P-k_P*t_nachher*P for t_vorher, t_nachher, e_Var, l_M,t_DLZ,P in zip(t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)]) 
+    npv = - I_total
+    for t in range(1, int(T) + 1): 
+        npv += (x_specific - C_main)/ ((1 + r) ** t)
+    return npv
 # Investitionssumme von einzelnen Unterstützungslösungen berechnen
 def calculate_investment(alternative, ist_situation, I_l2, I_l3, I_same, I_sim):
     # find out if extra investment is to be made:
@@ -243,7 +280,7 @@ class Situation:
         c_main_l3=0
         c_main_same=0
         c_main_sim=0
-        #--------Erhöhung auf Reifegrad 1--------
+        #--------Erhöhung auf Reifegrad 2--------
         if matlevel == 1:
             i = 1
             KW_l2_max = -10**6
@@ -255,7 +292,8 @@ class Situation:
                     KW_l2_max = KW_l2
                     I_l2_best = I_total
                     c_main_l2=c_main
-                KW_l2_tables.append(small_table(KW_l2,I_total,t_supported,t_unsupported,name=f"Investition {i}"))
+                    i_l2_best=i
+                KW_l2_tables.append(small_table(KW_l2,I_total,t_supported,t_unsupported,IiA,KäA,2,name=i))
                 i+=1
             KW_l2_tables.sort(key=lambda x: x.KW, reverse=True)
             KW_l3_max = -10**6
@@ -268,11 +306,11 @@ class Situation:
                     KW_l3_max = KW_l3
                     I_l3_best = I_l3
                     c_main_l3=c_main
-                KW_l3_tables.append(small_table(KW_l3,I_total,t_supported,t_unsupported,name=f"Investition {i}"))
+                KW_l3_tables.append(small_table(KW_l3,I_total,t_supported,t_unsupported,IiA,KäA,3,name=[i_l2_best,i]))
                 i+=1
             KW_l3_tables.sort(key=lambda x: x.KW, reverse=True)
 
-        #--------Erhöhung auf Reifegrad 2--------
+        #--------Erhöhung auf Reifegrad 3--------
         elif matlevel == 2: 
             KW_l2 = "bereits umgesetzt"
             KW_l3_max = -10**6
@@ -285,12 +323,12 @@ class Situation:
                     KW_l3_max = KW_l3
                     I_l3_best = I_l3
                     c_main_l3=c_main
-                KW_l3_tables.append(small_table(KW_l3,I_total,t_supported,t_unsupported,name=f"Investition {i}"))
+                KW_l3_tables.append(small_table(KW_l3,I_total,t_supported,t_unsupported,IiA,KäA,3,name=i))
                 i+=1
             KW_l3_tables.sort(key=lambda x: x.KW, reverse=True)
             KW_l2_tables.append(html.P(KW_l2))
 
-        #--------Erhöhung auf Reifegrad 3--------
+        #--------Reifegrad 3--------
         else:
             KW_l2 = "bereits umgesetzt"
             KW_l3 = "bereits umgesetzt"
@@ -308,10 +346,7 @@ class Situation:
         c_main_sim=0
         #--------Identifizierung identischer Artikel--------
         KW_IiA_tables = []
-        if IiA == 1:
-            KW_IiA = "bereits umgesetzt"
-            KW_IiA_tables.append(small_table(KW_IiA,I_total,t_supported,t_unsupported).table)
-        else:
+        if IiA==0:
             i = 1
             KW_IiA_max=-10**6
             for I_identisch, c_main in zip(I_same_list,c_main_list_3):
@@ -321,16 +356,14 @@ class Situation:
                 if KW_IiA>KW_IiA_max:
                     KW_IiA_max=KW_IiA
                     c_main_same=c_main
-                KW_IiA_tables.append(small_table(KW_IiA,I_total,t_supported,t_unsupported,name=f"Methode zur Identifizierung {i}"))
+                    I_identisch_best=I_identisch
+                KW_IiA_tables.append(small_table(KW_IiA,I_total,t_supported,t_unsupported,1,KäA,matlevel,name=i))
                 i+=1
             KW_IiA_tables.sort(key=lambda x: x.KW, reverse=True)
 
         #--------Klassifizierung ähnlicher Artikel--------
         KW_KäA_tables = []
-        if KäA == 1:
-            KW_KäA = "bereits umgesetzt"
-            KW_KäA_tables.append(small_table(KW_KäA,I_total,t_supported,t_unsupported).table)
-        else:
+        if KäA == 0:
             i=1
             KW_KäA_max=-10**6
             for n_KäA, I_sim, c_main in zip(n_KäA_list,I_sim_list, c_main_list):
@@ -341,16 +374,216 @@ class Situation:
                 if KW_KäA>KW_KäA_max:
                     KW_KäA_max=KW_KäA
                     c_main_sim=c_main
-                KW_KäA_tables.append(small_table(KW_KäA,I_total,t_supported,t_unsupported,name=f"Methode zur Klassifizierung {i}"))
+                    I_sim_best=I_sim
+                    n_KäA_best=n_KäA
+                KW_KäA_tables.append(small_table(KW_KäA,I_total,t_supported,t_unsupported,IiA,1,matlevel,name=i))
                 i+=1
             KW_KäA_tables.sort(key=lambda x: x.KW, reverse=True)
-            
+        
+        #------------beide--------------
+        if KäA == 0 and IiA == 0:
+            I_total=I_identisch_best+I_sim_best
+            t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,1,1,cumtimeProcess,cumtimeResource,n_KäA_best,mean_amount_of_elem_comp)
+            KW_KäA_IiA_max = calculate_npv_separate(I_identisch_best,I_sim_best,c_main_same,c_main_sim,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x )
+            KW_KäA_IiA_table=small_table(KW_KäA_IiA_max,I_total,t_supported,t_unsupported,1,1,matlevel,name=[KW_IiA_tables[0].number,KW_KäA_tables[0].number])
+            all_tables = [KW_IiA_tables[0]]+[KW_KäA_tables[0]]+[KW_KäA_IiA_table]
+            all_tables.sort(key=lambda x: x.KW, reverse=True)
+        elif KäA == 0:
+            all_tables = [KW_KäA_tables[0]] 
+        elif IiA == 0:
+            all_tables = [KW_IiA_tables[0]] 
+        best_solution = all_tables[0] if (KäA == 0 or IiA == 0) else None
+
+        if IiA==0 or KäA==0:
+            used_support = best_solution.support_functions
+
+            #------------------------give recommendations-------------------------------------------------------------------
+            recommend1=[]
+            if best_solution.KW>=0:
+                if "KäA" not in used_support and KäA==0:
+                    recommend1.append(html.P("KäA nicht umgesetzt"))
+                    i = I_sim
+                    while i>=0:
+                        i-=1
+                        I_total=calculate_investment(Alternative(1, 1, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,I_identisch,i)
+                        t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,1,1,cumtimeProcess,cumtimeResource,n_KäA_list,mean_amount_of_elem_comp)
+                        kw = calculate_npv(I_total,c_main_sim,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                        if kw >= KW_IiA_max:
+                            break
+                    if i>=0:
+                        recommend1.append(html.P(f"Investition von {I_sim} auf {i} ändern"))
+                    
+                    c = c_main_sim
+                    I_total=calculate_investment(Alternative(1, 1, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,I_identisch,I_sim)
+                    while c>=0:
+                        c-=1
+                        t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,1,1,cumtimeProcess,cumtimeResource,n_KäA_list,mean_amount_of_elem_comp)
+                        kw = calculate_npv(I_total,c,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                        if kw >= KW_IiA_max:
+                            break
+                    if c>=0:
+                        recommend1.append(html.P(f"Instandhaltungskostensatz von {c_main_sim} auf {c} ändern"))
+                    n_KäA = n_KäA_list.copy()
+                    while n_KäA[KW_KäA_tables[0].number-1]>=0:
+                        n_KäA[KW_KäA_tables[0].number-1]-=1
+                        t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,1,1,cumtimeProcess,cumtimeResource,n_KäA,mean_amount_of_elem_comp)
+                        kw = calculate_npv(I_total,c_main_sim,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                        if kw >= KW_IiA_max:
+                            break
+                    if n_KäA[KW_KäA_tables[0].number-1]>=0:
+                        recommend1.append(html.P(f"Instandhaltungskostensatz von {n_KäA_list[KW_KäA_tables[0].number-1]} auf {n_KäA[KW_KäA_tables[0].number-1]} ändern"))
+                        
+                    
+                if "IiA" not in used_support and IiA==0:
+                    recommend1.append("IiA nicht umgesetzt")
+                    i = I_identisch
+                    while i>=0:
+                        i-=1
+                        I_total=calculate_investment(Alternative(1, 1, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,i,I_sim)
+                        t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,1,1,cumtimeProcess,cumtimeResource,n_KäA_list,mean_amount_of_elem_comp)
+                        kw = calculate_npv(I_total,c_main_same,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                        if kw >= KW_KäA_max:
+                            break
+                    if i>=0:
+                        recommend1.append(html.P(f"Investition von {I_identisch} auf {i} ändern"))
+                    c = c_main_same
+                    I_total=calculate_investment(Alternative(1, 1, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,I_identisch,I_sim)
+                    while c>=0:
+                        c-=1
+                        t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,1,1,cumtimeProcess,cumtimeResource,n_KäA_list,mean_amount_of_elem_comp)
+                        kw = calculate_npv(I_total,c,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                        if kw >= KW_KäA_max:
+                            break
+                    if c>=0:
+                        recommend1.append(html.P(f"Instandhaltungskostensatz von {c_main_same} auf {c} ändern"))
+                        
+            else:
+                recommend1.append("Kapitalwert negativ")
+                if KäA==0:
+                    i = I_sim
+                    while i>=0:
+                        i-=1
+                        I_total=calculate_investment(Alternative(1, 1, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,I_identisch,i)
+                        t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,1,1,cumtimeProcess,cumtimeResource,n_KäA_list,mean_amount_of_elem_comp)
+                        kw = calculate_npv(I_total,c_main_sim,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                        if kw >= 0:
+                            break
+                    if i>=0:
+                            recommend1.append(html.P(f"Investition für KäA von {I_sim} auf {i} ändern"))
+                    c = c_main_sim
+                    I_total=calculate_investment(Alternative(1, 1, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,I_identisch,I_sim)
+                    while c>=0:
+                        c-=1
+                        t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,1,1,cumtimeProcess,cumtimeResource,n_KäA_list,mean_amount_of_elem_comp)
+                        kw = calculate_npv(I_total,c,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                        if kw >= 0:
+                            break
+                    if c>=0:
+                            recommend1.append(html.P(f"Instandhaltungskostensatz von KäA von {c_main_sim} auf {c} ändern"))
+                    n_KäA = n_KäA_list.copy()
+                    while n_KäA[KW_KäA_tables[0].number-1]>=0:
+                        n_KäA[KW_KäA_tables[0].number-1]-=1
+                        t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,1,1,cumtimeProcess,cumtimeResource,n_KäA,mean_amount_of_elem_comp)
+                        kw = calculate_npv(I_total,c_main_sim,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                        if kw >= 0:
+                            break
+                    if n_KäA[KW_KäA_tables[0].number-1]>=0:
+                        recommend1.append(html.P(f"Instandhaltungskostensatz von {n_KäA_list[KW_KäA_tables[0].number-1]} auf {n_KäA[KW_KäA_tables[0].number-1]} ändern"))
+                                
+                if IiA==0:
+                    i = I_identisch
+                    while i>=0:
+                        i-=1
+                        I_total=calculate_investment(Alternative(1, 1, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,i,I_sim)
+                        t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,1,1,cumtimeProcess,cumtimeResource,n_KäA_list,mean_amount_of_elem_comp)
+                        kw = calculate_npv(I_total,c_main_same,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                        if kw >= 0:
+                            break
+                    if i>=0:
+                            recommend1.append(html.P(f"Investition für IiA von {I_identisch} auf {i} ändern"))
+                        
+                    c = c_main_same
+                    I_total=calculate_investment(Alternative(1, 1, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,I_identisch,I_sim)
+                    while c>=0:
+                        c-=1
+                        t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,1,1,cumtimeProcess,cumtimeResource,n_KäA_list,mean_amount_of_elem_comp)
+                        kw = calculate_npv(I_total,c,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                        if kw >= 0:
+                            break
+                    if c>=0:
+                            recommend1.append(html.P(f"Instandhaltungskostensatz von IiA von {c_main_same} auf {c} ändern"))
+                                
+
+            self.recommend1=recommend1
+        else:
+            self.recommend1=None
+        #----------------------------------RG ----------------------------------------------
         self.KW_l2_tables=KW_l2_tables
         self.KW_l3_tables=KW_l3_tables
+        recommend2=[]
+
+        if matlevel==1:
+            self.best_level = sorted([KW_l2_tables[0]]+[KW_l3_tables[0]], key=lambda x: x.KW, reverse=True)[0]
+        elif matlevel==2:
+            self.best_level = KW_l3_tables[0]
+        else:
+            self.best_level = None
+        
+        if  (matlevel==2 and self.best_level.KW<0) or (matlevel==1 and self.best_level.RG==2):
+            if matlevel==1:
+                recommend2.append(html.P("Reifegrad 3 nicht umgesetzt"))
+            i = I_l3
+            goal_KW = KW_l2_max if matlevel == 1 else 0
+            while i>=0:
+                i-=1
+                I_total=KW_l2_tables[0].investition+i if matlevel == 1 else i
+                t_supported = calculate_time(3,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiA,KäA,cumtimeProcess,cumtimeResource,n_KäA_list,mean_amount_of_elem_comp)
+                kw = calculate_npv(I_total,c_main_l3,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                if kw >= goal_KW:
+                    break
+            if i>=0:
+                    recommend2.append(html.P(f"Investition für Reifegradstufe 3 von {I_l3} auf {i} ändern"))
+            c = c_main_l3
+            I_total=KW_l2_tables[0].investition+I_l3 if matlevel == 1 else I_l3
+            while c>=0:
+                c-=1
+                t_supported = calculate_time(3,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiA,KäA,cumtimeProcess,cumtimeResource,n_KäA_list,mean_amount_of_elem_comp)
+                kw = calculate_npv(I_total,c,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                if kw >= goal_KW:
+                    break
+            if c>=0:
+                    recommend2.append(html.P(f"Instandhaltungskostensatz von Reifegradstufe 3 von {c_main_l3} auf {c} ändern"))
+                    
+        if  matlevel==1 and self.best_level.KW<0:
+            recommend2.append("Kapitalwert negativ")
+            i = I_l2
+            while i>=0:
+                i-=1
+                I_total=i
+                t_supported = calculate_time(2,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiA,KäA,cumtimeProcess,cumtimeResource,n_KäA_list,mean_amount_of_elem_comp)
+                kw = calculate_npv(I_total,c_main_l2,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                if kw >= 0:
+                    break
+            if i>=0:
+                    recommend2.append(html.P(f"Investition für Reifegradstufe 2 von {I_l2} auf {i} ändern"))
+                
+            c = c_main_l2
+            I_total=I_l2
+            while c>=0:
+                c-=1
+                t_supported = calculate_time(2,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,IiA,KäA,cumtimeProcess,cumtimeResource,n_KäA_list,mean_amount_of_elem_comp)
+                kw = calculate_npv(I_total,c,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x)
+                if kw >= 0:
+                    break
+            if c>=0:
+                    recommend2.append(html.P(f"Instandhaltungskostensatz für Reifegradstufe 2 von {c_main_l2} auf {c} ändern"))
+        self.recommend2=recommend2
         self.KW_IiA_tables=KW_IiA_tables
         self.KW_KäA_tables=KW_KäA_tables
         self.c_main_same=c_main_same
         self.c_main_sim=c_main_sim
+        self.best_solution = best_solution
+
 
 
 

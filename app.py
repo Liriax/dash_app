@@ -274,32 +274,31 @@ def generateOutput(n_clicks1,n_clicks2, resultSort, clickData,
             'typeOfTimeMeasurement': typeOfTimeMeasurement}
     ist_situation = pd.DataFrame([data])
     sit = Situation(parameters)
-    # KW_l2=sit.KW_l2_tables
+    KW_l2=sit.KW_l2_tables
     KW_l3=sit.KW_l3_tables
     KW_IiA=sit.KW_IiA_tables
     KW_KäA=sit.KW_KäA_tables
     best_method_l2 = "bereits umgesetzt"
     best_method_l3 = "bereits umgesetzt"
-    # if matLevel<2:
-    #     best_method_l2 = KW_l2[0].name
-    #     KW_l2 = [x.table for x in KW_l2]
+    if matLevel<2:
+        best_method_l2 = KW_l2[0].number
+        KW_l2 = [x.table for x in KW_l2]
         
     if matLevel<3:
-        best_method_l3 = KW_l3[0].name
+        best_method_l3 = KW_l3[0].number
         KW_l3 = [x.table for x in KW_l3]
 
     if IiA ==0:
         I_al=KW_IiA[0].investition
-        best_method_3 = KW_IiA[0].name
+        best_method_3 = KW_IiA[0].number
         KW_IiA=[x.table for x in KW_IiA]
     else:
         I_al = same_prod_info_methods.iloc[0]['I_x']
         best_method_3 = "bereits umgesetzt"
     if KäA ==0:
         I_pr = KW_KäA[0].investition
-        best_method = KW_KäA[0].name
-        best_method_num = [int(s) for s in best_method.split() if s.isdigit()][0]
-        n_KäA = similar_prod_info_methods.iloc[best_method_num-1]['n_KäA']
+        best_method = KW_KäA[0].number
+        n_KäA = similar_prod_info_methods.iloc[best_method-1]['n_KäA']
         KW_KäA=[x.table for x in KW_KäA]
     else:
         I_pr = similar_prod_info_methods.iloc[0]['I_x']
@@ -328,7 +327,7 @@ def generateOutput(n_clicks1,n_clicks2, resultSort, clickData,
             None,None,None,None,None,None]
 
     if n_clicks2>0:
-        returns[2:]=[best_level_return,KW_IiA_KäA, f"Optimal: {best_method}", f"Optimal: {best_method_3}", f"Optimal: {best_method_l2}", f"Optimal: {best_method_l3}"]
+        returns[2:]=[best_level_return,KW_IiA_KäA, f"Optimal: Unterstützungslösung {best_method}", f"Optimal: Unterstützungslösung {best_method_3}", f"Optimal: Unterstützungslösung {best_method_l2}", f"Optimal: Unterstützungslösung {best_method_l3}"]
     if n_clicks1 is not None :
         c = calculator.Calculator(ist_situation,invest_params,product_family_conditions,product_family_absolute,product_family_relative)
         res = c.calculate_results()

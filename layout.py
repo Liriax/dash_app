@@ -286,7 +286,7 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                      
                     html.Br(),
                     html.Button("einzelne Kapitalwerte anzeigen", id='show-kw-button',n_clicks=0,style={'align': 'center', "font-weight": "bold"}),
-                    
+                    html.Br(),
                     html.P("--------Identifizierung identischer und Klassifizierung ähnlicher Artikel--------",style={ "font-weight": "bold","text-align":"center"}),
                     html.Div(id='IiA_KäA_KW'),
                     html.Br(),           

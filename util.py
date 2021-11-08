@@ -48,16 +48,17 @@ class small_table:
             support_functions.append("InA")
         support_functions = str(support_functions).strip("[]'").replace("'", "")
         self.support_functions=support_functions
-        self.name=f"Unterstützungslösung {name}" if not isinstance(name, list) else f"Unterstützungslösung {name[0]} und {name[1]}"
+        # self.name=f"Unterstützungslösung {name}" if not isinstance(name, list) else f"Unterstützungslösung {name[0]} und {name[1]}"
         self.number=name
         self.RG=RG
         self.investition = investition
         if isinstance(KW,str):
             self.table =  html.P(KW)
         else:
-            children = [html.Tr(children=[
-                            html.Th(colSpan=4, style={'text-align': 'left'},
-                                    children=[self.name])])] if name!=None else []
+            # children = [html.Tr(children=[
+            #                 html.Th(colSpan=4, style={'text-align': 'left'},
+            #                         children=[self.name])])] if name!=None else []
+            children = []
             children +=[
                 html.Tr(
                         children=[
@@ -306,7 +307,7 @@ class Situation:
                     KW_l3_max = KW_l3
                     I_l3_best = I_l3
                     c_main_l3=c_main
-                KW_l3_tables.append(small_table(KW_l3,I_total,t_supported,t_unsupported,IiA,KäA,3,name=[i_l2_best,i]))
+                KW_l3_tables.append(small_table(KW_l3,I_total,t_supported,t_unsupported,IiA,KäA,3,name=i))
                 i+=1
             KW_l3_tables.sort(key=lambda x: x.KW, reverse=True)
 
@@ -385,7 +386,7 @@ class Situation:
             I_total=I_identisch_best+I_sim_best
             t_supported = calculate_time(matlevel,cumTimeSameComponent,cumTimeSimComponent,cumTimeNewComponent,1,1,cumtimeProcess,cumtimeResource,n_KäA_best,mean_amount_of_elem_comp)
             KW_KäA_IiA_max = calculate_npv_separate(I_identisch_best,I_sim_best,c_main_same,c_main_sim,k_personal,r,T,t_unsupported,t_supported,r_acc,l_Mx, t_DLZ,P_x )
-            KW_KäA_IiA_table=small_table(KW_KäA_IiA_max,I_total,t_supported,t_unsupported,1,1,matlevel,name=[KW_IiA_tables[0].number,KW_KäA_tables[0].number])
+            KW_KäA_IiA_table=small_table(KW_KäA_IiA_max,I_total,t_supported,t_unsupported,1,1,matlevel)
             all_tables = [KW_IiA_tables[0]]+[KW_KäA_tables[0]]+[KW_KäA_IiA_table]
             all_tables.sort(key=lambda x: x.KW, reverse=True)
         elif KäA == 0:
@@ -412,6 +413,8 @@ class Situation:
                             break
                     if i>=0:
                         recommend1.append(html.P(f"Investition von {I_sim} auf {i} ändern"))
+                    else:
+                        recommend1.append("Die Reduzierung der Investition auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
                     
                     c = c_main_sim
                     I_total=calculate_investment(Alternative(1, 1, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,I_identisch,I_sim)
@@ -423,6 +426,9 @@ class Situation:
                             break
                     if c>=0:
                         recommend1.append(html.P(f"Instandhaltungskostensatz von {c_main_sim} auf {c} ändern"))
+                    else:
+                        recommend1.append("Die Reduzierung von Instandhaltungskostensatz auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                    
                     n_KäA = n_KäA_list.copy()
                     while n_KäA[KW_KäA_tables[0].number-1]>=0:
                         n_KäA[KW_KäA_tables[0].number-1]-=1
@@ -431,8 +437,10 @@ class Situation:
                         if kw >= KW_IiA_max:
                             break
                     if n_KäA[KW_KäA_tables[0].number-1]>=0:
-                        recommend1.append(html.P(f"Instandhaltungskostensatz von {n_KäA_list[KW_KäA_tables[0].number-1]} auf {n_KäA[KW_KäA_tables[0].number-1]} ändern"))
-                        
+                        recommend1.append(html.P(f"Anzahl manueller Eingabe von {n_KäA_list[KW_KäA_tables[0].number-1]} auf {n_KäA[KW_KäA_tables[0].number-1]} ändern"))
+                    else:
+                        recommend1.append("Die Reduzierung der Anzahl manueller Eingabe auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                       
                     
                 if "IiA" not in used_support and IiA==0:
                     recommend1.append("IiA nicht umgesetzt")
@@ -446,6 +454,9 @@ class Situation:
                             break
                     if i>=0:
                         recommend1.append(html.P(f"Investition von {I_identisch} auf {i} ändern"))
+                    else:
+                        recommend1.append("Die Reduzierung der Investition auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                    
                     c = c_main_same
                     I_total=calculate_investment(Alternative(1, 1, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,I_identisch,I_sim)
                     while c>=0:
@@ -456,7 +467,10 @@ class Situation:
                             break
                     if c>=0:
                         recommend1.append(html.P(f"Instandhaltungskostensatz von {c_main_same} auf {c} ändern"))
-                        
+                    else:
+                        recommend1.append("Die Reduzierung von Instandhaltungskostensatz auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                    
+
             else:
                 recommend1.append("Kapitalwert negativ")
                 if KäA==0:
@@ -470,6 +484,9 @@ class Situation:
                             break
                     if i>=0:
                             recommend1.append(html.P(f"Investition für KäA von {I_sim} auf {i} ändern"))
+                    else:
+                        recommend1.append("Die Reduzierung der Investition für KäA auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                    
                     c = c_main_sim
                     I_total=calculate_investment(Alternative(1, 1, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,I_identisch,I_sim)
                     while c>=0:
@@ -480,6 +497,9 @@ class Situation:
                             break
                     if c>=0:
                             recommend1.append(html.P(f"Instandhaltungskostensatz von KäA von {c_main_sim} auf {c} ändern"))
+                    else:
+                        recommend1.append("Die Reduzierung von Instandhaltungskostensatz von KäA auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                    
                     n_KäA = n_KäA_list.copy()
                     while n_KäA[KW_KäA_tables[0].number-1]>=0:
                         n_KäA[KW_KäA_tables[0].number-1]-=1
@@ -488,8 +508,10 @@ class Situation:
                         if kw >= 0:
                             break
                     if n_KäA[KW_KäA_tables[0].number-1]>=0:
-                        recommend1.append(html.P(f"Instandhaltungskostensatz von {n_KäA_list[KW_KäA_tables[0].number-1]} auf {n_KäA[KW_KäA_tables[0].number-1]} ändern"))
-                                
+                        recommend1.append(html.P(f"Anzahl manueller Eingabe von {n_KäA_list[KW_KäA_tables[0].number-1]} auf {n_KäA[KW_KäA_tables[0].number-1]} ändern"))
+                    else:
+                        recommend1.append("Die Reduzierung von Anzahl manueller Eingabe auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                               
                 if IiA==0:
                     i = I_identisch
                     while i>=0:
@@ -501,7 +523,9 @@ class Situation:
                             break
                     if i>=0:
                             recommend1.append(html.P(f"Investition für IiA von {I_identisch} auf {i} ändern"))
-                        
+                    else:
+                        recommend1.append("Die Reduzierung der Investition für IiA auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                       
                     c = c_main_same
                     I_total=calculate_investment(Alternative(1, 1, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,I_identisch,I_sim)
                     while c>=0:
@@ -512,6 +536,8 @@ class Situation:
                             break
                     if c>=0:
                             recommend1.append(html.P(f"Instandhaltungskostensatz von IiA von {c_main_same} auf {c} ändern"))
+                    else:
+                        recommend1.append("Die Reduzierung von Instandhaltungskostensatz von IiA auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
                                 
 
             self.recommend1=recommend1
@@ -543,6 +569,9 @@ class Situation:
                     break
             if i>=0:
                     recommend2.append(html.P(f"Investition für Reifegradstufe 3 von {I_l3} auf {i} ändern"))
+            else:
+                    recommend2.append("Die Reduzierung der Investition für Reifegradstufe 3 auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                    
             c = c_main_l3
             I_total=KW_l2_tables[0].investition+I_l3 if matlevel == 1 else I_l3
             while c>=0:
@@ -553,7 +582,9 @@ class Situation:
                     break
             if c>=0:
                     recommend2.append(html.P(f"Instandhaltungskostensatz von Reifegradstufe 3 von {c_main_l3} auf {c} ändern"))
-                    
+            else:
+                        recommend2.append("Die Reduzierung von Instandhaltungskostensatz von Reifegradstufe 3 auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                            
         if  matlevel==1 and self.best_level.KW<0:
             recommend2.append("Kapitalwert negativ")
             i = I_l2
@@ -566,7 +597,9 @@ class Situation:
                     break
             if i>=0:
                     recommend2.append(html.P(f"Investition für Reifegradstufe 2 von {I_l2} auf {i} ändern"))
-                
+            else:
+                        recommend2.append("Die Reduzierung der Investition für Reifegradstufe 2 auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                        
             c = c_main_l2
             I_total=I_l2
             while c>=0:
@@ -576,7 +609,10 @@ class Situation:
                 if kw >= 0:
                     break
             if c>=0:
-                    recommend2.append(html.P(f"Instandhaltungskostensatz für Reifegradstufe 2 von {c_main_l2} auf {c} ändern"))
+                    recommend2.append(html.P(f"Instandhaltungskostensatz von Reifegradstufe 2 von {c_main_l2} auf {c} ändern"))
+            else:
+                        recommend2.append("Die Reduzierung von Instandhaltungskostensatz von Reifegradstufe 2 auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                    
         self.recommend2=recommend2
         self.KW_IiA_tables=KW_IiA_tables
         self.KW_KäA_tables=KW_KäA_tables

@@ -414,7 +414,7 @@ class Situation:
                     if i>=0:
                         recommend1.append(html.P(f"Investition von {I_sim} auf {i} ändern"))
                     else:
-                        recommend1.append("Die Reduzierung der Investition auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                        recommend1.append(html.P("Die Reduzierung der Investition auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen\. Daher müssen die Eingangsparameter in Kombination reduziert werden\."))
                     
                     c = c_main_sim
                     I_total=calculate_investment(Alternative(1, 1, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,I_identisch,I_sim)
@@ -427,7 +427,7 @@ class Situation:
                     if c>=0:
                         recommend1.append(html.P(f"Instandhaltungskostensatz von {c_main_sim} auf {c} ändern"))
                     else:
-                        recommend1.append("Die Reduzierung von Instandhaltungskostensatz auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                        recommend1.append(html.P("Die Reduzierung von Instandhaltungskostensatz auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden."))
                     
                     n_KäA = n_KäA_list.copy()
                     while n_KäA[KW_KäA_tables[0].number-1]>=0:
@@ -439,7 +439,7 @@ class Situation:
                     if n_KäA[KW_KäA_tables[0].number-1]>=0:
                         recommend1.append(html.P(f"Anzahl manueller Eingabe von {n_KäA_list[KW_KäA_tables[0].number-1]} auf {n_KäA[KW_KäA_tables[0].number-1]} ändern"))
                     else:
-                        recommend1.append("Die Reduzierung der Anzahl manueller Eingabe auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                        recommend1.append(html.P("Die Reduzierung der Anzahl manueller Eingabe auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden."))
                        
                     
                 if "IiA" not in used_support and IiA==0:
@@ -455,7 +455,7 @@ class Situation:
                     if i>=0:
                         recommend1.append(html.P(f"Investition von {I_identisch} auf {i} ändern"))
                     else:
-                        recommend1.append("Die Reduzierung der Investition auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                        recommend1.append(html.P("Die Reduzierung der Investition auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen\. Daher müssen die Eingangsparameter in Kombination reduziert werden\."))
                     
                     c = c_main_same
                     I_total=calculate_investment(Alternative(1, 1, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,I_identisch,I_sim)
@@ -468,7 +468,7 @@ class Situation:
                     if c>=0:
                         recommend1.append(html.P(f"Instandhaltungskostensatz von {c_main_same} auf {c} ändern"))
                     else:
-                        recommend1.append("Die Reduzierung von Instandhaltungskostensatz auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                        recommend1.append(html.P("Die Reduzierung von Instandhaltungskostensatz auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden."))
                     
 
             else:
@@ -485,7 +485,7 @@ class Situation:
                     if i>=0:
                             recommend1.append(html.P(f"Investition für KäA von {I_sim} auf {i} ändern"))
                     else:
-                        recommend1.append("Die Reduzierung der Investition für KäA auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                        recommend1.append(html.P("Die Reduzierung der Investition für KäA auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden."))
                     
                     c = c_main_sim
                     I_total=calculate_investment(Alternative(1, 1, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,I_identisch,I_sim)
@@ -498,7 +498,7 @@ class Situation:
                     if c>=0:
                             recommend1.append(html.P(f"Instandhaltungskostensatz von KäA von {c_main_sim} auf {c} ändern"))
                     else:
-                        recommend1.append("Die Reduzierung von Instandhaltungskostensatz von KäA auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                        recommend1.append(html.P("Die Reduzierung von Instandhaltungskostensatz von KäA auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden."))
                     
                     n_KäA = n_KäA_list.copy()
                     while n_KäA[KW_KäA_tables[0].number-1]>=0:
@@ -510,7 +510,7 @@ class Situation:
                     if n_KäA[KW_KäA_tables[0].number-1]>=0:
                         recommend1.append(html.P(f"Anzahl manueller Eingabe von {n_KäA_list[KW_KäA_tables[0].number-1]} auf {n_KäA[KW_KäA_tables[0].number-1]} ändern"))
                     else:
-                        recommend1.append("Die Reduzierung von Anzahl manueller Eingabe auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                        recommend1.append(html.P("Die Reduzierung von Anzahl manueller Eingabe auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden."))
                                
                 if IiA==0:
                     i = I_identisch
@@ -524,7 +524,7 @@ class Situation:
                     if i>=0:
                             recommend1.append(html.P(f"Investition für IiA von {I_identisch} auf {i} ändern"))
                     else:
-                        recommend1.append("Die Reduzierung der Investition für IiA auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                        recommend1.append(html.P("Die Reduzierung der Investition für IiA auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden."))
                        
                     c = c_main_same
                     I_total=calculate_investment(Alternative(1, 1, matlevel),Alternative(IiA, KäA, matlevel),I_l2,I_l3,I_identisch,I_sim)
@@ -537,7 +537,7 @@ class Situation:
                     if c>=0:
                             recommend1.append(html.P(f"Instandhaltungskostensatz von IiA von {c_main_same} auf {c} ändern"))
                     else:
-                        recommend1.append("Die Reduzierung von Instandhaltungskostensatz von IiA auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                        recommend1.append(html.P("Die Reduzierung von Instandhaltungskostensatz von IiA auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden."))
                                 
 
             self.recommend1=recommend1
@@ -570,7 +570,7 @@ class Situation:
             if i>=0:
                     recommend2.append(html.P(f"Investition für Reifegradstufe 3 von {I_l3} auf {i} ändern"))
             else:
-                    recommend2.append("Die Reduzierung der Investition für Reifegradstufe 3 auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                    recommend2.append(html.P("Die Reduzierung der Investition für Reifegradstufe 3 auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden."))
                     
             c = c_main_l3
             I_total=KW_l2_tables[0].investition+I_l3 if matlevel == 1 else I_l3
@@ -583,7 +583,7 @@ class Situation:
             if c>=0:
                     recommend2.append(html.P(f"Instandhaltungskostensatz von Reifegradstufe 3 von {c_main_l3} auf {c} ändern"))
             else:
-                        recommend2.append("Die Reduzierung von Instandhaltungskostensatz von Reifegradstufe 3 auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                        recommend2.append(html.P("Die Reduzierung von Instandhaltungskostensatz von Reifegradstufe 3 auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden."))
                             
         if  matlevel==1 and self.best_level.KW<0:
             recommend2.append("Kapitalwert negativ")
@@ -598,7 +598,7 @@ class Situation:
             if i>=0:
                     recommend2.append(html.P(f"Investition für Reifegradstufe 2 von {I_l2} auf {i} ändern"))
             else:
-                        recommend2.append("Die Reduzierung der Investition für Reifegradstufe 2 auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                        recommend2.append(html.P("Die Reduzierung der Investition für Reifegradstufe 2 auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden."))
                         
             c = c_main_l2
             I_total=I_l2
@@ -611,7 +611,7 @@ class Situation:
             if c>=0:
                     recommend2.append(html.P(f"Instandhaltungskostensatz von Reifegradstufe 2 von {c_main_l2} auf {c} ändern"))
             else:
-                        recommend2.append("Die Reduzierung von Instandhaltungskostensatz von Reifegradstufe 2 auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden.")
+                        recommend2.append(html.P("Die Reduzierung von Instandhaltungskostensatz von Reifegradstufe 2 auf den Wert 0 reicht nicht aus, um die Unterstützungslösung anzunehmen. Daher müssen die Eingangsparameter in Kombination reduziert werden."))
                     
         self.recommend2=recommend2
         self.KW_IiA_tables=KW_IiA_tables

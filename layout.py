@@ -32,7 +32,7 @@ left_side = html.Div(className='col1', style={'margin-left': '1vw', 'margin-top'
                              ),
                              html.Tr(
                                  children=[
-                                     html.Td(colSpan=2, children=["Bestehende Unterstützungen", html.Br(), "(Wenn die Erzeugnisstruktur mehr als 2 Ebenen enthält, muss die Unterstützung die Erzeugnisstruktur berücksichtigen)"]),
+                                     html.Td(colSpan=2, children=["Bestehende Unterstützungen", html.Br(), "(Wenn die Erzeugnisstruktur mehr als 2 Ebenen enthält, muss die Unterstützung die Erzeugnisstruktur berücksichtigen)",html.P("(InA = Identifizierung neuer Artikel)")]),
                                      html.Td(children=[
                                          dcc.Checklist(
                                              id='supFunction',

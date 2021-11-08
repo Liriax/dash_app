@@ -158,7 +158,7 @@ class Calculator:
             res.append([npv, investition, t_unsupported,  t_supported, matLevel, KäA, IiA,t_supported_x,t_unsupported_x])
 
         res_df = pd.DataFrame(res, columns = ['npv', 'investition', 't_unsupported', 't_supported', 'matLevel', 'KäA', 'IiA',"t_supported_x","t_unsupported_x"])
-        name = ["RG {}{}{}".format(int(res_df.iloc[x]['matLevel']), ", IiA" if res_df.iloc[x]['IiA']==1 else "", ", KäA" if res_df.iloc[x]['KäA']==1 else "") if res_df.iloc[x]['investition'] >0 else "Ist-Situation" for x in range(0, len(res_df))]
+        name = ["RG {}{}{}{}".format(int(res_df.iloc[x]['matLevel']), ", IiA" if res_df.iloc[x]['IiA']==1 else "", ", KäA" if res_df.iloc[x]['KäA']==1 else "", ", InA" if res_df.iloc[x]['KäA']==1 and res_df.iloc[x]['IiA']==1 else "") if res_df.iloc[x]['investition'] >0 else "Ist-Situation" for x in range(0, len(res_df))]
         res_df['name']=name
         return res_df
 
